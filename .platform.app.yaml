@@ -17,7 +17,7 @@ web:
       index:
         - install/install.php
       allow: true
-      passthru: "install/install.php"
+      passthru: "/install/install.php"
       headers:
         X-XSS-Protection: "1; mode=block"
         X-Content-Type-Options: nosniff
