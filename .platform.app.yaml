@@ -5,37 +5,33 @@ runtime:
     - sodium
     - gd
     - exif
-build:
-  flavor: composer
-dependencies:
-  nodejs:
-    n: "*"
 web:
   locations:
     "/":
-      root: "public"
+      root: web
       index:
         - install/install.php
       allow: true
       passthru: "/install/install.php"
       headers:
+        X-FrameOptions: SAMEORIGIN
         X-XSS-Protection: "1; mode=block"
         X-Content-Type-Options: nosniff
-        Access-Control-Allow-Methods: GET
-        X-Frame-Options: deny
-        Content-Security-Policy: frame-ancestors 'self'
-        Referrer-Policy: strict-origin-when-cross-origin
-        Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()
       rules:
-        \.(jpg|jpeg|png|doc|docx|pdf)$:
-          headers:
-            Content-Disposition: attachment
+        \.(css|js|gif|jpe?g|png|ttf|eot|woff2?|otf|html|ico|svg?)$:
+          allow: true
+        ^/robots\.txt$:
+          allow: true
 
 relationships:
   database: "database:mysql"
 disk: 2048
 mounts:
   "/install": "shared:/install"
+  "app/media":
+    source: service
+    service: files
+    source_path: media
 hooks:
   build: |
     curl -fsS https://platform.sh/cli/installer | php
@@ -45,5 +41,3 @@ variables:
   php:
     memory_limit: "1024M"
     date.timezone: "Europe/Stockholm"
-  env:
-    APP_NAME: Bakgrundsanalys
