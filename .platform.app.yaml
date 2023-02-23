@@ -27,7 +27,7 @@ relationships:
   database: "database:mysql"
 disk: 2048
 mounts:
-  "/install": "shared:/install"
+  "/install": "shared:files/install"
   "app/media":
     source: service
     service: files
