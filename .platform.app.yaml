@@ -11,17 +11,7 @@ web:
       root: web
       index:
         - install
-      allow: true
       passthru: "/install/install.php"
-      headers:
-        X-FrameOptions: SAMEORIGIN
-        X-XSS-Protection: "1; mode=block"
-        X-Content-Type-Options: nosniff
-      rules:
-        \.(css|js|gif|jpe?g|png|ttf|eot|woff2?|otf|html|ico|svg?)$:
-          allow: true
-        ^/robots\.txt$:
-          allow: true
 
 relationships:
   database: "database:mysql"
