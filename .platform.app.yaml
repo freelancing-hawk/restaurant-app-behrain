@@ -39,5 +39,6 @@ hooks:
 
 variables:
   php:
-    memory_limit: "1024M"
+    memory_limit: "2048M"
+    max_execution_time: 600
     date.timezone: "Europe/Stockholm"
