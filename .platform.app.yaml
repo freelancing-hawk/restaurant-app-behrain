@@ -1,16 +1,9 @@
 name: restaurant-app-behrain
 type: "php:7.4"
-runtime:
-  extensions:
-    - sodium
-    - gd
-    - exif
 web:
   locations:
     "/":
       root: web
-      index:
-        - install
       passthru: "/install/install.php"
 
 relationships:
