@@ -1,6 +1,4 @@
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/inventoryAdjustmentDetails.css">
-
-
 <section class="main-content-wrapper">
 
     <section class="content-header">
@@ -8,7 +6,6 @@
             <?php echo lang('details_inventory_Adjustment'); ?>
         </h3>
     </section>
-
 
     <div class="box-wrapper">
             <!-- general form elements -->
@@ -74,7 +71,7 @@
                                                 echo '<tr id="row_' . $i . '">' .
                                                 '<td class="txt_24"><p>' . $i . '</p></td>' .
                                                 '<td class="ir_w_20">' . getIngredientNameById($wi->ingredient_id) . ' (' . getIngredientCodeById($wi->ingredient_id) . ')</span></td>' .
-                                                '<td class="ir_w_15">' . getAmtP($wi->consumption_amount) . unitName(getUnitIdByIgId($wi->ingredient_id)) . '</td>' .
+                                                '<td class="ir_w_15">' . getAmtPCustom($wi->consumption_amount) . unitName(getUnitIdByIgId($wi->ingredient_id)) . '</td>' .
                                                 '<td class="ir_w_15">' . $wi->consumption_status . '</td>' .
                                                 '</tr>';
                                             }

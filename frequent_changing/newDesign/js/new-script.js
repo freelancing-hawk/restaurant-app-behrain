@@ -63,13 +63,9 @@
   /**
    * Language Dropdown
    */
-  bodyElement.on("click", ".lang-dropdown-menu li", function () {
-    bodyElement
-      .find(".show-drop-result")
-      .html(
-        `<i class="currency-flag currency-flag-${$(this).attr(
-          "data-icon"
-        )}"></i> <span>${$(this).attr("data-lang")}</span>`
-      );
-  });
+
+  bodyElement.on("click", ".sub_sub > a", function (e) {
+    $(this).parent().toggleClass("menu-open");
+    $(this).next('.sub-menu').slideToggle(400);
+  })
 })(jQuery);

@@ -4,7 +4,7 @@ if ($this->session->flashdata('exception')) {
     echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-    echo escape_output($this->session->flashdata('exception'));
+    echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
     echo '</p></div></div></section>';
 }
 ?>
@@ -16,8 +16,7 @@ if ($this->session->flashdata('exception')) {
             <input type="hidden" class="datatable_name" data-title="<?php echo lang('employees'); ?>" data-id_name="datatable">
         </div>
         <div class="col-md-offset-4 col-md-2">
-            <a href="<?php echo base_url() ?>Master/addEditEmployee"><button type="button"
-                    class="btn btn-block btn-primary pull-right"><?php echo lang('add_employee'); ?></button></a>
+
         </div>
     </div>
 </section>
@@ -63,11 +62,11 @@ if ($this->session->flashdata('exception')) {
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a
+                                            <li data-access="delete-106" class="menu_assign_class"><a
                                                     href="<?php echo base_url() ?>Master/addEditEmployee/<?php echo escape_output($this->custom->encrypt_decrypt($empls->id, 'encrypt')); ?>"><i
                                                         class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a>
                                             </li>
-                                            <li><a class="delete"
+                                            <li data-access="delete-106" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>Master/deleteEmployee/<?php echo escape_output($this->custom->encrypt_decrypt($empls->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>

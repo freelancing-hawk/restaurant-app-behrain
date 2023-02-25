@@ -23,7 +23,7 @@ class Sale_model extends CI_Model {
      * @param int
      */
     public function getSaleList($outlet_id) {
-        $result = $this->db->query("SELECT s.*,u.full_name,c.name as customer_name,m.name
+        $result = $this->db->query("SELECT s.*,u.full_name,c.name as customer_name,m.name,c.phone as customer_phone
           FROM tbl_sales s
           INNER JOIN tbl_customers c ON(s.customer_id=c.id)
           LEFT JOIN tbl_users u ON(s.user_id=u.id)
@@ -164,14 +164,14 @@ class Sale_model extends CI_Model {
         $result = $this->db->query("SELECT tbl_food_menus.id, tbl_food_menus.code, tbl_food_menus.name, tbl_food_menus.sale_price, tbl_food_menus.photo, tbl_food_menu_categories.category_name
           FROM tbl_food_menus 
           LEFT JOIN tbl_food_menu_categories ON tbl_food_menus.category_id = tbl_food_menu_categories.id
-          WHERE tbl_food_menus.company_id=$company_id AND tbl_food_menus.del_status = 'Live'  
+          WHERE tbl_food_menus.company_id=$company_id AND tbl_food_menus.del_status = 'Live' AND parent_id =  '0' 
           ORDER BY tbl_food_menus.name ASC");
         $result = $this->db->get();
 
         if($result != false){
-          return $result->result();
+            return $result->result();
         }else{
-          return false;
+            return false;
         }
     }
     /**
@@ -254,8 +254,8 @@ class Sale_model extends CI_Model {
     public function getAllFoodMenus(){
       $outlet_id = $this->session->userdata('outlet_id');
       $getFM = getFMIds($outlet_id);
-      $result = $this->db->query("SELECT fm.*,fmc.category_name, COUNT(sd.food_menu_id) as item_sold 
-      FROM tbl_food_menus fm  LEFT JOIN (select * from tbl_food_menu_categories where del_status='Live') fmc ON fmc.id = fm.category_id LEFT JOIN (select * from tbl_sales_details where del_status='Live') sd ON sd.food_menu_id = fm.id WHERE FIND_IN_SET(fm.id, '$getFM') AND fm.del_status='Live' GROUP BY fm.id order BY name ASC")->result();
+      $result = $this->db->query("SELECT fm.*,fmc.category_name, COUNT(sd.food_menu_id) as item_sold,kitchen_id 
+      FROM tbl_food_menus fm  LEFT JOIN (select * from tbl_food_menu_categories where del_status='Live') fmc ON fmc.id = fm.category_id LEFT JOIN (select * from tbl_sales_details where del_status='Live') sd ON sd.food_menu_id = fm.id LEFT JOIN (select kitchen_id,cat_id from tbl_kitchen_categories where del_status='Live') kt_cat ON kt_cat.cat_id = fm.category_id WHERE FIND_IN_SET(fm.id, '$getFM') AND fm.del_status='Live' GROUP BY fm.id order BY name ASC")->result();
       if($result != false){
         return $result;
       }else{
@@ -291,7 +291,7 @@ class Sale_model extends CI_Model {
      */
     public function getAllMenuModifiers(){
      $company_id = $this->session->userdata('company_id');
-      $this->db->select("tbl_food_menus_modifiers.*,tbl_modifiers.name,tbl_modifiers.price");
+      $this->db->select("tbl_food_menus_modifiers.*,tbl_modifiers.name,tbl_modifiers.price,tbl_modifiers.tax_information");
       $this->db->from("tbl_food_menus_modifiers");
       $this->db->join('tbl_modifiers', 'tbl_modifiers.id = tbl_food_menus_modifiers.modifier_id', 'left');
       $this->db->where("tbl_food_menus_modifiers.company_id", $company_id);
@@ -402,6 +402,71 @@ class Sale_model extends CI_Model {
             return false;
         }
 
+    }
+    public function self_order_sales($outlet_id){
+        $type = escape_output($_GET['type']);
+
+        $self_order_ran_code = $this->session->userdata('self_order_ran_code');
+        $online_customer_id = $this->session->userdata('online_customer_id');
+
+        $this->db->select("tbl_kitchen_sales.*,tbl_customers.name as customer_name,tbl_customers.phone");
+        $this->db->from('tbl_kitchen_sales');
+        $this->db->join('tbl_customers', 'tbl_customers.id = tbl_kitchen_sales.customer_id', 'left');
+        $this->db->where("tbl_kitchen_sales.outlet_id", $outlet_id);
+        if($type==1 && $self_order_ran_code){
+            $this->db->where("tbl_kitchen_sales.self_order_ran_code", $self_order_ran_code);
+        }else{
+            $this->db->where("tbl_kitchen_sales.customer_id", $online_customer_id);
+        }
+        $this->db->where("tbl_kitchen_sales.del_status", "Live");
+        $this->db->order_by('tbl_kitchen_sales.id', 'DESC');
+        $result = $this->db->get();
+        if($result != false){
+            return $result->result();
+        }else{
+            return false;
+        }
+
+    }
+    public function self_order_sales_admin($outlet_id){
+        $role = $this->session->userdata('role');
+        $user_id = $this->session->userdata('user_id');
+        $this->db->select("tbl_kitchen_sales.*,tbl_customers.name as customer_name,tbl_customers.phone");
+        $this->db->from('tbl_kitchen_sales');
+        $this->db->join('tbl_customers', 'tbl_customers.id = tbl_kitchen_sales.customer_id', 'left');
+        $this->db->where("tbl_kitchen_sales.outlet_id", $outlet_id);
+        if($role!="Admin"){
+            $this->db->where("tbl_kitchen_sales.online_self_order_receiving_id", $user_id);
+        }
+        $this->db->where("tbl_kitchen_sales.del_status", "Live");
+        $this->db->where("is_self_order","Yes");
+        $this->db->order_by('tbl_kitchen_sales.id', 'DESC');
+        $result = $this->db->get();
+        if($result != false){
+            return $result->result();
+        }else{
+            return false;
+        }
+    }
+    public function online_order_sales_admin($outlet_id){
+        $role = $this->session->userdata('role');
+        $user_id = $this->session->userdata('user_id');
+        $this->db->select("tbl_kitchen_sales.*,tbl_customers.name as customer_name,tbl_customers.phone");
+        $this->db->from('tbl_kitchen_sales');
+        $this->db->join('tbl_customers', 'tbl_customers.id = tbl_kitchen_sales.customer_id', 'left');
+        $this->db->where("tbl_kitchen_sales.outlet_id", $outlet_id);
+        if($role!="Admin"){
+            $this->db->where("tbl_kitchen_sales.online_self_order_receiving_id", $user_id);
+        }
+        $this->db->where("tbl_kitchen_sales.del_status", "Live");
+        $this->db->where("is_online_order","Yes");
+        $this->db->order_by('tbl_kitchen_sales.id', 'DESC');
+        $result = $this->db->get();
+        if($result != false){
+            return $result->result();
+        }else{
+            return false;
+        }
     }
     /**
      * get All Tables With New Status
@@ -558,6 +623,62 @@ class Sale_model extends CI_Model {
           return false;
         }
     }
+    public function getAllItemsFromSalesDetailBySalesIdKitchen($sales_id){
+      $this->db->select("tbl_kitchen_sales_details.*,tbl_kitchen_sales_details.id as sales_details_id,tbl_food_menus.code as code");
+      $this->db->from('tbl_kitchen_sales_details');
+      $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_kitchen_sales_details.food_menu_id', 'left');
+      $this->db->where("sales_id", $sales_id);
+      $this->db->order_by('tbl_kitchen_sales_details.id', 'ASC');
+      $result = $this->db->get();
+
+        if($result != false){
+          return $result->result();
+        }else{
+          return false;
+        }
+    }
+    /**
+     * get All Items From Sales Detail By Sales Id
+     * @access public
+     * @return object
+     * @param int
+     */
+    public function getAllItemsFromSalesDetailBySalesIdModify($sales_id){
+      $this->db->select("tbl_sales_details.*,tbl_sales_details.id as sales_details_id,tbl_food_menus.code as code");
+      $this->db->from('tbl_sales_details');
+      $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_sales_details.food_menu_id', 'left');
+      $this->db->where("sales_id", $sales_id);
+      $this->db->where("is_free_item", "0");
+      $this->db->order_by('tbl_sales_details.id', 'ASC');
+      $result = $this->db->get();
+
+        if($result != false){
+          return $result->result();
+        }else{
+          return false;
+        }
+    }
+    /**
+     * get All Items From Sales Detail By Sales Id
+     * @access public
+     * @return object
+     * @param int
+     */
+    public function getAllItemsFromSalesDetailBySalesIdModifyChild($row_id,$sale_id){
+      $this->db->select("tbl_sales_details.*,tbl_sales_details.id as sales_details_id,tbl_food_menus.code as code");
+      $this->db->from('tbl_sales_details');
+      $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_sales_details.food_menu_id', 'left');
+      $this->db->where("is_free_item", $row_id);
+      $this->db->where("sales_id", $sale_id);
+      $this->db->order_by('tbl_sales_details.id', 'ASC');
+      $result = $this->db->get();
+
+        if($result != false){
+          return $result->result();
+        }else{
+          return false;
+        }
+    }
     /**
      * get Modifiers By Sale And Sale Details Id
      * @access public
@@ -572,6 +693,51 @@ class Sale_model extends CI_Model {
       $this->db->where("tbl_sales_details_modifiers.sales_id", $sales_id);
       $this->db->where("tbl_sales_details_modifiers.sales_details_id", $sale_details_id);
       $this->db->order_by('tbl_sales_details_modifiers.id', 'ASC');
+      $result = $this->db->get();
+
+        if($result != false){
+          return $result->result();
+        }else{
+          return false;
+        }
+    }
+    /**
+     * get Modifiers By Sale And Sale Details Id
+     * @access public
+     * @return object
+     * @param int
+     * @param int
+     */
+    public function getModifiersBySaleAndSaleDetailsIdKitchen($sales_id,$sale_details_id){
+      $this->db->select("tbl_kitchen_sales_details_modifiers.*,tbl_modifiers.name");
+      $this->db->from('tbl_kitchen_sales_details_modifiers');
+      $this->db->join('tbl_modifiers', 'tbl_modifiers.id = tbl_kitchen_sales_details_modifiers.modifier_id', 'left');
+      $this->db->where("tbl_kitchen_sales_details_modifiers.sales_id", $sales_id);
+      $this->db->where("tbl_kitchen_sales_details_modifiers.sales_details_id", $sale_details_id);
+      $this->db->order_by('tbl_kitchen_sales_details_modifiers.id', 'ASC');
+      $result = $this->db->get();
+
+        if($result != false){
+          return $result->result();
+        }else{
+          return false;
+        }
+    }
+    /**
+     * get Modifiers By Sale And Sale Details Id
+     * @access public
+     * @return object
+     * @param int
+     * @param int
+     */
+    public function getModifiersBySaleAndSaleDetailsIdKitchenAuto($sales_id,$sale_details_id){
+      $this->db->select("tbl_kitchen_sales_details_modifiers.*,tbl_modifiers.name");
+      $this->db->from('tbl_kitchen_sales_details_modifiers');
+      $this->db->join('tbl_modifiers', 'tbl_modifiers.id = tbl_kitchen_sales_details_modifiers.modifier_id', 'left');
+      $this->db->where("tbl_kitchen_sales_details_modifiers.sales_id", $sales_id);
+      $this->db->where("tbl_kitchen_sales_details_modifiers.is_print", 1);
+      $this->db->where("tbl_kitchen_sales_details_modifiers.sales_details_id", $sale_details_id);
+      $this->db->order_by('tbl_kitchen_sales_details_modifiers.id', 'ASC');
       $result = $this->db->get();
 
         if($result != false){
@@ -703,6 +869,28 @@ class Sale_model extends CI_Model {
       $this->db->from('tbl_payment_methods');
       $this->db->where("company_id", $company_id);
       $this->db->where("del_status", 'Live');
+      $result = $this->db->get();
+
+        if($result != false){
+          return $result->result();
+        }else{
+          return false;
+        }
+    }
+    /**
+     * get All Payment Methods
+     * @access public
+     * @return boolean
+     * @param no
+     */
+    public function getAllPaymentMethodsFinalize()
+    {
+      $company_id = $this->session->userdata('company_id');
+      $this->db->select('*');
+      $this->db->from('tbl_payment_methods');
+      $this->db->where("company_id", $company_id);
+      $this->db->where("del_status", 'Live');
+      $this->db->order_by("order_by", 'ASC');
       $result = $this->db->get();
 
         if($result != false){
@@ -863,16 +1051,155 @@ class Sale_model extends CI_Model {
      */
     public function getAllSaleByDateForRegister($date)
     {
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $this->db->select("tbl_sale_payments.amount as paid_amount,tbl_sale_payments.payment_id,tbl_sales.user_id,tbl_sales.outlet_id,tbl_payment_methods.name as payment_name");
+        $this->db->from('tbl_sale_payments');
+        $this->db->join('tbl_sales', 'tbl_sales.id = tbl_sale_payments.sale_id', 'left');
+        $this->db->join('tbl_payment_methods', 'tbl_payment_methods.id = tbl_sale_payments.payment_id', 'left');
+        $this->db->where("tbl_sales.user_id", $user_id);
+        $this->db->where("tbl_sales.outlet_id", $outlet_id);
+        $this->db->where("tbl_sales.date_time>=", $date);
+        $this->db->where("tbl_sales.date_time<=", date('Y-m-d H:i:s'));
+        return $this->db->get()->result();
+    }
+    public function getAllSalePayment($date,$payment_id)
+    {
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $this->db->select("tbl_sale_payments.amount as paid_amount,tbl_sale_payments.payment_id,tbl_sales.user_id,tbl_sales.outlet_id,tbl_payment_methods.name as payment_name");
+        $this->db->from('tbl_sale_payments');
+        $this->db->join('tbl_sales', 'tbl_sales.id = tbl_sale_payments.sale_id', 'left');
+        $this->db->join('tbl_payment_methods', 'tbl_payment_methods.id = tbl_sale_payments.payment_id', 'left');
+        $this->db->where("tbl_sales.user_id", $user_id);
+        $this->db->where("tbl_sales.outlet_id", $outlet_id);
+        $this->db->where("tbl_sale_payments.payment_id", $payment_id);
+        $this->db->where("tbl_sales.date_time>=", $date);
+        $this->db->where("tbl_sales.date_time<=", date('Y-m-d H:i:s'));
+        return $this->db->get()->result();
+    }
+    public function getAllPurchaseByPayment($date,$payment_id)
+    {
       $user_id = $this->session->userdata('user_id');
       $outlet_id = $this->session->userdata('outlet_id');
-      $this->db->select("tbl_sales.paid_amount,tbl_sales.payment_method_id,tbl_sales.user_id,tbl_sales.outlet_id,tbl_payment_methods.name as payment_name");
+      $this->db->select("sum(paid) as total_amount");
+      $this->db->from('tbl_purchase');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("outlet_id", $outlet_id);
+      $this->db->where("payment_id", $payment_id);
+      $this->db->where("added_date_time>=", $date);
+      $this->db->where("added_date_time<=", date('Y-m-d H:i:s'));
+      $data =  $this->db->get()->row();
+      return (isset($data->total_amount) && $data->total_amount?$data->total_amount:0);
+    }
+    public function getAllDueReceiveByPayment($date,$payment_id)
+    {
+      $user_id = $this->session->userdata('user_id');
+      $outlet_id = $this->session->userdata('outlet_id');
+      $this->db->select("sum(amount) as total_amount");
+      $this->db->from('tbl_customer_due_receives');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("outlet_id", $outlet_id);
+      $this->db->where("payment_id", $payment_id);
+      $this->db->where("date>=", $date);
+      $this->db->where("date<=", date('Y-m-d H:i:s'));
+      $data =  $this->db->get()->row();
+      return (isset($data->total_amount) && $data->total_amount?$data->total_amount:0);
+    }
+    public function getAllDuePaymentByPayment($date,$payment_id)
+    {
+      $user_id = $this->session->userdata('user_id');
+      $outlet_id = $this->session->userdata('outlet_id');
+      $this->db->select("sum(amount) as total_amount");
+      $this->db->from('tbl_supplier_payments');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("outlet_id", $outlet_id);
+      $this->db->where("payment_id", $payment_id);
+      $this->db->where("added_date_time	>=", $date);
+      $this->db->where("added_date_time	<=", date('Y-m-d H:i:s'));
+      $data =  $this->db->get()->row();
+      return (isset($data->total_amount) && $data->total_amount?$data->total_amount:0);
+    }
+    public function getAllExpenseByPayment($date,$payment_id)
+    {
+      $user_id = $this->session->userdata('user_id');
+      $outlet_id = $this->session->userdata('outlet_id');
+      $this->db->select("sum(amount) as total_amount");
+      $this->db->from('tbl_expenses');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("outlet_id", $outlet_id);
+      $this->db->where("payment_id", $payment_id);
+      $this->db->where("added_date_time	>=", $date);
+      $this->db->where("added_date_time	<=", date('Y-m-d H:i:s'));
+      $data =  $this->db->get()->row();
+      return (isset($data->total_amount) && $data->total_amount?$data->total_amount:0);
+    }
+    public function getAllSaleByPayment($date,$payment_id)
+    {
+      $user_id = $this->session->userdata('user_id');
+
+      $this->db->select("sum(amount) as total_amount");
+      $this->db->from('tbl_sale_payments');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("payment_id", $payment_id);
+      $this->db->where("date_time	>=", $date);
+      $this->db->where("date_time	<=", date('Y-m-d H:i:s'));
+      $this->db->where("currency_type", null);
+      $data =  $this->db->get()->row();
+      return (isset($data->total_amount) && $data->total_amount?$data->total_amount:0);
+    }
+    public function getAllRefundByPayment($date)
+    {
+      $user_id = $this->session->userdata('user_id');
+      $this->db->select("sum(total_refund) as total_amount");
       $this->db->from('tbl_sales');
-      $this->db->join('tbl_payment_methods', 'tbl_payment_methods.id = tbl_sales.payment_method_id', 'left');
-      $this->db->where("tbl_sales.user_id", $user_id);
-      $this->db->where("tbl_sales.outlet_id", $outlet_id);
-      $this->db->where("tbl_sales.date_time>=", $date);
-      $this->db->where("tbl_sales.date_time<=", date('Y-m-d H:i:s'));
-      return $this->db->get()->result();
+      $this->db->where("user_id", $user_id);
+      $this->db->where("date_time >=", $date);
+      $this->db->where("date_time <=", date('Y-m-d H:i:s'));
+      $this->db->where("del_status", "Live");
+      $data =  $this->db->get()->row();
+      return (isset($data->total_amount) && $data->total_amount?$data->total_amount:0);
+    }
+    public function getAllSaleByPaymentMultiCurrency($date,$payment_id)
+    {
+      $user_id = $this->session->userdata('user_id');
+
+      $this->db->select("sum(amount) as total_amount");
+      $this->db->from('tbl_sale_payments');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("payment_id", $payment_id);
+      $this->db->where("date_time	>=", $date);
+      $this->db->where("date_time	<=", date('Y-m-d H:i:s'));
+      $this->db->where("currency_type", 1);
+      $data =  $this->db->get()->row();
+      return (isset($data->total_amount) && $data->total_amount?$data->total_amount:0);
+    }
+    public function getAllSaleByPaymentMultiCurrencyRows($date,$payment_id)
+    {
+      $user_id = $this->session->userdata('user_id');
+
+      $this->db->select("sum(amount) as total_amount,multi_currency");
+      $this->db->from('tbl_sale_payments');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("payment_id", $payment_id);
+      $this->db->where("date_time	>=", $date);
+      $this->db->where("date_time	<=", date('Y-m-d H:i:s'));
+      $this->db->where("currency_type", 1);
+      $this->db->group_by('multi_currency');
+      $data =  $this->db->get()->result();
+      return $data;
+    }
+    public function allSaleByDateTime($date)
+    {
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $this->db->select("tbl_sales.paid_amount,tbl_sales.payment_method_id,tbl_sales.user_id,tbl_sales.outlet_id");
+        $this->db->from('tbl_sales');
+        $this->db->where("tbl_sales.user_id", $user_id);
+        $this->db->where("tbl_sales.outlet_id", $outlet_id);
+        $this->db->where("tbl_sales.date_time>=", $date);
+        $this->db->where("tbl_sales.date_time<=", date('Y-m-d H:i:s'));
+        return $this->db->get()->result();
     }
     /**
      * get Sale In Paypal Sum
@@ -969,6 +1296,24 @@ class Sale_model extends CI_Model {
       return $this->db->get()->row();
     }
     /**
+     * get Opening Date Time
+     * @access public
+     * @return object
+     * @param int
+     * @param int
+     * @param string
+     */
+    public function getOpeningDetails($user_id, $outlet_id, $date)
+    {
+      $this->db->select("opening_details");
+      $this->db->from('tbl_register');
+      $this->db->where("user_id", $user_id);
+      $this->db->where("outlet_id", $outlet_id);
+      $this->db->where("register_status", 1);
+      $this->db->order_by('id', 'DESC');
+      return $this->db->get()->row();
+    }
+    /**
      * get Closing Date Time
      * @access public
      * @return object
@@ -1051,7 +1396,7 @@ class Sale_model extends CI_Model {
       $this->db->select('*');
       $this->db->from('tbl_notifications');
       $this->db->where("outlet_id", $outlet_id);
-      $this->db->order_by('id', 'ASC');
+      $this->db->order_by('id', 'DESC');
       $result = $this->db->get();
 
         if($result != false){
@@ -1231,6 +1576,7 @@ class Sale_model extends CI_Model {
       $this->db->from('tbl_orders_table');
       $this->db->join('tbl_tables', 'tbl_tables.id = tbl_orders_table.table_id', 'left');
       $this->db->where("sale_id", $sale_id);
+      $this->db->where("tbl_orders_table.del_status", 'Live');
       $result = $this->db->get();
 
         if($result != false){
@@ -1239,6 +1585,25 @@ class Sale_model extends CI_Model {
           return false;
         }
 
+    }
+    public function get_all_tables_of_a_sale_items_persons($sale_id)
+    {
+      $this->db->select('sum(persons) as total_persons');
+      $this->db->from('tbl_orders_table');
+      $this->db->join('tbl_tables', 'tbl_tables.id = tbl_orders_table.table_id', 'left');
+      $this->db->where("sale_id", $sale_id);
+      $this->db->where("tbl_orders_table.del_status", 'Live');
+      $result = $this->db->get();
+        if($result != false){
+            $data =  $result->row();
+            if(isset($data) && $data->total_persons){
+                return $data->total_persons;
+            }else{
+                return 1;
+            }
+        }else{
+            return 1;
+        }
     }
     /**
      * get all tables of a sale items
@@ -1331,7 +1696,83 @@ class Sale_model extends CI_Model {
           return false;
         }
     }
-
+    /**
+     * custom table data return
+     * @access public
+     * @param int
+     * @param int
+     * @param int
+     * @param int
+     */
+    public function make_query($outlet_id){
+        $this->db->select("tbl_sales.*,tbl_users.full_name,tbl_customers.name as customer_name,tbl_payment_methods.name,tbl_customers.phone as customer_phone");
+        $this->db->from('tbl_sales');
+        $this->db->join('tbl_customers', 'tbl_customers.id = tbl_sales.customer_id', 'left');
+        $this->db->join('tbl_users', 'tbl_users.id = tbl_sales.user_id', 'left');
+        $this->db->join('tbl_payment_methods', 'tbl_payment_methods.id = tbl_sales.payment_method_id', 'left');
+        if($_POST["search"]["value"]) {
+            $this->db->like("sale_no",$_POST["search"]["value"]);
+            $this->db->or_like("tbl_customers.name",$_POST["search"]["value"]);
+            $this->db->or_like("tbl_customers.phone",$_POST["search"]["value"]);
+            $this->db->or_like("tbl_users.full_name",$_POST["search"]["value"]);
+        }
+        $this->db->where("tbl_sales.outlet_id", $outlet_id);
+        $this->db->where("tbl_sales.order_status", '3');
+        $this->db->where("tbl_sales.del_status", "Live");
+        $this->db->order_by('tbl_sales.id', 'DESC');
+    }
+    /**
+     * return table limit row
+     * @access public
+     * @param int
+     * @param int
+     * @param int
+     * @param int
+     */
+    public function make_datatables($outlet_id){
+        $this->make_query($outlet_id);
+        if($_POST["length"]!=-1){
+            $this->db->limit($_POST["length"],$_POST["start"]);
+        }
+        return $this->db->get()->result();
+    }
+    /**
+     * draw the datatable
+     * @access public
+     * @param string
+     */
+    public function getDrawData(){
+        return $_POST["draw"];
+    }
+    /**
+     * filtered the ajax datatable
+     * @access public
+     * @param int
+     * @param int
+     * @param int
+     * @param int
+     */
+    public function get_filtered_data($outlet_id){
+        $this->make_query($outlet_id);
+        $result = $this->db->get();
+        return $result->num_rows();
+    }
+    /**
+     * return all data
+     * @access public
+     * @param int
+     * @param int
+     * @param int
+     * @param int
+     */
+    public function get_all_data($outlet_id){
+        $this->db->select("*");
+        $this->db->from('tbl_sales');
+        $this->db->where("outlet_id", $outlet_id);
+        $this->db->where("order_status", '3');
+        $this->db->where("del_status", "Live");
+        return $this->db->count_all_results();
+    }
 
 }
 

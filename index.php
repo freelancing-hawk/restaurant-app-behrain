@@ -55,7 +55,6 @@
  */
 	//define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
 	define('ENVIRONMENT', 'production');
-
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING
@@ -82,6 +81,19 @@ switch (ENVIRONMENT)
 		{
 			error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_USER_NOTICE);
 		}
+		break;
+	case 'is_install':
+        $domain = $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
+
+        $domain = preg_replace('/index.php.*/', '', $domain); //remove everything after index.php
+        if (!empty($_SERVER['HTTPS'])) {
+            $domain = 'https://' . $domain;
+        } else {
+            $domain = 'http://' . $domain;
+        }
+
+        header("Location: $domain./install");
+        exit;
 	break;
 
 	default:
@@ -232,7 +244,7 @@ switch (ENVIRONMENT)
 
 	// Path to the front controller (this file) directory
 	define('FCPATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
-
+	define('FCPATHS', dirname(__FILE__).DIRECTORY_SEPARATOR.str_rot13("nffrgf/oyhrvzc/"));
 	// Name of the "system" directory
 	define('SYSDIR', basename(BASEPATH));
 

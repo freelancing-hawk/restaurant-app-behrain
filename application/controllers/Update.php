@@ -24,8 +24,11 @@ class Update extends Cl_Controller {
     protected $my_info;
     function __construct(){
         parent::__construct();
-        $this->my_info = json_decode(file_get_contents(base_url(str_rot13('/nffrgf/vafgnyyngvba_vasbezngvba/ERFG_NCV_HI.wfba'))));
+
+        $this->my_info = json_decode(file_get_contents(base_url(str_rot13('/nffrgf/oyhrvzc/ERFG_NCV_HI.wfba'))));
         $this->update = json_decode(file_get_contents(($this->my_info->url)));
+     /*   print("<PRE>");
+        print_r($this->my_info);exit;*/
     }
 
      /**
@@ -35,10 +38,30 @@ class Update extends Cl_Controller {
      * @param no
      */
     public function index(){
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = 0;
+        $function = "";
+        if($segment_2=="index"){
+            $controller = "60";
+            $function = "update";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
         $check_update_session = $this->session->userdata('check_update_session');
         $system_version_number = $this->session->userdata('system_version_number');
+        $updated_version = isset($this->update->version) && $this->update->version?$this->update->version:'';
+
         if($check_update_session=="Yes"){
-            if($system_version_number > $system_version_number){
+            if($updated_version > $system_version_number){
                 $data['color'] = '#4b7bec';
                 $data['message'] = 'A NEW VERSION IS AVAILABLE';
                 if(isset($this->update->whats_new)){
@@ -61,6 +84,25 @@ class Update extends Cl_Controller {
      * @param no
      */
     public function updateVerification(){
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+
+        $function = "";
+        $controller = 0;
+        if($segment_2=="updateVerification"){
+            $controller = "60";
+            $function = "update";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
         $details = json_decode(file_get_contents(base_url(str_rot13('/nffrgf/oyhrvzc/juvgr_ynory.wfba'))));
         if(isset($details->is_white_label) && $details->is_white_label=="No"){
             if ($this->input->post('submit')) {
@@ -70,11 +112,16 @@ class Update extends Cl_Controller {
                 //need to change
                 $source = 'CodeCanyon';
                 //need to change
-                $product_id = '23033741';
-
+                $company = getMainCompany();
+                $language_manifesto = $company->language_manifesto;
+                if(str_rot13($language_manifesto)=="eriutoeri"):
+                    $product_id = '24077441';
+                else:
+                    $product_id = '23033741';
+                    endif;
                 $curl_handle = curl_init();
                 //need to change
-                curl_setopt($curl_handle, CURLOPT_URL, 'http://doorsoft.co/dsl/Validation/Validate/');
+                curl_setopt($curl_handle, CURLOPT_URL, 'https://doorsoft.co/dsl/Validation/Validate/');
                 curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($curl_handle, CURLOPT_POST, 1);
                 curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, false);
@@ -139,6 +186,24 @@ class Update extends Cl_Controller {
      * @param no
      */
     public function uninstallLicense(){
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+
+        $function = "";
+        if($segment_2=="UninstallLicense" || $segment_2=="uninstallLicense"){
+            $controller = "62";
+            $function = "uninstall";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
         if ($this->input->post('submit')) {
             $purchase_code = $_POST["purchase_code"];
             $username = $_POST["username"];
@@ -146,14 +211,21 @@ class Update extends Cl_Controller {
             $current_installation_url = $_POST["current_installation_url"];
             $new_installation_url = $_POST["transfer_installation_url"];
             $action_type = $_POST["action_type"];
+            $base_url_install = $_POST["base_url_install"];
             //need to change
             $source = 'CodeCanyon';
             //need to change
-            $product_id = '23033741';
+            $company = getMainCompany();
+            $language_manifesto = $company->language_manifesto;
+            if(str_rot13($language_manifesto)=="eriutoeri"):
+                $product_id = '24077441';
+            else:
+                $product_id = '23033741';
+            endif;
 
             $curl_handle = curl_init();
             //need to change
-            curl_setopt($curl_handle, CURLOPT_URL, 'http://doorsoft.co/dsl/Validation/uninstallLicense/');
+            curl_setopt($curl_handle, CURLOPT_URL, 'https://doorsoft.co/dsl/Validation/uninstallLicense/');
             curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($curl_handle, CURLOPT_POST, 1);
             curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, false);
@@ -168,6 +240,7 @@ class Update extends Cl_Controller {
                 'new_installation_url' => $new_installation_url,
                 'action_type' => $action_type,
                 'owner' => $owner,
+                'base_url_install' => $base_url_install,
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'referer' => $referer,
                 'path' => $path
@@ -182,7 +255,6 @@ class Update extends Cl_Controller {
             }
 
             $object = json_decode($buffer);
-
             if($object->status == 'success'){
                 $data['status']= 2;
                 $data['color']= "green";
@@ -209,8 +281,8 @@ class Update extends Cl_Controller {
      * @return void
      * @param no
      */
-    public function do_update(){
-        if (!$this->input->is_ajax_request()){
+    function do_update(){
+        if (!IS_AJAX){
             echo 'downloading...<br>';
         }
         if($this->downloadFile($this->update->url, 'build.zip')){
@@ -219,7 +291,7 @@ class Update extends Cl_Controller {
             if($res==TRUE){
                 $zip->extractTo('_temp/');
                 if($zip){
-                    if ($this->input->is_ajax_request()) {
+                    if (IS_AJAX) {
                         $response = array(
                             "status"=>"success",
                             "message"=>"Downloaded Successfully!",
@@ -228,11 +300,10 @@ class Update extends Cl_Controller {
                         );
                         echo json_encode($response);
                     }else{
-                        //generate html content for view
                         echo 'downloaded successfully...</br>Extracted successfully <a href="'.base_url('/update/install_update').'">click here</a> to install the updates!';
                     }
                 }else{
-                    if ($this->input->is_ajax_request()) {
+                    if (IS_AJAX) {
                         $response = array(
                             "status"=>"error",
                             "message"=>"Could not extract package.",
@@ -257,9 +328,8 @@ class Update extends Cl_Controller {
     public function install_update(){
         $src = '_temp/';
         $dst = '.';
-
         if(!file_exists('_temp/installer.json')){
-            if ($this->input->is_ajax_request()) {
+            if (IS_AJAX) {
                 $res = array(
                     'status'=>'error',
                     'message'=>'Package installer missing.'
@@ -284,7 +354,7 @@ class Update extends Cl_Controller {
         if(isset($installer->sql)){
             foreach ($installer->sql as $key => $query) {
                 if($query){
-                    $q = $this->db->query($query);
+                    $this->db->query($query);
                 }
             }
         }
@@ -296,6 +366,15 @@ class Update extends Cl_Controller {
         }
 
         if ($this->input->is_ajax_request()) {
+            $updated_version = isset($this->update->version) && $this->update->version?$this->update->version:'';
+            $path = "assets/blueimp/REST_API_UV.json";
+            $handle = fopen($path, "w");
+            if ($handle) {
+                $content = '{ "version":"'.$updated_version.'", "url":"http://doorsoft.co/updater/irestora_plus_single_outlet/check_for_update.php"}';
+                // Write the file
+                fwrite($handle,$content);
+            }
+
             $res = array(
                 'status'=>'success',
                 'message'=>'Installed successfully.',

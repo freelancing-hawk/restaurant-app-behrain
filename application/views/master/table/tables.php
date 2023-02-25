@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
 
     <?php
@@ -9,7 +8,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -22,9 +21,7 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('tables'); ?>" data-id_name="datatable">
             </div>
             <div>
-                <a class="btn_list m-right btn bg-blue-btn" href="<?php echo base_url() ?>table/addEditTable">
-                   <i data-feather="plus"></i> <?php echo lang('add_table'); ?>
-                </a>
+
             </div>
         </div>
     </section>
@@ -43,6 +40,7 @@
                         <thead>
                             <tr>
                                 <th class="ir_w_1"> <?php echo lang('sn'); ?></th>
+                                <th class="ir_w_20"><?php echo lang('area'); ?></th>
                                 <th class="ir_w_20"><?php echo lang('table_name'); ?></th>
                                 <th class="ir_w_20"><?php echo lang('seat_capacity'); ?></th>
                                 <th class="ir_w_10"><?php echo lang('position'); ?></th>
@@ -61,6 +59,7 @@
                                 ?>
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($i--); ?></td>
+                                <td><?php echo escape_output(getAreaName($value->area)) ?></td>
                                 <td><?php echo escape_output($value->name) ?></td>
                                 <td><?php echo escape_output($value->sit_capacity) ?></td>
                                 <td><?php echo escape_output($value->position) ?></td>
@@ -74,11 +73,11 @@
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a
+                                            <li data-access="update-280" class="menu_assign_class"><a
                                                     href="<?php echo base_url() ?>table/addEditTable/<?php echo escape_output($this->custom->encrypt_decrypt($value->id, 'encrypt')); ?>"><i
                                                         class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a>
                                             </li>
-                                            <li><a class="delete"
+                                            <li data-access="delete-280" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>table/deleteTable/<?php echo escape_output($this->custom->encrypt_decrypt($value->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>
@@ -102,7 +101,7 @@
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jquery-3.3.1.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/datatable_custom/dataTables.buttons.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/datatable_custom/buttons.flash.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jszip.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/datatable_custom/pdfmake.min.js"></script>

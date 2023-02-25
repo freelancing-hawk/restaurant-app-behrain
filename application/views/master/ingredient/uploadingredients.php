@@ -1,5 +1,3 @@
-
-
 <section class="main-content-wrapper">
     <section class="alert-wrapper">
         <?php
@@ -8,15 +6,15 @@
             echo '<div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception'));
+            echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
             echo '</p></div>';
         }
         if ($this->session->flashdata('exception_err')) {
 
             echo '<div class="alert alert-danger alert-dismissible"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception_err'));
+        <div class="alert-body"><p><i class="m-right fa fa-times"></i>';
+            echo escape_output($this->session->flashdata('exception_err'));unset($_SESSION['exception_err']);
             echo '</p></div>';
         }
         ?>
@@ -24,7 +22,7 @@
 
     <section class="content-header">
         <h3 class="top-left-header">
-            Upload Ingredient
+            <?php echo lang('upload_ingredient'); ?>
         </h3>
     </section>
 
@@ -43,10 +41,7 @@
                                     placeholder="<?php echo lang('upload_file'); ?>"
                                     value="<?php echo set_value('name'); ?>">
                             </div>
-                            <div class="checkbox my-2 form-group">
-                                <label><input type="checkbox" name="remove_previous"
-                                        value="1"> <span class="ms-2"><?php echo lang('remove_all_previous_data'); ?></span></label>
-                            </div>
+
                             <?php if (form_error('userfile')) { ?>
                             <div class="callout callout-danger my-2">
                                 <?php echo form_error('userfile'); ?>

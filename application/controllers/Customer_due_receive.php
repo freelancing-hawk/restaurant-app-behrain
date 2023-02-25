@@ -36,10 +36,30 @@ class Customer_due_receive extends Cl_Controller {
             $this->session->set_userdata("clicked_method", $this->uri->segment(2));
             redirect('Outlet/outlets');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "151";
+        $function = "";
+
+        if($segment_2=="customerDueReceives"){
+            $function = "view";
+        }elseif($segment_2=="addCustomerDueReceive" ||  $segment_2=="getCustomerDue"){
+            $function = "add";
+        }elseif($segment_2=="deleteCustomerDueReceive"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         //check register is open or not
         $user_id = $this->session->userdata('user_id');
         $outlet_id = $this->session->userdata('outlet_id');
@@ -95,12 +115,12 @@ class Customer_due_receive extends Cl_Controller {
             $this->form_validation->set_rules('reference_no', lang('ref_no'), 'required|max_length[50]');
             $this->form_validation->set_rules('amount', lang('amount'), 'required|max_length[50]');
             $this->form_validation->set_rules('customer_id', lang('customer'), 'required|max_length[10]');
+            $this->form_validation->set_rules('payment_id', lang('payment_method'), 'required|max_length[10]');
             $this->form_validation->set_rules('note', lang('note'), 'max_length[200]');
             if ($this->form_validation->run() == TRUE) {
                 $splr_payment_info = array();
                 $splr_payment_info['date'] = date("Y-m-d H:i:s");
-                $splr_payment_info['only_date'] = date("Y-m-d");
-                // $splr_payment_info['date'] = date("Y-m-d", strtotime($this->input->post($this->security->xss_clean('date'))));
+                $splr_payment_info['only_date'] = date("Y-m-d", strtotime($this->input->post($this->security->xss_clean('date'))));
                 $splr_payment_info['amount'] =htmlspecialchars($this->input->post($this->security->xss_clean('amount')));
                 $splr_payment_info['reference_no'] =htmlspecialchars($this->input->post($this->security->xss_clean('reference_no')));
                 $splr_payment_info['customer_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('customer_id')));

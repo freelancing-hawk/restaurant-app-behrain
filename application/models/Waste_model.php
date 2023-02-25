@@ -25,7 +25,7 @@ class Waste_model extends CI_Model {
     public function getIngredientList() {
         $outlet_id = $this->session->userdata('outlet_id');
         $company_id = $this->session->userdata('company_id');
-        $this->db->select("tbl_ingredients.id, tbl_ingredients.name, tbl_ingredients.code, tbl_purchase_ingredients.unit_price as purchase_price, tbl_units.unit_name");
+        $this->db->select("tbl_ingredients.id,tbl_ingredients.conversion_rate, tbl_ingredients.name, tbl_ingredients.code, tbl_purchase_ingredients.unit_price as purchase_price, tbl_units.unit_name");
         $this->db->from("tbl_ingredients");
         $this->db->join("tbl_purchase_ingredients", 'tbl_purchase_ingredients.ingredient_id = tbl_ingredients.id', 'left');
         $this->db->join("tbl_units", 'tbl_units.id = tbl_ingredients.unit_id', 'left');
@@ -34,6 +34,18 @@ class Waste_model extends CI_Model {
         $this->db->where("tbl_purchase_ingredients.del_status", 'Live');
         $this->db->where("tbl_purchase_ingredients.outlet_id", $outlet_id);
         $result = $this->db->get()->result();
+        return $result;
+    }
+    public function getPurchaseIng($in_id) {
+        $outlet_id = $this->session->userdata('outlet_id');
+        $this->db->select("tbl_purchase_ingredients.*,tbl_ingredients.conversion_rate");
+        $this->db->from("tbl_purchase_ingredients");
+        $this->db->join("tbl_ingredients", 'tbl_ingredients.id = tbl_purchase_ingredients.ingredient_id', 'left');
+        $this->db->order_by("tbl_purchase_ingredients.id", "DESC");
+        $this->db->where("tbl_purchase_ingredients.del_status", 'Live');
+        $this->db->where("tbl_purchase_ingredients.outlet_id", $outlet_id);
+        $this->db->where("tbl_purchase_ingredients.ingredient_id", $in_id);
+        $result = $this->db->get()->row();
         return $result;
     }
     /**
@@ -47,7 +59,6 @@ class Waste_model extends CI_Model {
         $company_id = $this->session->userdata('company_id');
         $this->db->select("*");
         $this->db->from("tbl_food_menus");
-
         $this->db->order_by("tbl_food_menus.name", "ASC");
         $this->db->where("tbl_food_menus.company_id", $company_id);
         $this->db->where("tbl_food_menus.del_status", 'Live');

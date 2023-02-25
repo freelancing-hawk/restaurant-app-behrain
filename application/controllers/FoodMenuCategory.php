@@ -28,10 +28,33 @@ class FoodMenuCategory extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "229";
+        $function = "";
+        if($segment_2=="foodMenuCategories"){
+            $function = "view";
+        }elseif($segment_2=="addEditFoodMenuCategory" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditFoodMenuCategory"){
+            $function = "add";
+        }elseif($segment_2=="sortingForPOS"){
+            $function = "sorting";
+        }elseif($segment_2=="deleteFoodMenuCategory"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -48,6 +71,18 @@ class FoodMenuCategory extends Cl_Controller {
         $data = array();
         $data['foodMenuCategories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_food_menu_categories");
         $data['main_content'] = $this->load->view('master/foodMenuCategory/foodMenuCategories', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+     /**
+     * food Menu Categories
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function sortingForPOS() {
+        $data = array();
+        $data['foodMenuCategories'] = $this->Common_model->getSortingForPOS();
+        $data['main_content'] = $this->load->view('master/foodMenuCategory/ordering_for_pos', $data, TRUE);
         $this->load->view('userHome', $data);
     }
      /**

@@ -3,6 +3,7 @@
 <input type="hidden" id="date_field_required" value="<?php echo lang('date_field_required'); ?>">
 <input type="hidden" id="at_least_ingredient" value="<?php echo lang('at_least_ingredient'); ?>">
 <input type="hidden" id="paid_field_required" value="<?php echo lang('paid_field_required'); ?>">
+<input type="hidden" id="payment_id_field_required" value="<?php echo lang('payment_id_field_required'); ?>">
 <input type="hidden" id="are_you_sure" value="<?php echo lang('are_you_sure'); ?>">
 <input type="hidden" id="base_url" value="<?php echo base_url(); ?>">
 <input type="hidden" id="alert" value="<?php echo lang('alert'); ?>">
@@ -140,10 +141,10 @@
                                             <th>
                                                 <?php echo lang('ingredient'); ?>(<?php echo lang('code'); ?>)</th>
                                             <th><?php echo lang('unit_price'); ?> <span
-                                                    class="ir_c_transparent">fdf</span></th>
+                                                    class="ir_c_transparent">&nbsp;</span></th>
                                             <th><?php echo lang('quantity_amount'); ?></th>
                                             <th><?php echo lang('total'); ?> <span
-                                                    class="ir_c_transparent">Hiddentext</span></th>
+                                                    class="ir_c_transparent">&nbsp;</span></th>
                                             <th><?php echo lang('actions'); ?></th>
                                         </tr>
                                     </thead>
@@ -158,7 +159,7 @@
                                                 '<td class="txt_18">' . getIngredientNameById($pi->ingredient_id) . ' (' . getIngredientCodeById($pi->ingredient_id) . ')</span></td>' .
                                                 '<input type="hidden" id="ingredient_id_' . $i . '" name="ingredient_id[]" value="' . $pi->ingredient_id . '"/>' .
                                                 '<td><input type="text" id="unit_price_' . $i . '" name="unit_price[]" onfocus="this.select();" class="form-control integerchk aligning" placeholder="Unit Price" value="' . $pi->unit_price . '" onkeyup="return calculateAll();"/></td>' .
-                                                '<td><input type="text" data-countID="' . $i . '" id="quantity_amount_' . $i . '" name="quantity_amount[]" onfocus="this.select();" class="form-control integerchk aligning countID" class="ir_w_85" placeholder="Qty/Amount" value="' . $pi->quantity_amount . '"  onkeyup="return calculateAll();" ><span class="label_aligning">' . unitName(getUnitIdByIgId($pi->ingredient_id)) . '</span></td>' .
+                                                '<td><input type="text" data-countID="' . $i . '" id="quantity_amount_' . $i . '" name="quantity_amount[]" onfocus="this.select();" class="form-control integerchk aligning countID" class="ir_w_85" placeholder="Qty/Amount" value="' . $pi->quantity_amount . '"  onkeyup="return calculateAll();" ><span class="label_aligning">' . unitName(getPUnitIdByIgId($pi->ingredient_id)) . '</span></td>' .
                                                 '<td><input type="text" id="total_' . $i . '" name="total[]" class="form-control integerchk aligning" placeholder="Total" value="' . $pi->total . '" readonly/></td>' .
                                                 '<td><a class="btn bg-red-btn" onclick="return deleter(' . $i . ',' . $pi->ingredient_id . ');" ><i class="fa fa-trash txt_22"></i> </a></td>' .
                                                 '</tr>'
@@ -210,10 +211,41 @@
                                        readonly value="<?php echo escape_output($purchase_details->due) ?>">
                             </div>
                         </div>
+                        <div class="col-md-1"></div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-8"></div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label><?php echo lang('payment_method'); ?> <span class="required_star">*</span></label>
+                                <select tabindex="3" class="form-control select2 ir_w_100" id="payment_id"
+                                        name="payment_id">
+                                    <option value=""><?php echo lang('select'); ?></option>
+                                    <?php foreach (getAllPaymentMethods(5) as $value) {
+                                        ?>
+                                        <option value="<?php echo escape_output($value->id) ?>"
+                                            <?php echo set_select('payment_id', $value->id); ?> <?php
+                                        if ($purchase_details->payment_id == $value->id) {
+                                            echo "selected";
+                                        }
+                                        ?>>
+                                            <?php echo escape_output($value->name)?></option>
+                                        <?php
+                                    } ?>
+                                </select>
+                            </div>
+                            <?php if (form_error('payment_id')) { ?>
+                                <div class="callout callout-danger my-2">
+                                    <?php echo form_error('payment_id'); ?>
+                                </div>
+                            <?php } ?>
+                            <div class="callout callout-danger my-2 error-msg payment_id_err_msg_contnr">
+                                <p id="payment_id_err_msg"></p>
+                            </div>
+                        </div>
                     </div>
                     
                 </div>
-
+    <p>&nbsp;</p>
                 <input type="hidden" name="suffix_hidden_field" id="suffix_hidden_field" />
                 <div class="box-footer">
                     <div class="row">
@@ -235,7 +267,7 @@
         
 </section>
 
-<div class="modal fade" id="supplierModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="supplierModal" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -334,11 +366,11 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="noticeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="noticeModal" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="noticeModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Notice</h3>
+                <h3 class="modal-title"><?php echo lang('notice'); ?></h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true"><i data-feather="x"></i>
                     </span>
@@ -349,18 +381,6 @@
                     <div class="col-md-12 hidden-lg hidden-sm">
                         <p class="foodMenuCartNotice">
                             <strong class="ir_ml39"><?php echo lang('notice'); ?></strong><br>
-                            <?php echo lang('notice_text_1'); ?>
-                        </p>
-                    </div>
-                    <div class="col-md-12 hidden-xs hidden-sm">
-                        <p class="foodMenuCartNotice">
-                            <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
-                            <?php echo lang('notice_text_1'); ?>
-                        </p>
-                    </div>
-                    <div class="col-md-12 hidden-xs hidden-lg">
-                        <p class="foodMenuCartNotice">
-                            <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
                             <?php echo lang('notice_text_1'); ?>
                         </p>
                     </div>

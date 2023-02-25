@@ -75,9 +75,11 @@
                         <thead>
                             <tr>
                                 <th class="ir_w2_txt_center"><?php echo lang('sn'); ?></th>
-                                <th class="ir_w_31"><?php echo lang('date'); ?></th>
-                                <th class="ir_w_35"><?php echo lang('total_sale'); ?></th>
-                                <th class="ir_w_31"><?php echo lang('vat'); ?></th>
+                                <th class="ir_w_15"><?php echo lang('sale_no'); ?></th>
+                                <th><?php echo lang('date'); ?></th>
+                                <th><?php echo lang('total_sale'); ?></th>
+                                <th><?php echo lang('applied_tax'); ?> <?php echo lang('amount'); ?></th>
+                                <th><?php echo lang('total'); ?> <?php echo lang('vat'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -86,30 +88,54 @@
                             $vatTotal = 0;
                             if (isset($vatReport)):
                                 foreach ($vatReport as $key => $value) {
+                                    if($value->total_vat):
                                     $grandTotal+=$value->total_payable;
                                     $vatTotal+=$value->total_vat;
                                     $key++;
                                     ?>
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key--); ?></td>
-                                <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->sale_date))) ?>
+                                <td><?= escape_output($value->sale_no) ?>
+                                <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->sale_date))) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_payable)) ?></td>
+                                <td>
+                                    <?php
+                                        $vat_json = json_decode($value->sale_vat_objects);
+                                        foreach ($vat_json as $key=>$value1){
+                                            if((float)$value1->tax_field_amount):
+                                            echo escape_output($value1->tax_field_type).":".escape_output($value1->tax_field_amount);
+                                            if($key<sizeof($vat_json)-1){
+                                                echo ", ";
+                                            }
+                                            endif;
+                                        }
+                                    ?>
                                 </td>
-                                <td><?php echo escape_output(getAmt($value->total_payable)) ?></td>
-                                <td><?php echo escape_output(getAmt($value->total_vat)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_vat)) ?></td>
                             </tr>
                             <?php
+                                endif;
                                 }
                             endif;
                             ?>
                         </tbody>
-                       
+                        <tfoot>
+                            <tr>
+                                <th class="ir_w2_txt_center"></th>
+                                <th class="ir_w2_txt_center"></th>
+                                <th class="pull-right"><?php echo lang('total'); ?></th>
+                                <th><?php echo escape_output(getAmtCustom($grandTotal)) ?></th>
+                                <th></th>
+                                <th class=""><?php echo escape_output(getAmtCustom($vatTotal)) ?></th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
                 <!-- /.box-body -->
             </div>
     </div>
 
-        
+
 </section>
 <!-- DataTables -->
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jquery-3.3.1.js"></script>

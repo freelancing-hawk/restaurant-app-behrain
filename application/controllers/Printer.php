@@ -34,6 +34,31 @@ class Printer extends Cl_Controller {
         }
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "35";
+        $function = "";
+
+        if($segment_2=="printers"){
+            $function = "view";
+        }elseif($segment_2=="addEditPrinter" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditPrinter"){
+            $function = "add";
+        }elseif($segment_2=="deletePrinter"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
     }
 
     /**
@@ -87,7 +112,7 @@ class Printer extends Cl_Controller {
                 $data['path'] = htmlspecialchars($this->input->post('path'));
                 $data['title'] = htmlspecialchars($this->input->post('title'));
                 $data['type'] = htmlspecialchars($this->input->post('type'));
-                $data['profile_'] = htmlspecialchars($this->input->post('profile'));
+                $data['profile_'] = "default";
                 $data['printer_ip_address'] = htmlspecialchars($this->input->post('printer_ip_address'));
                 $data['printer_port'] = htmlspecialchars($this->input->post('printer_port'));
                 $data['characters_per_line'] = htmlspecialchars($this->input->post('characters_per_line'));

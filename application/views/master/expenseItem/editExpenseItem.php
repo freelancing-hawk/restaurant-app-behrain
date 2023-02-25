@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">

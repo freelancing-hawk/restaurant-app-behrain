@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Welcome to iRestora PLUS Printer Server</title>
+    <title>Welcome to Printer Server</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.7 -->
@@ -17,11 +17,13 @@
 </head>
 
 <body class="loginPage">
-    <div class="row">
-        <h1>Welcome to iRestora PLUS Printer Server </h1>
-    </div>
-    <!-- Bootstrap 3.3.7 -->
-    <script src="assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<div class="row">
+    <h1>Welcome to Printer Server </h1>
+    <h2 style="text-align: center"><a href="print.php?printer_type_value=192.168.1.87&&port=9100&&type=network" target="_blank">Test Print</a> </h2>
+    <h2 style="text-align: center"><a href="cach_drawer.phps" target="_blank">Test Cash Drawer</a> </h2>
+</div>
+<!-- Bootstrap 3.3.7 -->
+<script src="assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
 </body>
 

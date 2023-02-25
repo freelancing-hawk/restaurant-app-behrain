@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
     <?php
     if ($this->session->flashdata('exception')) {
@@ -8,7 +7,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -20,9 +19,7 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('expense_items'); ?>" data-id_name="datatable">
             </div>
             <div>
-                <a class="btn bg-blue-btn m-right btn_list" href="<?php echo base_url() ?>expenseItems/addEditExpenseItem">
-                   <i data-feather="plus"></i> <?php echo lang('add_expense_item'); ?>
-                </a>
+
             </div>
         </div>
     </section>
@@ -61,11 +58,11 @@
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a
+                                            <li data-access="update-255" class="menu_assign_class"><a
                                                     href="<?php echo base_url() ?>expenseItems/addEditExpenseItem/<?php echo escape_output($this->custom->encrypt_decrypt($ei->id, 'encrypt')); ?>"><i
                                                         class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a>
                                             </li>
-                                            <li><a class="delete"
+                                            <li data-access="delete-255" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>expenseItems/deleteExpenseItem/<?php echo escape_output($this->custom->encrypt_decrypt($ei->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>

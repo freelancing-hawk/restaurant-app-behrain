@@ -1,6 +1,4 @@
 <link rel="stylesheet" href="<?= base_url() ?>frequent_changing/css/custom_check_box.css">
-
-
 <!-- Main content -->
 <section class="main-content-wrapper">
 
@@ -10,7 +8,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -70,7 +68,7 @@
                             <?php } ?>
 
                         </div>
-                        
+
                         <div class="col-sm-12 mb-2 col-md-6">
 
                             <div class="form-group">
@@ -97,7 +95,7 @@
                             <?php } ?>
 
                         </div>
-                        
+
                         <?php
                         $language_manifesto = $this->session->userdata('language_manifesto');
                         if(str_rot13($language_manifesto)=="eriutoeri"):
@@ -140,24 +138,10 @@
                                     </div>
                                 <?php } ?>
                             </div>
-                            <div class="col-sm-12 mb-2 col-md-6">
-                                <div class="form-group">
-                                    <label> <?php echo lang('has_kitchen'); ?></label>
-                                    <select tabindex="2" class="form-control select2" name="has_kitchen" id="has_kitchen">
-                                        <option <?php echo set_select('has_kitchen',"Yes")?> <?php echo isset($outlet_information->has_kitchen) && $outlet_information->has_kitchen=="Yes"?'selected':''?> value="Yes"><?php echo lang('yes'); ?></option>
-                                        <option <?php echo set_select('has_kitchen',"No")?> <?php echo isset($outlet_information->has_kitchen) && $outlet_information->has_kitchen=="No"?'selected':''?> value="No"><?php echo lang('no'); ?></option>
-                                    </select>
-                                </div>
-                                <?php if (form_error('has_kitchen')) { ?>
-                                    <div class="callout callout-danger my-2">
-                                        <?php echo form_error('has_kitchen'); ?>
-                                    </div>
-                                <?php } ?>
-                            </div>
                             <?php
                         endif;
                         ?>
-                        
+
                         <div class="col-sm-12 mb-2 col-md-6">
 
                             <div class="form-group">
@@ -171,27 +155,51 @@
                             <?php } ?>
 
                         </div>
-
+                        <div class="col-sm-12 mb-2 col-md-6">
+                            <div class="form-group">
+                                <label> <?php echo lang('online_self_order_receiving'); ?></label>
+                                <select  class="form-control select2" name="online_self_order_receiving_id" id="online_self_order_receiving_id">
+                                    <option value=""><?php echo lang('select'); ?></option>
+                                    <?php
+                                    foreach ($waiters as $value):
+                                        if($value->designation=="Cashier"):
+                                            if($outlet_information->id!=$value->id):
+                                                ?>
+                                                <option <?php echo ($outlet_information->online_self_order_receiving_id==$value->id)?'selected':''?>  <?php echo set_select('online_self_order_receiving_id',$value->id)?> value="<?=$value->id?>"><?=$value->full_name?></option>
+                                                <?php
+                                            endif;
+                                        endif;
+                                    endforeach;
+                                    ?>
+                                </select>
+                            </div>
+                            <?php if (form_error('online_self_order_receiving_id')) { ?>
+                                <div class="callout callout-danger my-2">
+                                    <?php echo form_error('online_self_order_receiving_id'); ?>
+                                </div>
+                            <?php } ?>
+                        </div>
                     </div>
 
                     <?php
                     $language_manifesto = $this->session->userdata('language_manifesto');
                     if(str_rot13($language_manifesto)=="eriutoeri"):
                     ?>
-                    
+
                     <div class="row my-3">
-                        <div class="col-sm-6 col-md-4">
+                        <div class="col-sm-6 col-md-12">
                             <div class="form-group">
-                                <label><?php echo lang('tooltip_txt_26'); ?></label>
+                                <h6><?php echo lang('tooltip_txt_26'); ?></h6>
                             </div>
                         </div>
                         <div class="clearfix"></div>
-                        <div class="col-sm-6 col-md-4">
+                        <div class="col-sm-6 col-md-12">
                             <label class="container txt_48"> <?php echo lang('select_all'); ?>
                                 <input class="checkbox_userAll" type="checkbox" id="checkbox_userAll">
                                 <span class="checkmark"></span>
                             </label>
-                        </div>    
+                            <b class="pull-right info_red"><?php echo lang('order_type_details'); ?></b>
+                        </div>
                     </div>
                     <hr>
                     <div class="row">
@@ -209,16 +217,70 @@
                                 }
                             endif;
                             $previous_price = (array)json_decode($outlet_information->food_menu_prices);
-                            $sale_price = isset($previous_price["tmp".$item->id]) && $previous_price["tmp".$item->id]?$previous_price["tmp".$item->id]:$item->sale_price;
+                            $sale_price_tmp = isset($previous_price["tmp".$item->id]) && $previous_price["tmp".$item->id]?$previous_price["tmp".$item->id]:'';
+
+                            $dine_ta_price = $item->sale_price;
+                            $sale_ta_price = $item->sale_price_take_away;
+                            $sale_de_price = $item->sale_price_delivery;
+
+                            if(isset($sale_price_tmp) && $sale_price_tmp){
+                                $sale_price = explode("||",$sale_price_tmp);
+                                $dine_ta_price = isset($sale_price[0]) && $sale_price[0]?$sale_price[0]:$item->sale_price;
+                                $sale_ta_price = isset($sale_price[1]) && $sale_price[1]?$sale_price[1]:$item->sale_price_take_away;
+                                $sale_de_price = isset($sale_price[2]) && $sale_price[2]?$sale_price[2]:$item->sale_price_delivery;
+                            }
+
                             ?>
                             <div class="col-sm-12 col-md-4 mb-2">
-                                <label class="container txt_47"> <?="<span>".$item->name."</span>"?>
-                                    <input class="checkbox_user child_class" <?=$checked?> data-name="<?php echo str_replace(' ', '_', $item->name)?>" value="<?=$item->id?>" type="checkbox" name="item_check[]">
+                                <div class="border_custom">
+                                <label class="container txt_47" for="checker_<?php echo escape_output($item->id)?>"><?="<b>".getParentNameTemp($item->parent_id).(isset($item->name) && $item->name?''.$item->name.'':'')."</b>"?>
+                                    <input class="checkbox_user child_class" id="checker_<?php echo escape_output($item->id)?>"  <?=$checked?> data-name="<?php echo str_replace(' ', '_', $item->name)?>" value="<?=$item->id?>" type="checkbox" name="item_check[]">
                                     <span class="checkmark"></span>
                                 </label>
                                 <div class="form-group outlet-price-field">
-                                    <label class="txt_outlet_1"><?php echo lang('price'); ?></label>
-                                    <input  type="text" value="<?php echo escape_output($sale_price)?>" name="price_<?php echo $item->id?>" placeholder="<?php echo lang('price');?>" onfocus="select()" class="form-control txt_outlet_2">
+                                    <label class="txt_outlet_1"><?php echo lang('price'); ?><?php echo lang('DI'); ?></label>
+                                    <input  type="text" value="<?php echo escape_output($dine_ta_price)?>" name="price_<?php echo escape_output($item->id)?>" placeholder="<?php echo lang('price');?><?php echo lang('DI'); ?>" onfocus="select()" class="txt_21 form-control">
+                                </div>
+                                <div class="form-group outlet-price-field">
+                                    <label class="txt_outlet_1"><?php echo lang('price'); ?><?php echo lang('TA'); ?></label>
+                                    <input  type="text" value="<?php echo escape_output($sale_ta_price)?>" name="price_ta_<?php echo escape_output($item->id)?>" placeholder="<?php echo lang('price');?><?php echo lang('TA'); ?>" onfocus="select()" class="txt_21 form-control">
+                                </div>
+                            <?php if(!sizeof($deliveryPartners)):?>
+                                <div class="form-group outlet-price-field">
+                                    <label class="txt_outlet_1"><?php echo lang('price'); ?><?php echo lang('De'); ?></label>
+                                    <input  type="text" value="<?php echo escape_output($sale_de_price)?>" name="price_de_<?php echo escape_output($item->id)?>" placeholder="<?php echo lang('price');?><?php echo lang('De'); ?>" onfocus="select()" class="form-control txt_21">
+                                </div>
+                            <?php else:?>
+                                <label class="margin_top_de_price"><?php echo lang('price'); ?> <?php echo lang('De'); ?></label>
+                                    <div class="form-group  outlet-price-field">
+
+                                        <table class="txt_21 margin_left_de_price">
+                                            <tbody>
+                                            <?php
+                                            $delivery_price = (array)json_decode($outlet_information->delivery_price);
+                                            foreach ($deliveryPartners as $value):
+                                                $delivery_price_value = (array)json_decode(isset($delivery_price["index_".$item->id]) && $delivery_price["index_".$item->id]?$delivery_price["index_".$item->id]:'');
+                                                $dl_price = isset($delivery_price_value["index_".$value->id]) && $delivery_price_value["index_".$value->id]?$delivery_price_value["index_".$value->id]:'';
+                                                if(!$dl_price){
+                                                    $dl_price = $item->sale_price;
+                                                }
+                                                ?>
+                                                <tr>
+                                                     <td class="txt_21_50"><?php echo escape_output($value->name)?>
+                                                    </td>
+                                                    <td class="txt_21_50">
+                                                        <input type="hidden" name="delivery_person<?=$item->id?>[]" value="<?php echo escape_output($value->id)?>">
+                                                        <input tabindex="4" type="text" onfocus="this.select();"
+                                                               name="sale_price_delivery_json<?=$item->id?>[]" class="margin_top_9 form-control integerchk check_required"
+                                                               placeholder="<?php echo lang('sale_price'); ?> (<?php echo lang('delivery'); ?>)"
+                                                               value="<?php echo escape_output($dl_price); ?>"></td>
+                                                </tr>
+                                            <?php endforeach;?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                            <?php endif;?>
+                                <br>
                                 </div>
                             </div>
                             <?php
@@ -246,7 +308,5 @@
                 <?php echo form_close(); ?>
             </div>
     </div>
-    
-    
 </section>
 <script src="<?php echo base_url(); ?>frequent_changing/js/edit_outlet.js"></script>

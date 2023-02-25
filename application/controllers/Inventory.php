@@ -39,10 +39,8 @@ class Inventory extends Cl_Controller {
             $this->session->set_userdata("clicked_method", $this->uri->segment(2));
             redirect('Outlet/outlets');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-            redirect('Authentication/userProfile');
-        }
+
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -54,6 +52,27 @@ class Inventory extends Cl_Controller {
      * @param no
      */
     public function index() {
+        //start check access function
+        $segment_1 = $this->uri->segment(1);
+        $segment_2 = $this->uri->segment(2);
+
+        $controller = "129";
+        $function = "";
+
+        if($segment_1=="Inventory" || $segment_2=="index"){
+            $function = "view";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+
         $data = array();
         $ingredient_id = $this->input->post('ingredient_id');
         $category_id = $this->input->post('category_id');
@@ -62,18 +81,39 @@ class Inventory extends Cl_Controller {
         $company_id = $this->session->userdata('company_id');
         $data['ingredient_categories'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_ingredient_categories");
         $data['ingredients'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_ingredients");
+
         $data['foodMenus'] = $this->Sale_model->getAllFoodMenus();
         $data['inventory'] = $this->Inventory_model->getInventory($category_id, $ingredient_id, $food_id);
         $data['main_content'] = $this->load->view('inventory/inventory', $data, TRUE);
         $this->load->view('userHome', $data);
     }
-     /**
+    /**
      * inventory info
      * @access public
      * @return void
      * @param no
      */
-    public function inventory_food_menu() {
+    public function inventoryFoodMenu() {
+        //start check access function
+        $segment_1 = $this->uri->segment(1);
+        $segment_2 = $this->uri->segment(2);
+
+        $controller = "346";
+        $function = "";
+
+        if($segment_1=="Inventory" || $segment_2=="inventoryFoodMenu"){
+            $function = "view";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $data = array();
         $food_id = $this->input->post('food_id');
         $company_id = $this->session->userdata('company_id');
@@ -85,12 +125,38 @@ class Inventory extends Cl_Controller {
         $this->load->view('userHome', $data);
     }
      /**
+     * inventory info
+     * @access public
+     * @return void
+     * @param no
+     */
+     /**
      * get Inventory Alert List
      * @access public
      * @return void
      * @param no
      */
     public function getInventoryAlertList() {
+        //start check access function
+        $segment_1 = $this->uri->segment(1);
+        $segment_2 = $this->uri->segment(2);
+
+        $controller = "173";
+        $function = "";
+
+        if($segment_1=="Inventory" || $segment_2=="getInventoryAlertList"){
+            $function = "view";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $data = array();
         $data['inventory'] = $this->Inventory_model->getInventoryAlertList();
         $data['main_content'] = $this->load->view('inventory/inventoryAlertList', $data, TRUE);
@@ -111,6 +177,11 @@ class Inventory extends Cl_Controller {
             $results = $this->Inventory_model->getAllByOutletIdForDropdown($outlet_id, "tbl_ingredients");
         }
         echo json_encode($results);
+    }
+    public function getCurrentInventory() {
+        $ing_id = $_POST['ing_id'];
+        $data =  $this->Inventory_model->getCurrentInventory($ing_id);
+        echo json_encode($data);
     }
 
 }

@@ -38,10 +38,35 @@ class Purchase extends Cl_Controller {
             $this->session->set_userdata("clicked_method", $this->uri->segment(2));
             redirect('Outlet/outlets');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "106";
+        $function = "";
+
+        if($segment_2=="purchases"){
+            $function = "view";
+        }elseif(($segment_2=="addEditPurchase" || $segment_2=="getSupplierList" || $segment_2=="addNewSupplierByAjax") && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="purchaseDetails" && $segment_3){
+            $function = "view_details";
+        }elseif($segment_2=="addEditPurchase" || $segment_2=="getSupplierList" || $segment_2=="addNewSupplierByAjax"){
+            $function = "add";
+        }elseif($segment_2=="deletePurchase"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -99,6 +124,7 @@ class Purchase extends Cl_Controller {
             $this->form_validation->set_rules('date', lang('date'), 'required|max_length[50]');
             $this->form_validation->set_rules('note', lang('note'), 'max_length[200]');
             $this->form_validation->set_rules('paid', lang('paid_amount'), 'required|numeric|max_length[50]');
+            $this->form_validation->set_rules('payment_id', lang('payment_method'), 'required|numeric|max_length[50]');
             if ($this->form_validation->run() == TRUE) {
                 $purchase_info['reference_no'] =htmlspecialchars($this->input->post($this->security->xss_clean('reference_no')));
                 $purchase_info['supplier_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('supplier_id')));
@@ -107,10 +133,12 @@ class Purchase extends Cl_Controller {
                 $purchase_info['grand_total'] =htmlspecialchars($this->input->post($this->security->xss_clean('grand_total')));
                 $purchase_info['paid'] =htmlspecialchars($this->input->post($this->security->xss_clean('paid')));
                 $purchase_info['due'] =htmlspecialchars($this->input->post($this->security->xss_clean('due')));
+                $purchase_info['payment_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('payment_id')));
                 $purchase_info['user_id'] = $this->session->userdata('user_id');
                 $purchase_info['outlet_id'] = $this->session->userdata('outlet_id');
 
                 if ($id == "") {
+                    $purchase_info['added_date_time'] = date('Y-m-d H:i:s');
                     $purchase_id = $this->Common_model->insertInformation($purchase_info, "tbl_purchase");
                     $this->savePurchaseIngredients($_POST['ingredient_id'], $purchase_id, 'tbl_purchase_ingredients');
                     $this->session->set_flashdata('exception', lang('insertion_success'));
@@ -125,6 +153,7 @@ class Purchase extends Cl_Controller {
             } else {
                 if ($id == "") {
                     $data = array();
+                    $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                     $data['pur_ref_no'] = $this->Purchase_model->generatePurRefNo($outlet_id);
                     $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_suppliers');
                     $data['ingredients'] = $this->Purchase_model->getIngredientListWithUnitAndPrice($company_id);
@@ -132,6 +161,7 @@ class Purchase extends Cl_Controller {
                     $this->load->view('userHome', $data);
                 } else {
                     $data = array();
+                    $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                     $data['encrypted_id'] = $encrypted_id;
                     $data['purchase_details'] = $this->Common_model->getDataById($id, "tbl_purchase");
                     $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_suppliers');
@@ -144,15 +174,16 @@ class Purchase extends Cl_Controller {
         } else {
             if ($id == "") {
                 $data = array();
+                $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                 $data['pur_ref_no'] = $this->Purchase_model->generatePurRefNo($outlet_id);
                 $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_suppliers');
-                ;
                 $data['ingredients'] = $this->Purchase_model->getIngredientListWithUnitAndPrice($company_id);
                 $data['main_content'] = $this->load->view('purchase/addPurchase', $data, TRUE);
                 $this->load->view('userHome', $data);
             } else {
                 $data = array();
                 $data['encrypted_id'] = $encrypted_id;
+                $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                 $data['purchase_details'] = $this->Common_model->getDataById($id, "tbl_purchase");
                 $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_suppliers');
                 $data['ingredients'] = $this->Purchase_model->getIngredientListWithUnitAndPrice($company_id);
@@ -171,15 +202,22 @@ class Purchase extends Cl_Controller {
      * @param string
      */
     public function savePurchaseIngredients($purchase_ingredients, $purchase_id, $table_name) {
+        //This variable could not be escaped because this is array content
         foreach ($purchase_ingredients as $row => $ingredient_id):
+            $ingredient = getIngredient($_POST['ingredient_id'][$row]);
+            $conversion_rate = isset($ingredient->conversion_rate) && $ingredient->conversion_rate?$ingredient->conversion_rate:1;
+            $inline_cost = ($_POST['unit_price'][$row]/$conversion_rate);
             $fmi = array();
             $fmi['ingredient_id'] = $_POST['ingredient_id'][$row];
             $fmi['unit_price'] = $_POST['unit_price'][$row];
             $fmi['quantity_amount'] = $_POST['quantity_amount'][$row];
             $fmi['total'] = $_POST['total'][$row];
+            $fmi['cost_per_unit'] = getAmtP($inline_cost);
             $fmi['purchase_id'] = $purchase_id;
             $fmi['outlet_id'] = $this->session->userdata('outlet_id');
             $this->Common_model->insertInformation($fmi, "tbl_purchase_ingredients");
+            //set average cost for profit loss report
+            setAverageCost($_POST['ingredient_id'][$row]);
         endforeach;
     }
      /**

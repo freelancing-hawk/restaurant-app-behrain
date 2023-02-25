@@ -6,8 +6,7 @@
     <div>
         <h3 class="text-left top-left-header"><?php echo lang('inventory'); ?>  <?php echo lang('report'); ?></h3>
     </div>
-    
-    <input type="hidden" class="datatable_name" data-id_name="datatable">
+    <input type="hidden" class="datatable_name" data-filter="no" data-title="<?php echo lang('inventory'); ?>  <?php echo lang('report'); ?>" data-id_name="datatable">
     
 </section>
 
@@ -109,40 +108,57 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                                $totalStock = 0;
-                                $grandTotal = 0;
-                                $alertCount = 0;
-                                $totalTK = 0;
-                                if (!empty($inventory) && isset($inventory)):
-                                    foreach ($inventory as $key => $value):
+                        <?php
+                        $totalStock = 0;
+                        $grandTotal = 0;
+                        $alertCount = 0;
+                        $totalTK = 0;
+                        if (!empty($inventory) && isset($inventory)):
+                            foreach ($inventory as $key => $value):
+                                $conversion_rate = (int)$value->conversion_rate?$value->conversion_rate:1;
                                 if($value->id):
+                                    $totalStock = ($value->total_purchase*$value->conversion_rate)  - $value->total_consumption - $value->total_modifiers_consumption - $value->total_waste + $value->total_consumption_plus - $value->total_consumption_minus + ($value->total_transfer_plus*$value->conversion_rate) - ($value->total_transfer_minus*$value->conversion_rate)  +  ($value->total_transfer_plus_2*$value->conversion_rate) -  ($value->total_transfer_minus_2*$value->conversion_rate)+ ($value->total_production*$value->conversion_rate);
                                     $last_purchase_price = getLastPurchaseAmount($value->id);
-                                        $totalStock = $value->total_purchase - $value->total_consumption - $value->total_modifiers_consumption - $value->total_waste + $value->total_consumption_plus - $value->total_consumption_minus + $value->total_transfer_plus  - $value->total_transfer_minus  +  $value->total_transfer_plus_2  -  $value->total_transfer_minus_2;
-                                        $totalTK = $totalStock * $last_purchase_price;
-                                        if ($totalStock >= 0) {
-                                            $grandTotal = $grandTotal + $totalStock * $last_purchase_price;
-                                        }
-                                        $key++;
+                                    $totalTK = $totalStock * $last_purchase_price;
+
+                                    if ($totalStock >= 0) {
+                                        $grandTotal = $grandTotal + $totalStock * $last_purchase_price;
+                                    }
+                                    if($value->conversion_rate==0 || $value->conversion_rate==''){
+                                        $total_sale_unit = isset($value->conversion_rate) && (int)$value->conversion_rate?(int)($totalStock/1):'0';
+                                    }else{
+                                        $total_sale_unit = isset($value->conversion_rate) && (int)$value->conversion_rate?(int)($totalStock/$value->conversion_rate):'0';
+                                    }
+
+                                    $key++;
+
+                                    ?>
+                                    <tr>
+                                        <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
+                                        <td><?= escape_output($value->name . "(" . $value->code . ")") ?></td>
+                                        <td><?php echo escape_output($value->category_name); ?></td>
+                                        <?php if($value->ing_type=="Plain Ingredient" && $value->is_direct_food!=2  && $value->conversion_rate!=1):?>
+                                            <td style="<?= ($totalStock <= $value->alert_quantity) ? 'color:red' : '' ?>"><?php echo ($total_sale_unit)  && $total_sale_unit>0? getAmtP($total_sale_unit) : getAmtP(0) ?><?php echo " " . $value->unit_name2 ?></span> <span><?= ($totalStock) ? getAmtP($totalStock%$conversion_rate) : getAmtP(0) ?><?= " " . escape_output($value->unit_name)?></span></td>
+                                        <?php else:
+                                            $stock_float = (float)((($total_sale_unit)  && $total_sale_unit>0? ($total_sale_unit) : (0))+(($totalStock) ? ($totalStock%$conversion_rate) : (0)));
+                                            ?>
+                                            <td style="<?= ($totalStock <= $value->alert_quantity) ? 'color:red' : '' ?>"><?php echo escape_output(getAmtP($stock_float)) ?> <?= " " . escape_output($value->unit_name)?></span></td>
+                                            <?php
+                                        endif
                                         ?>
-                            <tr>
-                                <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
-                                <td><?= escape_output($value->name . "(" . $value->code . ")") ?></td>
-                                <td><?php echo escape_output($value->category_name); ?></td>
-                                <td><span  style="<?= ($totalStock <= $value->alert_quantity) ? 'color:red' : '' ?>"><?= ($totalStock) ? getAmtP($totalStock) :getAmtP(0) ?><?= " " . escape_output($value->unit_name) ?></span>
-                                <td><span  style="<?= ($totalStock <= $value->alert_quantity) ? 'color:red' : '' ?>"><?= ($totalStock) ? getAmtP($totalStock * $last_purchase_price) :getAmtP(0) ?></span>
-                                </td>
-                                <td><?= escape_output(getAmtP($value->alert_quantity) . " " . $value->unit_name) ?></td>
-                            </tr>
-                            <?php
-                                    endif;
-                                    endforeach;
+                                        <td><?= escape_output(getAmtP($totalTK)) ?></td>
+                                        <td><?= escape_output(getAmtP($value->alert_quantity) . " " . $value->unit_name2) ?></td>
+
+                                    </tr>
+                                    <?php
                                 endif;
-                                ?>
+                            endforeach;
+                        endif;
+                        ?>
                         </tbody>
 
                     </table>
-                    <input type="hidden" value="<?php echo escape_output(getAmtP($grandTotal)); ?>" id="grandTotal" name="grandTotal">
+                    <input type="hidden" value="<?php echo escape_output(getAmtPCustom($grandTotal)); ?>" id="grandTotal" name="grandTotal">
                 </div>
                 <!-- /.box-body -->
             </div>

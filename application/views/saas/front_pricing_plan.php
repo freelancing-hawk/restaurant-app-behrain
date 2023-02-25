@@ -56,10 +56,7 @@
     endforeach;
     ?>
     <div
-
-
-
 </div>
-
-<div style="clear: both;"><div class="table-buy"><a class="pricing-action btn btn-primary float_left" href="<?php echo base_url() ?>"><?php echo lang('back'); ?></a></div></div>
+<br>
+<div class="table-buy"><a class="pricing-action btn btn-primary float_left" href="<?php echo base_url() ?>"><?php echo lang('back'); ?></a></div>
 <script src="<?php echo base_url(); ?>assets/POS/js/media.js"></script>

@@ -1,17 +1,14 @@
-
-
  <section class="main-content-wrapper">
         <?php
             if ($this->session->flashdata('exception')) {
 
                 echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
-                <button type="button" class="btn-close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-                echo escape_output($this->session->flashdata('exception'));
+                echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
                 echo '</p></div></div></section>';
             }
             ?>
-
 
             <section class="content-header">
                 <div class="row">
@@ -20,9 +17,7 @@
                         <input type="hidden" class="datatable_name" data-title="<?php echo lang('wastes'); ?>" data-id_name="datatable">
                     </div>
                     <div class="col-sm-12 col-md-4">
-                        <a  class="btn_list m-right btn bg-blue-btn" href="<?php echo base_url() ?>Waste/addEditWaste">
-                            <i data-feather="plus"></i> <?php echo lang('add_waste'); ?>
-                        </a>
+
                     </div>
                 </div>
             </section>
@@ -57,7 +52,7 @@
                                     <td><?php echo escape_output($wsts->reference_no) ?></td>
                                     <td><?php echo escape_output(date($this->session->userdata('date_format'), strtotime($wsts->date))); ?>
                                     </td>
-                                    <td><?php echo escape_output(getAmtP($wsts->total_loss)) ?></td>
+                                    <td><?php echo escape_output(getAmtPCustom($wsts->total_loss)) ?></td>
                                     <td class="ir_txt_center"><?php echo ingredientCount($wsts->id); ?></td>
                                     <td><?php echo escape_output(employeeName($wsts->employee_id)); ?></td>
                                     <td><?php echo escape_output($wsts->note) ?></td>
@@ -69,11 +64,11 @@
                                                 <i data-feather="more-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                                <li><a
+                                                <li data-access="view_details-137" class="menu_assign_class"><a
                                                         href="<?php echo base_url() ?>Waste/wasteDetails/<?php echo escape_output($this->custom->encrypt_decrypt($wsts->id, 'encrypt')); ?>"><i
                                                             class="fa fa-eye tiny-icon"></i><?php echo lang('view_details'); ?></a>
                                                 </li>
-                                                <li><a class="delete"
+                                                <li data-access="delete-137" class="menu_assign_class"><a class="delete"
                                                         href="<?php echo base_url() ?>Waste/deleteWaste/<?php echo escape_output($this->custom->encrypt_decrypt($wsts->id, 'encrypt')); ?>"><i
                                                             class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                                 </li>
@@ -106,5 +101,4 @@
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/vfs_fonts.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.colVis.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/newDesign/js/forTable.js"></script>
- 
- <script src="<?php echo base_url(); ?>frequent_changing/js/custom_report.js"></script>
+<script src="<?php echo base_url(); ?>frequent_changing/js/custom_report.js"></script>

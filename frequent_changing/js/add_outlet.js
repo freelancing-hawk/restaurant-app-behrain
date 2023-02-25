@@ -15,6 +15,7 @@ $(function () {
         }
     });
 
+
     $(document).on('click', '.checkbox_user', function(){
         if($(".checkbox_user").length == $(".checkbox_user:checked").length) {
             $("#checkbox_userAll").prop("checked", true);

@@ -70,9 +70,6 @@
                         <?php echo lang('back'); ?></a>
                         </div>
                     </div>
-              
-                   
-                    </a>
                 </div>
                 <?php echo form_close(); ?>
             </div>

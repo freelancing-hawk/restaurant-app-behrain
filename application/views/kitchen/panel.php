@@ -51,7 +51,6 @@ foreach ($notifications as $single_notification){
           href="<?php echo base_url(); ?>assets/bower_components/font-awesome/v5/all.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/bower_components/select2/dist/css/select2.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>asset/plugins/iCheck/minimal/color-scheme.css">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/common.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/login.css">
 
@@ -77,11 +76,41 @@ foreach ($notifications as $single_notification){
     <link rel="icon" href="<?php echo base_url(); ?>images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css-framework/bootstrap-new/bootstrap.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/newDesign/style.css">
+    <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/kitchen_panel/css/custom_kitchen_panel.css">
+    <style>
+        <?php if ($this->session->has_userdata('language')) {
+                $font_detect=$this->session->userdata('language');
+        }?>
+        <?php if($font_detect=="arabic"):?>
+        @font-face {
+            font-family: arabic_font;
+            src: url(<?=base_url()?>/assets/Cairo-VariableFont_wght.ttf);
+        }
+        .arabic_font {
+            font-family: arabic_font !important
+        }
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        span,
+        p,
+        div {
+            font-family: arabic_font !important
+        }
+        <?php endif;?>
+    </style>
 </head>
 
-<body>
+<body class="arabic_font">
     <input type="hidden" id="csrf_name_" value="<?php echo escape_output($this->security->get_csrf_token_name()); ?>">
     <input type="hidden" id="csrf_value_" value="<?php echo escape_output($this->security->get_csrf_hash()); ?>">
+    <input type="hidden" id="kitchen_id" value="<?php echo escape_output($kitchen_id); ?>">
+    <input type="hidden" id="note_text" value="<?php echo lang("note") ?>">
+    <input type="hidden" id="sale_no" value="<?php echo lang("sale_no") ?>">
+    <input type="hidden" id="table" value="<?php echo lang("table") ?>">
+    <input type="hidden" id="order_type" value="<?php echo lang("order_type") ?>">
 
     <span class="ir_display_none" id="selected_order_for_refreshing_help"></span>
     <span class="ir_display_none" id="refresh_it_or_not"><?php echo lang('yes'); ?></span>
@@ -89,7 +118,7 @@ foreach ($notifications as $single_notification){
         <div class="fix main_top">
             <div class="row">
                 <div class="top_header col-sm-12 col-md-4">
-                    <h1><?php echo lang('kitchen_panel'); ?></h1>
+                    <h1><?php echo escape_output($kitchen->name); ?></h1>
                 </div>
                 <div class="top_menu col-sm-12 col-md-8 d-flex align-items-center justify-content-end">
 
@@ -97,30 +126,30 @@ foreach ($notifications as $single_notification){
                     <?php echo form_open(base_url() . 'Authentication/setlanguage', $arrayName = array('id' => 'language')) ?>
                     <select tabindex="2" class="form-control select2 ir_w_100" name="language"
                             onchange='this.form.submit()'>
-                            <option value="english" <?php if(isset($language)){
-                                            if ($language == 'english')
-                                                echo "selected";
-                                            }
-                                            ?>>English</option>
-                            <option value="spanish" <?php if(isset($language)){
-                                            if ($language == 'spanish')
-                                                echo "selected";
-                                            }
-                                            ?>>Spanish</option>
-                            <option value="french" <?php if(isset($language)){
-                                            if ($language == 'french')
-                                                echo "selected";
-                                            }
-                                            ?>>French</option>
-                            <option value="arabic" <?php if(isset($language)){
-                                            if ($language == 'arabic')
-                                                echo "selected";
-                                            }
-                                            ?>>Arabic</option>
+                        <option value="english" <?php if(isset($language)){
+                            if ($language == 'english')
+                                echo "selected";
+                        }
+                        ?>>English</option>
+                        <option value="spanish" <?php if(isset($language)){
+                            if ($language == 'spanish')
+                                echo "selected";
+                        }
+                        ?>>Spanish</option>
+                        <option value="french" <?php if(isset($language)){
+                            if ($language == 'french')
+                                echo "selected";
+                        }
+                        ?>>French</option>
+                        <option value="arabic" <?php if(isset($language)){
+                            if ($language == 'arabic')
+                                echo "selected";
+                        }
+                        ?>>Arabic</option>
                     </select>
                     </form>
 
-                    <a class="btn bg-blue-btn me-2"href="<?php echo base_url(); ?>Authentication/userProfile" id="logout_button"><i
+                    <a class="btn bg-blue-btn me-2"href="<?php echo base_url(); ?>Kitchen/kitchens" id="logout_button"><i
                                 class="fas me-2 fas-caret-square-left"></i><?php echo lang('back'); ?></a>
 
                     <div class="top_menu_right" id="group_by_order_item_holder ir_h_float_m"></div>
@@ -158,7 +187,7 @@ foreach ($notifications as $single_notification){
 
   
 
-    <div class="modal fade" id="help_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="help_modal" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
             <div class="modal-header">
@@ -186,7 +215,7 @@ foreach ($notifications as $single_notification){
     </div>
 
 
-    <div class="modal fade" id="notification_list_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="notification_list_modal" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
             <div class="modal-header">
@@ -209,7 +238,7 @@ foreach ($notifications as $single_notification){
 
                 <div id="notification_list_holder" class="fix">
                     <!--This variable could not be escaped because this is html content-->
-                    <?php echo $notification_list_show;?>
+                    <?php echo ($notification_list_show);?>
                 </div>
             </div>
             <div class="modal-footer">

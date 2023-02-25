@@ -25,7 +25,7 @@
                     title: "Alert!",
                     text: "Name field is required!",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#0d6efd"
+                    confirmButtonColor: "#7367f0"
                 });
                 $(this).css("border","2px solid #c53d3d !important");
             }else if(phone==''){
@@ -38,7 +38,7 @@
                     title: "Alert!",
                     text: "Phone field is required!",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#0d6efd"
+                    confirmButtonColor: "#7367f0"
                 });
                 $(this).css("border","2px solid #c53d3d !important");
             }else if(subject==''){
@@ -51,7 +51,7 @@
                     title: "Alert!",
                     text: "Subject field is required!",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#0d6efd"
+                    confirmButtonColor: "#7367f0"
                 });
                 $(this).css("border","2px solid #c53d3d !important");
             }else if(message==''){
@@ -64,7 +64,7 @@
                     title: "Alert!",
                     text: "Message field is required!",
                     confirmButtonText: "OK",
-                    confirmButtonColor: "#0d6efd"
+                    confirmButtonColor: "#7367f0"
                 });
                 $(this).css("border","2px solid #c53d3d !important");
             }
@@ -90,7 +90,7 @@
                             title: hidden_alert,
                             text: data.msg,
                             confirmButtonText: hidden_ok,
-                            confirmButtonColor: "#0d6efd"
+                            confirmButtonColor: "#7367f0"
                         });
                     }
                 });

@@ -25,7 +25,6 @@ class Waiter_app extends Cl_Controller {
         $this->load->model('Common_model');
         $this->load->model('Sale_model');
         $this->load->model('Kitchen_model');
-        $this->load->model('Bar_model');
         $this->load->model('Waiter_model');
         $this->load->model('Master_model');
         $this->load->library('form_validation');
@@ -168,11 +167,11 @@ class Waiter_app extends Cl_Controller {
             $single_table_information = $this->get_all_information_of_a_sale($sale_id);
             $order_number = '';
             if($single_table_information->order_type==1){
-                $order_number = 'A '.$single_table_information->sale_no;
+                $order_number = $single_table_information->sale_no;
             }else if($single_table_information->order_type==2){
-                $order_number = 'B '.$single_table_information->sale_no;
+                $order_number = $single_table_information->sale_no;
             }else if($single_table_information->order_type==3){
-                $order_number = 'C '.$single_table_information->sale_no;
+                $order_number = $single_table_information->sale_no;
             }
             $notification_message = 'Order:'.$order_number.' has been modified';
             $bar_kitchen_notification_data = array();

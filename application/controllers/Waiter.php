@@ -28,10 +28,7 @@ class Waiter extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-            redirect('Authentication/userProfile');
-        }
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -42,6 +39,24 @@ class Waiter extends Cl_Controller {
      * @param no
      */
     public function panel(){
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $controller = "104";
+        $function = "";
+
+        if($segment_2=="panel"){
+            $function = "view";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $data = array();
         $data['notifications'] = $this->get_new_notification();
         $this->load->view('waiter/panel', $data);
@@ -97,6 +112,10 @@ class Waiter extends Cl_Controller {
         $data1 = $this->Waiter_model->getNewOrders($outlet_id);
         $i = 0;
         for($i;$i<count($data1);$i++){
+            $data_bell = array();
+            $data_bell['is_kitchen_bell'] = 2;
+            $this->Common_model->updateInformation($data_bell, $data1[$i]->sale_id, "tbl_sales");
+
             $data1[$i]->total_waiter_type_items = $this->Waiter_model->get_total_waiter_type_items($data1[$i]->sale_id);
             $data1[$i]->total_waiter_type_done_items = $this->Waiter_model->get_total_waiter_type_done_items($data1[$i]->sale_id);
             $data1[$i]->total_waiter_type_started_cooking_items = $this->Waiter_model->get_total_waiter_type_started_cooking_items($data1[$i]->sale_id);
@@ -145,11 +164,11 @@ class Waiter extends Cl_Controller {
                 $this->db->update('tbl_sales', $cooking_update_array_sales_tbl);
 
                 if($sale_info[0]->order_type==1){
-                    $order_name = "A ".$sale_info[0]->sale_no;
+                    $order_name = $sale_info[0]->sale_no;
                 }elseif($sale_info[0]->order_type==2){
-                    $order_name = "B ".$sale_info->sale_no;
+                    $order_name = $sale_info->sale_no;
                 }elseif($sale_info[0]->order_type==3){
-                    $order_name = "C ".$sale_info[0]->sale_no;
+                    $order_name = $sale_info[0]->sale_no;
                 }
                 $notification = "Table: ".$sale_info[0]->table_name.', Customer: '.$sale_info[0]->customer_name.', Item: '.$item_info->menu_name.' is ready to serve, Order: '.$order_name;
                 $notification_data = array();        
@@ -199,12 +218,12 @@ class Waiter extends Cl_Controller {
                     $sale_info = $this->get_all_information_of_a_sale_waiter_type($sale_id);
                     $order_type_operation = '';
                     if($sale_info->order_type==1){
-                        $order_name = "A ".$sale_info->sale_no;
+                        $order_name = $sale_info->sale_no;
                     }elseif($sale_info->order_type==2){
-                        $order_name = "B ".$sale_info->sale_no;
+                        $order_name = $sale_info->sale_no;
                         $order_type_operation = 'Take Away order is ready to take';
                     }elseif($sale_info->order_type==3){
-                        $order_name = "C ".$sale_info->sale_no;
+                        $order_name = $sale_info->sale_no;
                         $order_type_operation = 'Delivery order is ready to deliver';
                     }
                     $notification = 'Customer: '.$sale_info->customer_name.', Order Number: '.$order_name.' '.$order_type_operation;

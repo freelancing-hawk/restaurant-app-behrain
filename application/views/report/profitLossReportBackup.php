@@ -80,37 +80,37 @@
                             <tr>
                                 <td class="ir_w_40">
                                     <?php echo lang('purchase'); ?>(<?php echo lang('only_paid_amount'); ?>)</td>
-                                <td><?= isset($saleReportByDate['total_purchase_amount']) ? getAmt($saleReportByDate['total_purchase_amount']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['total_purchase_amount']) ? getAmtCustom($saleReportByDate['total_purchase_amount']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td><?php echo lang('sale'); ?>(<?php echo lang('only_paid_amount'); ?>)</td>
-                                <td><?= isset($saleReportByDate['total_sales_amount']) ? getAmt($saleReportByDate['total_sales_amount']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['total_sales_amount']) ? getAmtCustom($saleReportByDate['total_sales_amount']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td><?php echo lang('total'); ?> <?php echo lang('vat'); ?></td>
-                                <td><?= isset($saleReportByDate['total_sales_vat']) ? getAmt($saleReportByDate['total_sales_vat']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['total_sales_vat']) ? getAmtCustom($saleReportByDate['total_sales_vat']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td><?php echo lang('expense'); ?></td>
-                                <td><?= isset($saleReportByDate['expense_amount']) ? getAmt($saleReportByDate['expense_amount']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['expense_amount']) ? getAmtCustom($saleReportByDate['expense_amount']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td><?php echo lang('supplier_due_payment'); ?></td>
-                                <td> <?= isset($saleReportByDate['supplier_payment_amount']) ? getAmt($saleReportByDate['supplier_payment_amount']) : getAmt(0) ?>
+                                <td> <?= isset($saleReportByDate['supplier_payment_amount']) ? getAmtCustom($saleReportByDate['supplier_payment_amount']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td><?php echo lang('customer_due_receive'); ?></td>
-                                <td><?= isset($saleReportByDate['customer_receive_amount']) ? getAmt($saleReportByDate['customer_receive_amount']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['customer_receive_amount']) ? getAmtCustom($saleReportByDate['customer_receive_amount']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td><?php echo lang('waste'); ?></td>
-                                <td><?= isset($saleReportByDate['total_loss_amount']) ? getAmt($saleReportByDate['total_loss_amount']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['total_loss_amount']) ? getAmtCustom($saleReportByDate['total_loss_amount']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
@@ -119,7 +119,7 @@
                                     <?php echo lang('waste'); ?> + <?php echo lang('expense'); ?> +
                                     <?php echo lang('supplier_due_payment'); ?>))</td>
                                 <td class="ir_w_20">
-                                    <?= isset($saleReportByDate['gross_profit']) ? getAmt($saleReportByDate['gross_profit']) : getAmt(0) ?>
+                                    <?= isset($saleReportByDate['gross_profit']) ? getAmtCustom($saleReportByDate['gross_profit']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
@@ -128,7 +128,7 @@
                                     <?php echo lang('waste'); ?> + <?php echo lang('expense'); ?> +
                                     <?php echo lang('supplier_due_payment'); ?>) - <?php echo lang('vat'); ?>))</td>
                                 <td class="ir_w_20">
-                                    <?= isset($saleReportByDate['net_profit']) ? getAmt($saleReportByDate['net_profit']) : getAmt(0) ?>
+                                    <?= isset($saleReportByDate['net_profit']) ? getAmtCustom($saleReportByDate['net_profit']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                         </tbody>

@@ -11,7 +11,7 @@
                     <h3 class="top-left-header text-left"><?php echo lang('foodMenuSaleByCategories'); ?></h3>
     <section class="content-header">
         <input type="hidden" class="datatable_name" data-title="<?php echo lang('food_sales_report'); ?>" data-id_name="datatable">
-        
+
     </section>
 
     <div class="my-2">
@@ -115,8 +115,8 @@
                                     <td><?php echo escape_output($value->menu_name) ?></td>
                                     <td><?php echo escape_output($value->category_name) ?></td>
                                     <td><?php echo escape_output($value->totalQty) ?></td>
-                                    <td><?php echo escape_output(getAmtP($value->menu_unit_price * $value->totalQty)) ?></td>
-                                    <td><?php echo escape_output(getAmtP(($value->menu_unit_price*$value->totalQty)/$value->totalQty)) ?></td>
+                                    <td><?php echo escape_output(getAmtPCustom($value->menu_unit_price * $value->totalQty)) ?></td>
+                                    <td><?php echo escape_output(getAmtPCustom(($value->menu_unit_price*$value->totalQty)/$value->totalQty)) ?></td>
                                 </tr>
                                 <?php
                             }
@@ -127,10 +127,10 @@
                             <th class="ir_w2_txt_center"></th>
                             <th></th>
                             <th></th>
-                            <th><?php echo lang('total'); ?>(Amount X Qty)</th>
+                            <th><?php echo lang('total'); ?>(<?php echo lang('Amount_X_Qty'); ?>)</th>
                             <th><?php echo escape_output($total_qty) ?></th>
-                            <th><?php echo escape_output(getAmtP($total_amount)) ?></th>
-                            <th><?php echo escape_output(getAmtP($total_average)) ?></th>
+                            <th><?php echo escape_output(getAmtPCustom($total_amount)) ?></th>
+                            <th><?php echo escape_output(getAmtPCustom($total_average)) ?></th>
 
                         </tr>
                     </table>

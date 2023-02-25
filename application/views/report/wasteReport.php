@@ -117,7 +117,7 @@
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?php echo escape_output($value->reference_no) ?></td>
                                 <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->date))) ?></td>
-                                <td><?php echo escape_output(getAmt($value->total_loss)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_loss)) ?></td>
                                 <td><?php echo escape_output(ingredientCount($value->id)); ?></td>
                                 <td><?php echo escape_output($value->EmployeedName) ?></td>
                             </tr>

@@ -10,7 +10,7 @@
             echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception'));
+            echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
             echo '</p></div></div></section>';
         }
         ?>
@@ -20,7 +20,7 @@
             echo '<section class="alert-wrapper"><div class="alert alert-danger alert-dismissible"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception_1'));
+            echo escape_output($this->session->flashdata('exception_1'));unset($_SESSION['exception_1']);
             echo '</p></div></div></section>';
         }
         ?>
@@ -85,7 +85,17 @@
                         <br>
 
                         <div class="row">
-                            <div class="col-sm-12 col-md-6">
+                            <div class="col-sm-12 col-md-4">
+                                <div class="form-group">
+                                    <label><?php echo lang('tax_type'); ?> <span class="required_star">*</span></label>
+                                    <select class="form-control select2" name="tax_type">
+                                        <option <?php echo set_select('tax_type','1')?> <?php echo isset($company->tax_type) & $company->tax_type==1?'selected':''?> value="1"><?php echo lang('exclusive_tax'); ?></option>
+                                        <option <?php echo set_select('tax_type','2')?> <?php echo isset($company->tax_type) & $company->tax_type==2?'selected':''?> value="2"><?php echo lang('inclusive_tax'); ?></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 col-md-4">
 
                                 <div class="form-group">
                                     <label><?php echo lang('my_tax_title'); ?> <span class="required_star">*</span></label>
@@ -104,9 +114,8 @@
 
                                 <button id="show_how_tax_title_works" type="button" class="btn bg-blue-btn mt-3" data-bs-toggle="modal" data-bs-target="#show_how_tax_title_works_modal"><?php echo lang('how_tax_title_works'); ?></button>
 
-
                             </div>
-                            <div class="col-sm-12 col-md-6">
+                            <div class="col-sm-12 col-md-4">
 
                                 <div class="form-group">
                                     <label><?php echo lang('tax_registration_no'); ?> <span class="required_star">*</span></label>
@@ -161,28 +170,6 @@
 
                             </div>
                         </div>
-                        <div id="gst_yes_section" style="display:<?php if($company->tax_is_gst=="Yes"){echo "block;";}else{echo "none;";} ?>">
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-
-                                    <div class="form-group">
-                                        <label><?php echo lang('state_code'); ?> <span class="required_star">*</span></label>
-                                        <input tabindex="1" type="text" id="state_code" name="state_code" class="form-control" placeholder="<?php echo lang('state_code'); ?>" value="<?php echo escape_output($company->state_code); ?>">
-                                    </div>
-                                    <?php if (form_error('state_code')) { ?>
-                                        <div class="callout callout-danger my-2">
-                                            <?php echo form_error('state_code'); ?>
-                                        </div>
-                                    <?php } ?>
-                                    <div class="alert alert-error txt_35 txt_11"  id="state_code_error">
-                                        <p><?php echo lang('tooltip_txt_4'); ?></p>
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-                        </div>
                         <br>
 
                         <div class="row">
@@ -207,17 +194,17 @@
 
                                         if(isset($tax_setting) && count($tax_setting)>0){
                                             foreach($tax_setting as $key=>$single_tax){
-                                                $show_tax_row .= '<tr class="tax_single_row" id="tax_row_'.$new_row_number.'">';
+                                                $show_tax_row .= '<tr  class="tax_single_row '.setReadonly(3,$single_tax->tax).'" id="tax_row_'.$new_row_number.'">';
                                                 $show_tax_row .= '<td>'.$new_row_number.'</td>';
-                                                $show_tax_row .= '<td><input type="hidden" name="p_tax_id[]" value="'.(isset($single_tax->id) && $single_tax->id?$single_tax->id:'').'"><input type="text" name="taxes[]" class="form-control check_required" value="'.$single_tax->tax.'"/></td>';
+                                                $show_tax_row .= '<td><input type="hidden" name="p_tax_id[]" value="'.(isset($single_tax->id) && $single_tax->id?$single_tax->id:'').'"><input type="text" name="taxes[]" '.setReadonly(1,$single_tax->tax).' class="form-control check_required" value="'.$single_tax->tax.'"/></td>';
                                                 $show_tax_row .= '<td><input type="text" onfocus="select()" name="tax_rate[]" class="form-control integerchk check_required" value="'.$single_tax->tax_rate.'"/></td>';
-                                                $show_tax_row .= '<td class="txt_51"><span class="remove_this_tax_row txt_25" id="remove_this_tax_row_'.$new_row_number.'" ><i class="color_red fa fa-trash"></i> </span></td>';
+                                                $show_tax_row .= '<td class="txt_51"><span style="display: '.setReadonly(2,$single_tax->tax).'" class="remove_this_tax_row txt_25" id="remove_this_tax_row_'.$new_row_number.'" ><i class="color_red fa fa-trash"></i> </span></td>';
                                                 $show_tax_row .= '</tr>';
                                                 $new_row_number++;
                                             }
                                         }
                                         //This variable could not be escaped because this is html content
-                                        echo $show_tax_row;
+                                        echo ($show_tax_row);
                                         ?>
                                         </tbody>
                                     </table>
@@ -322,12 +309,6 @@
             <div class="modal-body">
                 <p>
                     <?php echo lang('tooltip_txt_16'); ?><br>
-                    <?php echo lang('tooltip_txt_17'); ?><br>
-                    <?php echo lang('tooltip_txt_18'); ?><br>
-                    <?php echo lang('tooltip_txt_19'); ?><br>
-                    <?php echo lang('tooltip_txt_20'); ?><br>
-                    <?php echo lang('tooltip_txt_21'); ?><br>
-
                 </p>
             </div>
             <div class="modal-footer">

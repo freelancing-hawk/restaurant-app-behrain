@@ -21,7 +21,8 @@ jqry(document).ready(function () {
   //get title and datatable id name from hidden input filed that is before in the table in view page for every datatable
   let datatable_name = $(".datatable_name").attr("data-id_name");
   let title = $(".datatable_name").attr("data-title");
-  let TITLE = title + ", " + today;
+  let TITLE = title + "" +
+      "" + today;
   jqry(`#${datatable_name},#datatable2`).DataTable({
     autoWidth: false,
     ordering: true,
@@ -31,26 +32,31 @@ jqry(document).ready(function () {
     buttons: [
       {
         extend: "print",
+        title: TITLE,
         text: '<i class="fa fa-print"></i> Print',
         titleAttr: "print",
       },
       {
         extend: "copyHtml5",
+        title: TITLE,
         text: '<i class="fa fa-files-o"></i> Copy',
         titleAttr: "Copy",
       },
       {
         extend: "excelHtml5",
+        title: TITLE,
         text: '<i class="fa fa-file-excel-o"></i> Excel',
         titleAttr: "Excel",
       },
       {
         extend: "csvHtml5",
+        title: TITLE,
         text: '<i class="fa fa-file-text-o"></i> CSV',
         titleAttr: "CSV",
       },
       {
         extend: "pdfHtml5",
+        title: TITLE,
         text: '<i class="fa fa-file-pdf-o"></i> PDF',
         titleAttr: "PDF",
       },

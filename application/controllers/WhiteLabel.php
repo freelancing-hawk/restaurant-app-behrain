@@ -29,12 +29,28 @@ class WhiteLabel extends CI_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-            redirect('Authentication/userProfile');
-        }
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "49";
+        $function = "";
+
+        if($segment_2=="index" || $segment_2==""){
+            $function = "update";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
     }
     public function index($id = '') {
         $company_id = $id = $outlet_id = $this->session->userdata('company_id');

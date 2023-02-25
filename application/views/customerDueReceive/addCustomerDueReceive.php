@@ -90,7 +90,7 @@
                                 <select tabindex="3" class="form-control select2 ir_w_100" id="payment_id"
                                         name="payment_id">
                                     <option value=""><?php echo lang('select'); ?></option>
-                                    <?php foreach ($payment_methods as $value) {
+                                    <?php foreach (getAllPaymentMethods(5) as $value) {
                                         ?>
                                         <option value="<?php echo escape_output($value->id) ?>"
                                             <?php echo set_select('payment_id', $value->id); ?>>

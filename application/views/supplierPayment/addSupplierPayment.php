@@ -1,6 +1,5 @@
 <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/js/add_supplier_payment.js"></script>
 
-
 <!-- Main content -->
 <section class="main-content-wrapper">
 
@@ -18,7 +17,7 @@
                 <?php echo form_open(base_url('SupplierPayment/addSupplierPayment')); ?>
                 <div class="box-body">
                     <div class="row">
-                        <div class="col-sm-12 mb-2 col-md-6">
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('date'); ?> <span class="required_star">*</span></label>
                                 <input tabindex="1" type="text" id="date" readonly name="date" class="form-control"
@@ -29,7 +28,8 @@
                                 <?php echo form_error('date'); ?>
                             </div>
                             <?php } ?>
-
+                        </div>
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('supplier'); ?> <span class="required_star">*</span></label>
                                 <select tabindex="3" class="form-control select2 ir_w_100" id="supplier_id"
@@ -48,7 +48,8 @@
                                 <?php echo form_error('supplier_id'); ?>
                             </div>
                             <?php } ?>
-
+                        </div>
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('amount'); ?> <span class="required_star">*</span></label>
                                 <input tabindex="2" type="text" name="amount" onfocus="this.select();"
@@ -63,7 +64,28 @@
 
 
                         </div>
-                        <div class="col-sm-12 mb-2 col-md-6">
+                        <div class="col-sm-12 mb-2 col-md-3">
+                            <div class="form-group">
+                                <label><?php echo lang('payment_method'); ?> <span class="required_star">*</span></label>
+                                <select tabindex="3" class="form-control select2 ir_w_100" id="payment_id"
+                                        name="payment_id">
+                                    <option value=""><?php echo lang('select'); ?></option>
+                                    <?php foreach (getAllPaymentMethods(5) as $value) {
+                                        ?>
+                                        <option value="<?php echo escape_output($value->id) ?>"
+                                            <?php echo set_select('payment_id', $value->id); ?>>
+                                            <?php echo escape_output($value->name)?></option>
+                                        <?php
+                                    } ?>
+                                </select>
+                            </div>
+                            <?php if (form_error('payment_id')) { ?>
+                                <div class="callout callout-danger my-2">
+                                    <?php echo form_error('payment_id'); ?>
+                                </div>
+                            <?php } ?>
+                        </div>
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('note'); ?></label>
                                 <textarea tabindex="5" class="form-control" rows="7" name="note"
@@ -96,6 +118,4 @@
                 <?php echo form_close(); ?>
             </div>
     </div>
- 
- 
 </section>

@@ -35,11 +35,11 @@ class Waiter_api_model extends CI_Model {
             return false;
         }
     }/**
-     * get Notification By Outlet Id
-     * @access public
-     * @return boolean
-     * @param int
-     */
+ * get Notification By Outlet Id
+ * @access public
+ * @return boolean
+ * @param int
+ */
     public function get_outlet_name($outlet_id)
     {
         $this->db->select('*');
@@ -74,7 +74,7 @@ class Waiter_api_model extends CI_Model {
                 $return_details['data'] = $data;
                 return $return_details;
             }else{
-                if(!isAccess($data->id) && $data->will_login=="Yes"){
+                if(!checkAccessWaiter("73","74",$data->role_id) && $data->will_login=="Yes"){
                     $return_details['status'] = false;
                     $return_details['msg'] = "You have not access for Waiter Panel";
                 }elseif($data->active_status!="Active"){
@@ -86,8 +86,7 @@ class Waiter_api_model extends CI_Model {
                 }else if($data->designation!="Waiter"){
                     $return_details['status'] = false;
                     $return_details['msg'] = "Only Admin or Waiter user can login, check documentation for detail";
-                }else if($data->designation!="Waiter"){
-
+                }else if($data->designation!="Waiter" && !isFoodCourt()){
                     $this->db->select("*");
                     $this->db->from("tbl_companies");
                     $this->db->where("id", $data->company_id);
@@ -100,6 +99,59 @@ class Waiter_api_model extends CI_Model {
                     $return_details['status'] = true;
                     $return_details['data'] = $data;
                     $return_details['msg'] = "Successfully login";
+                }else{
+                    $return_details['status'] = false;
+                    $return_details['msg'] = "Something is wrong!";
+                }
+            }
+        }else{
+            $return_details['status'] = false;
+            $return_details['msg'] = "Username/Password wrong!";
+        }
+        return $return_details;
+    }
+    public function getUserInformationWaterPin($login_pin) {
+        $this->db->select("*");
+        $this->db->from("tbl_users");
+        $this->db->where("login_pin", $login_pin);
+        $this->db->where("del_status", 'Live');
+        $data =  $this->db->get()->row();
+        $return_details['status'] = false;
+        if($data){
+            if($data->role=="Admin"){
+                $return_details['status'] = true;
+                $return_details['msg'] = "Successfully login";
+                $return_details['data'] = $data;
+                return $return_details;
+            }else{
+                if(!checkAccessWaiter("73","74",$data->role_id) && $data->will_login=="Yes"){
+                    $return_details['status'] = false;
+                    $return_details['msg'] = "You have not access for Waiter Panel";
+                }elseif($data->active_status!="Active"){
+                    $return_details['status'] = false;
+                    $return_details['msg'] = "Your account is not active, please contact with admin";
+                }else if($data->will_login!="Yes"){
+                    $return_details['status'] = false;
+                    $return_details['msg'] = "Your account is not allow to login, please contact with admin";
+                }else if($data->designation!="Waiter"){
+                    $return_details['status'] = false;
+                    $return_details['msg'] = "Only Admin or Waiter user can login, check documentation for detail";
+                }else if($data->designation!="Waiter" && !isFoodCourt()){
+                    $this->db->select("*");
+                    $this->db->from("tbl_companies");
+                    $this->db->where("id", $data->company_id);
+                    $company_info= $this->db->get()->row();
+                    if($company_info->is_active!=1){
+                        $return_details['status'] = false;
+                        $return_details['msg'] = "Your assigned company is not active, please contact with admin";
+                    }
+                }else if($data->designation=="Waiter" && $data->will_login=="Yes" && $data->active_status=="Active"){
+                    $return_details['status'] = true;
+                    $return_details['data'] = $data;
+                    $return_details['msg'] = "Successfully login";
+                }else{
+                    $return_details['status'] = false;
+                    $return_details['msg'] = "Something is wrong!";
                 }
             }
         }else{

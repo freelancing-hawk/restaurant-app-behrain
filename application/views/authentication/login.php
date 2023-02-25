@@ -23,138 +23,136 @@ if($wl){
     <title><?php echo escape_output($site_name); ?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <!-- jQuery 3 -->
+
     <script src="<?php echo base_url(); ?>assets/bower_components/jquery/dist/jquery.min.js"></script>
-    <!-- Bootstrap 5.0.0 -->
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css-framework/bootstrap-new/bootstrap.min.css">
-    <!-- Font Awesome -->
     <link rel="stylesheet"
-        href="<?php echo base_url(); ?>assets/bower_components/font-awesome/css/font-awesome.min.css">
+          href="<?php echo base_url(); ?>assets/bower_components/font-awesome/css/font-awesome.min.css">
     <!-- Ionicons -->
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/bower_components/Ionicons/css/ionicons.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/AdminLTE.css">
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/common.css">
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/login.css">
-    <!-- iCheck -->
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/plugins/iCheck/square/blue.css">
-    <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/css/login.css">
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="<?php echo base_url(); ?>images/favicon.ico" type="image/x-icon">
-    <!-- Favicon -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/css/bootstrap.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="<?php echo base_url(); ?>frequent_changing/js/bootstrap.min.js"></script>
+    <script src="<?php echo base_url(); ?>frequent_changing/js/login.js"></script>
+    <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/css/login_new.css">
     <link rel="icon" href="<?php echo base_url(); ?>images/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/newDesign/components/signin.css">
-    <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/newDesign/style.css">
+    <script src="<?php echo base_url(); ?>assets/pin_login/dist/jquery.pinlogin.min.js"></script>
+    <link href="<?php echo base_url(); ?>assets/pin_login/src/jquery.pinlogin.css" rel="stylesheet" type="text/css" />
 </head>
-
 <body>
-<input type="hidden" id="site_logo" value="<?php echo base_url(); ?>assets/media/logo.png">
-<input type="hidden" id="site_favicon" value="<?php echo base_url(); ?>images/favicon.ico">
-<input type="hidden" id="saas_m_ch" value="<?=file_exists(APPPATH.'controllers/Service.php')?'yes':''?>">
+<div class="container">
+    <div class="row">
 
+        <!-- Mixins-->
+        <!-- Pen Title-->
+        <div class="pen-title">
+            <img src="<?php echo escape_output($system_logo); ?>">
+        </div>
+        <?php
+            $login_type = $this->session->flashdata('login_type');
+        ?>
+        <table class="btn_login_pin_table">
+            <tr>
+                <td><a href="#" class="btn_login_pin_type <?php echo isset($login_type) && $login_type==2?'active_login_btn':($login_type!=1?'active_login_btn':'')?> login_type" data-id="2">Default</a> <a class="btn_login_pin_type login_type  <?php echo isset($login_type) && $login_type==1?'active_login_btn':''?>" data-id="1" href="#">Login using Pin</a></td>
+            </tr>
+        </table>
+        <div class="container">
 
-    <div class="login-auth-page">
-        <div class="row h-100">
+            <div class="card"></div>
+            <div class="card">
+                <?php
+                if ($this->session->flashdata('exception_1')) {
+                    echo '<p class="red_error"><i  class="fa fa-times"></i> ';echo escape_output($this->session->flashdata('exception_1'));unset($_SESSION['exception_1']);
+                    echo '</p>';
+                }
+                ?>
 
-            <div class="d-none d-lg-flex col-lg-8 left-item align-items-center p-5">
-                <div class="w-100 d-lg-flex align-items-center justify-content-center px-5">
-                    <img class="img-fluid" src="<?php echo base_url();?>frequent_changing/newDesign/img/login.svg" alt="Login V2">
+                <?php
+                if ($this->session->flashdata('exception')) {
+                    echo '<p class="green_error"><i  class="fa fa-check"></i> ';echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
+                    echo '</p>';
+                }
+                ?>
+                <h1 class="title"><?php echo lang('login'); ?></h1>
+
+                <?php echo form_open(base_url() . 'Authentication/loginCheck', $arrayName = array('novalidate' => 'novalidate')) ?>
+                <div class="div_1 text_center display_none_login" id="loginpin"></div>
+                <input type="hidden" class="form-control display_none_login" name="login_pin" id="login_pin" placeholder="<?php echo lang('login_pin'); ?>"     value="">
+                <input type="hidden" class="form-control display_none_login" name="login_type" id="login_type_hidden" value="<?php echo isset($login_type) && $login_type?$login_type:2?>">
+
+                <div class="input-container margin_login_top div_2">
+                    <input name="email_address" type="text" value="<?php if(APPLICATION_MODE == 'demo'){ echo "admin@doorsoft.co"; }else{ echo set_value('email_address');} ?>" id="email_address" required="required"/>
+                    <label for="email_address"><?php echo lang('email_address'); ?></label>
+                    <div class="bar"></div>
+
                 </div>
-            </div>
-
-            <div class="d-flex col-lg-4 align-items-center auth-bg px-2 p-lg-5">
-                <div class="col-12 col-sm-8 col-md-6 col-lg-12 px-xl-2 mx-auto">
-                    <div class="login-box-body px-3">
-                        <?php
-                        if ($this->session->flashdata('exception_1')) {
-                            echo '<div class="alert-wrapper"><div class="alert alert-danger alert-dismissible fade show"> 
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                <div class="alert-body p-2">
-                                <p><i class="m-right fa fa-times"></i>';echo escape_output($this->session->flashdata('exception_1'));
-                            echo '</p></div></div></div>';
-                        }
-                        ?>
-
-                        <?php
-                        if ($this->session->flashdata('exception')) {
-                            echo '<div class="alert-wrapper"><div class="topAlert alert alert-success alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                <div class="alert-body p-2"><p><i class="m-right fa fa-check"></i>';echo escape_output($this->session->flashdata('exception'));
-                            echo '</p></div></div></div>';
-                        }
-                        ?>
-                        <?php echo form_open(base_url('Authentication/loginCheck')); ?>
-                        <div>
-                            <h3 class="auth-title">Welcome to <?php echo escape_output($site_name); ?></h3>
-                            <p class="auth-desc">Please sign-in to your account and start the adventure</p>
-                        </div>
-                        <div class="col-sm-12 mb-3">
-                            <div class="form-group has-feedback">
-                                <input type="text" class="form-control" name="email_address" id="email_address"
-                                    placeholder="<?php echo lang('email_address'); ?>"
-                                    value="<?php if(APPLICATION_MODE == 'demo'){ echo "admin@doorsoft.co"; }else{ echo '';} ?>">
-                            </div>
-                        </div>
-                        <?php if (form_error('email_address')) { ?>
-                            <div class="callout callout-danger my-2">
-                                <?php echo form_error('email_address'); ?>
-                            </div>
-                        <?php } ?>
-
-                        <div class="col-sm-12 mb-3">
-                            <div class="form-group has-feedback pass">
-                                <input type="password" name="password" class="form-control" id="password"
-                                    placeholder="<?php echo lang('password'); ?>"
-                                    value="<?php if(APPLICATION_MODE == 'demo'){ echo "123456"; }else{ echo '';} ?>">
-                            </div>
-                        </div>
-
-                        <?php if (form_error('password')) { ?>
-                            <div class="callout callout-danger my-2">
-                                <?php echo form_error('password'); ?>
-                            </div>
-                        <?php } ?>
-
-                        <div class="col-sm-12">
-                                <button type="submit" name="submit" value="submit"
-                                        class="btn bg-blue-btn w-100"><?php echo lang('login'); ?></button>
-                        </div>
-                        <?php echo form_close();  if(isServiceAccessOnly('sGmsJaFJE')): ?>
-                            <p class="text-center my-3">
-                                <a class="txt-color-primary" href="<?php echo base_url()?>singup"><?php echo lang('Signup'); ?></a>
-                            </p>
-                        <?php endif;
-
-                        if(isServiceAccessOnly('sGmsJaFJE') && APPLICATION_MODE == 'demo'): ?>
-                        <div class="row">
-                            <div class="col-sm-12 mb-2 col-md-6">
-                                <button type="button" data-username="admin@doorsoft.co" data-password="123456" name="button" class="btn w-100 bg-blue-btn set_credentials">Supper Admin</button>
-                            </div>
-                            <div class="col-sm-12 mb-2 col-md-6">
-                                <button type="button" data-username="foodcorner@gmail.com" data-password="123456" name="button" class="btn w-100 bg-blue-btn set_credentials">Restaurant Admin</button>
-                            </div> 
-                        </div>
-                        <?php endif; if(APPLICATION_MODE == 'demo'): ?>
-                                <p class="text-center custom_margin_lg"><a target="_blank" class="btn btn-danger w-100 " href="<?=base_url()?>Authentication/index"><?php echo lang('Click'); ?> <?php echo lang('here'); ?>  <?php echo lang('if_you_face_issue_to_login'); ?></a></p>
-                        <?php endif; ?>
+                <?php if (form_error('email_address')) { ?>
+                    <div class="error_txt div_2">
+                        <?php echo form_error('email_address'); ?>
                     </div>
+                <?php } ?>
+                <br>
+                <div class="input-container  div_2">
+                    <input id="password" type="password" name="password" value="<?php if(APPLICATION_MODE == 'demo'){ echo "123456"; }else{ echo set_value('password');} ?>" required="required"/>
+                    <label for="password"><?php echo lang('password'); ?></label>
+                    <div class="bar"></div>
                 </div>
+                <?php if (form_error('password')) { ?>
+                    <div class="error_txt div_2">
+                        <?php echo form_error('password'); ?>
+                    </div>
+                <?php } ?>
+                <div class="button-container div_2">
+                    <button type="submit" class="submit_login" name="submit" value="submit"><span><?php echo lang('login'); ?></span></button>
+                </div>
+                <?php
+                if(isServiceAccessOnly('sGmsJaFJE')): ?>
+                <p class="text-center div_signup_link div_2">
+                    <a class="txt-color-primary div_signup_link_a" href="<?php echo base_url()?>#pricing"><?php echo lang('Signup'); ?></a>
+                </p>
+                <?php endif;?>
+                <div class="footer div_2"><a href="<?php echo base_url()?>forgot-password-step-one"><?php echo lang('forgot_password'); ?></a></div>
+                <?php echo form_close();?>
+            </div>
+            <?php if(APPLICATION_MODE == 'demo'): ?>
+                <p class="text-center custom_margin_lg margin_top7"><a target="_blank" class="btn btn-danger w-100 " href="<?=base_url()?>Authentication/index"><?php echo lang('Click'); ?> <?php echo lang('here'); ?>  <?php echo lang('if_you_face_issue_to_login'); ?></a></p>
+                <?php
+                $company = getMainCompany();
+                $language_manifesto = $company->language_manifesto;
+                if(str_rot13($language_manifesto)=="eriutoeri"):?>
+                    <a class="btn btn-danger custom_shadow" href="https://codecanyon.net/item/irestora-plus-multi-outlet-next-gen-restaurant-pos/24077441" target="_blank">&nbsp;&nbsp;Buy Now&nbsp;&nbsp;</a>
+                <?php else:?>
+                    <a class="btn btn-danger custom_shadow" href="https://codecanyon.net/item/irestora-plus-next-gen-restaurant-pos/23033741" target="_blank">&nbsp;&nbsp;Buy Now&nbsp;&nbsp;</a>
+                <?php endif;?>
+            <?php endif; ?>
+            <div class="card alt">
+                <!--<div class="toggle"></div>-->
+                <h1 class="title">Register
+                    <div class="close"></div>
+                </h1>
+                <form>
+                    <div class="input-container">
+                        <input type="text" id="Username" required="required"/>
+                        <label for="Username">Username</label>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="input-container">
+                        <input type="password" id="Password" required="required"/>
+                        <label for="Password">Password</label>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="input-container">
+                        <input type="password" id="Repeat Password" required="required"/>
+                        <label for="Repeat Password">Repeat Password</label>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="button-container">
+                        <button><span>Next</span></button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
-   
-
-    <script src="<?php echo base_url(); ?>assets/css-framework/bootstrap-new/bootstrap.bundle.min.js"></script>
-    <!-- SlimScroll -->
-    <script src="<?php echo base_url(); ?>assets/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
-    <!-- FastClick -->
-    <script src="<?php echo base_url(); ?>assets/bower_components/fastclick/lib/fastclick.js"></script>
-    <!-- AdminLTE App -->
-    <script src="<?php echo base_url(); ?>assets/dist/js/adminlte.min.js"></script>
-    <!-- AdminLTE for demo purposes -->
-    <script src="<?php echo base_url(); ?>assets/dist/js/demo.js"></script>
-    <script src="<?php echo base_url(); ?>frequent_changing/js/media.js"></script>
-    <script src="<?php echo base_url(); ?>frequent_changing/js/login.js"></script>
+</div>
 </body>
-
 </html>

@@ -37,10 +37,30 @@ class SupplierPayment extends CI_Controller {
             $this->session->set_userdata("clicked_method", $this->uri->segment(2));
             redirect('Outlet/outlets');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "147";
+        $function = "";
+
+        if($segment_2=="supplierPayments"){
+            $function = "view";
+        }elseif($segment_2=="addSupplierPayment" ||  $segment_2=="getSupplierDue"){
+            $function = "add";
+        }elseif($segment_2=="deleteSupplierPayment"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -85,15 +105,18 @@ class SupplierPayment extends CI_Controller {
             $this->form_validation->set_rules('date', lang('date'), 'required|max_length[50]');
             $this->form_validation->set_rules('amount', lang('amount'), 'required|max_length[50]');
             $this->form_validation->set_rules('supplier_id', lang('supplier'), 'required|max_length[10]');
+            $this->form_validation->set_rules('payment_id', lang('payment_method'), 'required|max_length[10]');
             $this->form_validation->set_rules('note', lang('note'), 'max_length[200]');
             if ($this->form_validation->run() == TRUE) {
                 $splr_payment_info = array();
                 $splr_payment_info['date'] = date("Y-m-d", strtotime($this->input->post($this->security->xss_clean('date'))));
                 $splr_payment_info['amount'] =htmlspecialchars($this->input->post($this->security->xss_clean('amount')));
                 $splr_payment_info['supplier_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('supplier_id')));
+                $splr_payment_info['payment_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('payment_id')));
                 $splr_payment_info['note'] =htmlspecialchars($this->input->post($this->security->xss_clean('note')));
                 $splr_payment_info['user_id'] = $this->session->userdata('user_id');
                 $splr_payment_info['outlet_id'] = $this->session->userdata('outlet_id');
+                $splr_payment_info['added_date_time'] = date('Y-m-d H:i:s');
 
                 $this->Common_model->insertInformation($splr_payment_info, "tbl_supplier_payments");
                 $this->session->set_flashdata('exception', lang('insertion_success'));
@@ -101,12 +124,14 @@ class SupplierPayment extends CI_Controller {
                 redirect('SupplierPayment/supplierPayments');
             } else {
                 $data = array();
+                $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                 $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_suppliers");
                 $data['main_content'] = $this->load->view('supplierPayment/addSupplierPayment', $data, TRUE);
                 $this->load->view('userHome', $data);
             }
         } else {
             $data = array();
+            $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
             $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_suppliers");
             $data['main_content'] = $this->load->view('supplierPayment/addSupplierPayment', $data, TRUE);
             $this->load->view('userHome', $data);

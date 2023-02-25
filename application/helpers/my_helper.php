@@ -10,6 +10,101 @@ function escape_output($string){
     }else{
         return '';
     }
+}
+function getPlanText($text){
+    if($text){
+        $res = trim(str_replace( array( '\'', '"',',' , ';', '<', '>','(',')','{','}','[',']','$','%','#','/','@','&','?'), ' ', $text));
+        $tmp_text = trim(preg_replace('/\s\s+/', ' ', str_replace("\n", " ", $res)));
+        $final_txt = preg_replace("/[\n\r]/"," ",escape_output($tmp_text)); #remove new line from address
+       return $final_txt;
+    }else{
+        return '';
+    }
+}
+function checkH() {
+    $spi = null;
+    if ( defined( 'INPUT_SERVER' ) && filter_has_var( INPUT_SERVER, 'REMOTE_ADDR' ) ) {
+        $spi = filter_input( INPUT_SERVER, 'REMOTE_ADDR', FILTER_VALIDATE_IP );
+    } elseif ( defined( 'INPUT_ENV' ) && filter_has_var( INPUT_ENV, 'REMOTE_ADDR' ) ) {
+        $spi = filter_input( INPUT_ENV, 'REMOTE_ADDR', FILTER_VALIDATE_IP );
+    } elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+        $spi = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP );
+    }
+
+    if ( empty( $spi ) ) {
+        $spi = '127.0.0.1';
+    }
+    $data = empty( filter_var( $spi, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE | FILTER_FLAG_NO_PRIV_RANGE ));
+    return $data;
+}
+
+function checkHH() {
+    $spi = null;
+    if ( defined( 'INPUT_SERVER' ) && filter_has_var( INPUT_SERVER, 'REMOTE_ADDR' ) ) {
+        $spi = filter_input( INPUT_SERVER, 'REMOTE_ADDR', FILTER_VALIDATE_IP );
+    } elseif ( defined( 'INPUT_ENV' ) && filter_has_var( INPUT_ENV, 'REMOTE_ADDR' ) ) {
+        $spi = filter_input( INPUT_ENV, 'REMOTE_ADDR', FILTER_VALIDATE_IP );
+    } elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+        $spi = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP );
+    }
+
+    if ( empty( $spi ) ) {
+        $spi = '127.0.0.1';
+    }
+    $data = empty( filter_var( $spi, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE | FILTER_FLAG_NO_PRIV_RANGE ));
+    return $data!=1?$data:'';
+}
+
+function getTotalItem($sale_id) {
+    $CI = & get_instance();
+    $CI->db->select('sum(qty) as totalQty');
+    $CI->db->from('tbl_sales_details');
+    $CI->db->where('sales_id', $sale_id);
+    $CI->db->where('del_status', 'Live');
+    $query_result = $CI->db->get();
+    $row = $query_result->row();
+    if($row){
+        return $row->totalQty;
+    }else{
+        return 0;
+    }
+}
+function get_numb_with_zero($number){
+    $numb = str_pad($number, 2, '0', STR_PAD_LEFT);
+    return $numb;
+}
+
+function getRanking($amount) {
+    $CI = & get_instance();
+    $txt = "";
+    if($amount>=0 && $amount<=50){
+        $txt = "A";
+    }
+    else if($amount>50 && $amount<=80){
+        $txt = "B";
+    }
+    else if($amount>80 && $amount<=100){
+        $txt = "C";
+    }
+
+    return $txt;
+
+}
+function getTotalHour($start_time,$end_time){
+    $time1 = $start_time;
+    $time2 = $end_time;
+    $array1 = explode(':', $time1);
+    $array2 = explode(':', $time2);
+
+    $minutes1 = ($array1[0] * 60.0 + $array1[1]);
+    $minutes2 = ($array2[0] * 60.0 + $array2[1]);
+
+    $total_min = $minutes1 - $minutes2;
+    $total_tmp_hour = (int)($total_min/60);
+    $total_tmp_hour_minus = ($total_min%60);
+
+    //return $total_tmp_hour.".".$total_min_tmp;
+    return $total_tmp_hour.".".get_numb_with_zero($total_tmp_hour_minus);
 
 }
 /**
@@ -23,12 +118,88 @@ function getMainMenu() {
     $CI->db->select('*');
     $CI->db->from('tbl_admin_user_menus');
     $CI->db->where('is_ignore!=', 1);
+    $CI->db->where('del_status', "Live");
     $CI->db->order_by('order_by asc');
     $main_row =  $CI->db->get()->result();
     foreach ($main_row as $key=>$value){
         $main_row[$key]->sub_menus = getAllByCustomId($value->id,"parent_id","tbl_admin_user_menus","");
     }
     return $main_row;
+
+}
+function getSplitTotalBill($id) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_sales');
+    $CI->db->where('del_status', "Live");
+    $CI->db->where('split_sale_id', $id);
+    $main_row =  $CI->db->get()->result();
+    return sizeof($main_row);
+
+}
+function getTotalSaleRows() {
+    $CI = & get_instance();
+    $CI->db->select('count(id) as total_row');
+    $CI->db->from('tbl_sales');
+    $CI->db->where('split_sale_id', Null);
+    $main_row =  $CI->db->get()->row();
+    return ($main_row->total_row);
+
+}
+function getExistFoodMenu($sale_id,$food_menu_id) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_sales_details');
+    $CI->db->where('del_status', "Live");
+    $CI->db->where('sales_id', $sale_id);
+    $CI->db->where('food_menu_id', $food_menu_id);
+    $main_row =  $CI->db->get()->row();
+    return $main_row;
+
+}
+function getRandomCodeOne($length = 1) {
+    $characters = 'abcdefghijklmnopqrstuvwxyz';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+function getRandomCodeTwoCapital($length = 2) {
+    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+function getShortName() {
+    $CI = & get_instance();
+    $short_name = strtolower(substr($CI->session->userdata('full_name'),0, 1));
+    if(!$short_name){
+        $short_name = getRandomCodeOne(1);
+    }
+    return $short_name.(getRandomCodeTwoCapital(2));
+}
+function getExistFoodMenuModifier($sale_id,$food_menu_id) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_sales_details_modifiers');
+    $CI->db->where('sales_id', $sale_id);
+    $CI->db->where('food_menu_id', $food_menu_id);
+    $main_row =  $CI->db->get()->result();
+    return $main_row;
+
+}
+function getCustomerDue($customer_id) {
+    $CI = & get_instance();
+    $outlet_id = $CI->session->userdata('outlet_id');
+    $customer_due = $CI->db->query("SELECT SUM(due_amount) as due FROM tbl_sales WHERE customer_id=$customer_id and outlet_id=$outlet_id and del_status='Live' and order_status='3'")->row();
+    $customer_payment = $CI->db->query("SELECT SUM(amount) as amount FROM tbl_customer_due_receives WHERE customer_id=$customer_id and outlet_id=$outlet_id and del_status='Live'")->row();
+    $remaining_due = $customer_due->due - $customer_payment->amount;
+    return $remaining_due;
 
 }
 /**
@@ -57,6 +228,33 @@ function isServiceAccess($user_id='',$company_id='',$service_type='') {
         }
     }
     return $status;
+}
+/**
+ * get Main Menu
+ * @access
+ * @return boolean
+ * @param no
+ */
+function isFoodCourt($id='') {
+    $company = getMainCompany();
+    $status = false;
+    if(isset($company->languagefcrt_manifesto) && str_rot13($company->languagefcrt_manifesto)=="fTzfWnSWIRSPeg"){
+        $status = true;
+    }
+    return $status;
+}
+/**
+ * get Main Menu
+ * @access
+ * @return boolean
+ * @param no
+ */
+function getLabelForFoodCourt($str) {
+    $company = getMainCompany();
+    if(isset($company->languagefcrt_manifesto) && str_rot13($company->languagefcrt_manifesto)=="fTzfWnSWIRSPeg"){
+        $str = "food_court";
+    }
+    return $str;
 }
 
 /**
@@ -109,6 +307,55 @@ function isServiceAccessOnly($service_type='') {
     }
     return $status;
 }
+function getStatusOrdersItems($sale_id) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_kitchen_sales_details');
+    $CI->db->where('sales_id', $sale_id);
+    $CI->db->where('del_status', "Live");
+    $main_row =  $CI->db->get()->result();
+    return $main_row;
+}
+function getStatusOrders() {
+    $CI = & get_instance();
+    $outlet_id = $CI->session->userdata('outlet_id');
+
+    $CI->db->select('tbl_kitchen_sales.id,tbl_kitchen_sales.sale_no,tbl_customers.name as customer_name');
+    $CI->db->from('tbl_kitchen_sales');
+    $CI->db->join('tbl_customers', 'tbl_customers.id = tbl_kitchen_sales.customer_id', 'left');
+    $CI->db->where('tbl_kitchen_sales.del_status', "Live");
+    $CI->db->where('tbl_kitchen_sales.is_pickup_sale', 1);
+    $CI->db->where('tbl_kitchen_sales.outlet_id', $outlet_id);
+    $results =  $CI->db->get()->result();
+    foreach ($results as $ky=>$value){
+        $items = getStatusOrdersItems($value->id);
+        $new = 0;
+        $inprogress = 0;
+        $done = 0;
+        foreach($items as $ky1=>$value1){
+            if($value1->cooking_status=="New"){
+                $new++;
+            }else if($value1->cooking_status=="Done"){
+                $done++;
+            }else if($value1->cooking_status=="Started Cooking"){
+                $inprogress++;
+            }
+        }
+        $status = '';
+        if($new==sizeof($items)){
+            //all new red
+            $status = '1';
+        }else if($done==sizeof($items)){
+            //all done green
+            $status = '2';
+        }else{
+            //inprogress
+            $status = '3';
+        }
+        $results[$ky]->status = $status;
+    }
+    return $results;
+}
 /**
  * get Main Menu
  * @access
@@ -146,6 +393,71 @@ function getLastSaleId() {
     $last_row =   $CI->db->get()->row();
     return $last_row?$last_row->id:'';
 }
+function getParentNameOnly($id) {
+    $CI = & get_instance();
+    $food_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
+    return (isset($food_information->name) && $food_information->name?$food_information->name:'');
+}
+function getSaleDetailsBySaleNo($sale_no) {
+    $CI = & get_instance();
+    $user_information = $CI->db->query("SELECT * FROM tbl_sales where `sale_no`='$sale_no' AND del_status='Live'")->row();
+    if(isset($user_information) && $user_information){
+        return $user_information;
+    }else{
+        return false;
+    }
+}
+/**
+ * return access module main name
+ * @return string
+ * @param int
+ */
+if (!function_exists('getMainModuleName')) {
+    function getMainModuleName($id)
+    {
+        $CI = &get_instance();
+        $CI->db->select("*");
+        $CI->db->from("tbl_main_modules");
+        $CI->db->where("id", $id);
+        $result = $CI->db->get()->row();
+        if ($result) {
+            return escape_output($result->name);
+        } else {
+            return '';
+        }
+    }
+}
+function getKitchenSaleDetailsBySaleNo($sale_no) {
+    $CI = & get_instance();
+    $user_information = $CI->db->query("SELECT * FROM tbl_kitchen_sales where `sale_no`='$sale_no' AND del_status='Live'")->row();
+
+    if(isset($user_information) && $user_information){
+        return $user_information;
+    }else{
+        return false;
+    }
+}
+function getExistOrderInfo($sale_no) {
+    $CI = & get_instance();
+    $user_information = $CI->db->query("SELECT * FROM tbl_running_orders where `sale_no`='$sale_no' AND del_status='Live'")->row();
+
+    if(isset($user_information) && $user_information){
+        return $user_information;
+    }else{
+        return false;
+    }
+}
+
+function getExistOrderInfoTable($sale_no,$table_id) {
+    $CI = & get_instance();
+    $user_information = $CI->db->query("SELECT * FROM tbl_running_order_tables where `sale_no`='$sale_no' AND `table_id`='$table_id' AND del_status='Live'")->row();
+
+    if(isset($user_information) && $user_information){
+        return $user_information;
+    }else{
+        return false;
+    }
+}
 /**
  * get Main Menu
  * @access
@@ -159,6 +471,140 @@ function returnSaleNo($id) {
     $CI->db->where('id', $id);
     $last_row =   $CI->db->get()->row();
     return $last_row?$last_row->sale_no:'';
+}
+function getSaleDetailsByCode($code) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_sales');
+    $CI->db->where('random_code', $code);
+    $CI->db->where('del_status', "Live");
+    $last_row =   $CI->db->get()->row();
+    return $last_row;
+}
+function checkExistItem($sale_id,$item_id,$row_counter) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_kitchen_sales_details');
+    $CI->db->where('sales_id', $sale_id);
+    $CI->db->where('food_menu_id', $item_id);
+    $CI->db->where('del_status', "Live");
+    $CI->db->limit(1, $row_counter);
+    $selected_row =   $CI->db->get()->row();
+    return $selected_row;
+}
+function checkExistItemModifer($sale_id,$item_id,$sales_details_id,$single_modifier_id) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_kitchen_sales_details_modifiers');
+    $CI->db->where('sales_id', $sale_id);
+    $CI->db->where('food_menu_id', $item_id);
+    $CI->db->where('sales_details_id', $sales_details_id);
+    $CI->db->where('modifier_id', $single_modifier_id);
+    $selected_row =   $CI->db->get()->row();
+    return $selected_row;
+}
+function getCustomerData($customer_id) {
+    $CI = & get_instance();
+    $information = $CI->db->query("SELECT * FROM tbl_customers where `id`='$customer_id'")->row();
+
+    if($information){
+        return $information;
+    }else{
+        return "";
+    }
+}
+function getSaleText($id) {
+    $CI = & get_instance();
+    $txt = '';
+
+    $CI->db->select("*");
+    $CI->db->from("tbl_sales");
+    $CI->db->where("id", $id);
+    $sale =  $CI->db->get()->row();
+
+    if(isset($sale) && $sale){
+        $customer_info = getCustomerData($sale->customer_id);
+        $txt.="Sale No: ".$sale->sale_no.", ";
+        $txt.="Sale Date: ".date($CI->session->userdata('date_format'), strtotime($sale->sale_date)).", ";
+        $txt.="Customer: ".(isset($customer_info) && $customer_info->name?$customer_info->name:'---')." - ".(isset($customer_info) && $customer_info->phone?$customer_info->phone:'').", ";
+
+        if(isset($sale->vat) && $sale->vat){
+            $txt.="VAT: ".$sale->vat.",";
+        }
+        if(isset($sale->total_discount_amount) && $sale->total_discount_amount){
+            $txt.="Discount: ".$sale->total_discount_amount.", ";
+        }
+        if(isset($sale->delivery_charge) && $sale->delivery_charge){
+            $txt.="Charge: ".$sale->delivery_charge.", ";
+        }
+        if(isset($sale->tips_amount) && $sale->tips_amount){
+            $txt.="Tips: ".$sale->tips_amount.", ";
+        }
+        $txt.="Total Payable: ".$sale->total_payable;
+
+        $CI->db->select("*");
+        $CI->db->from("tbl_sales_details");
+        $CI->db->where("sales_id", $id);
+        $sale_items =  $CI->db->get()->result();
+
+        if(isset($sale_items) && $sale_items){
+            $txt.="<br><b>Items:</b><br>";
+            foreach ($sale_items as $key1=>$value1){
+                $txt.=$value1->menu_name."("."$value1->qty X $value1->menu_unit_price".")";
+                if($value1->menu_combo_items  && $value1->menu_combo_items!='undefined'){
+                    $txt.="=><b>Combo Items:</b>";
+                    $txt.=$value1->menu_combo_items;
+                }
+                if($key1 < (sizeof($sale_items) -1)){
+                    $txt.=", ";
+                }
+
+                $CI->db->select("tbl_sales_details_modifiers.*,tbl_modifiers.name");
+                $CI->db->from('tbl_sales_details_modifiers');
+                $CI->db->join('tbl_modifiers', 'tbl_modifiers.id = tbl_sales_details_modifiers.modifier_id', 'left');
+                $CI->db->where("tbl_sales_details_modifiers.sales_id", $sale->id);
+                $CI->db->where("tbl_sales_details_modifiers.sales_details_id", $value1->id);
+                $CI->db->order_by('tbl_sales_details_modifiers.id', 'ASC');
+                $result = $CI->db->get();
+                $data_result = $result->result();
+                if($data_result){
+                    $txt.=", <b>&nbsp;&nbsp;Modifier:</b>";
+                    foreach($data_result as $key11=>$single_modifier){
+                        $txt.="&nbsp;&nbsp;".$single_modifier->name;
+                        if($key11 < (sizeof($data_result) -1)){
+                            $txt.=", ";
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    return $txt;
+}
+function setDefaultTimezone(){
+    $CI = & get_instance();
+    $CI->db->select("zone_name");
+    $CI->db->from('tbl_companies');
+    $CI->db->where('del_status', "Live");
+    $zoneName = $CI->db->get()->row();
+    if ($zoneName)
+        date_default_timezone_set($zoneName->zone_name);
+}
+function putAuditLog($user_id,$txt,$event,$date_time) {
+    setDefaultTimezone();
+
+    $CI = & get_instance();
+    $outlet_id = $CI->session->userdata("outlet_id");
+    $data['user_id'] = $user_id;
+    $data['event_title'] = $event;
+    $data['date_time'] = $date_time;
+    $data['outlet_id'] = $outlet_id;
+    $data['date'] = date('Y-m-d');
+    $data['details'] = $txt;
+    $CI->db->insert("tbl_audit_logs", $data);
+
 }
 /**
  * get Main Menu
@@ -206,12 +652,17 @@ function getAllByCustomId($id,$filed,$tbl,$order=''){
 function getLanguageManifesto(){
     $CI = & get_instance();
     $language_manifesto = $CI->session->userdata('language_manifesto');
-    $outlet_id = $CI->session->userdata('outlet_id');
-    if(str_rot13($language_manifesto)=="eriutoeri"){
-        return [$language_manifesto,"Outlet/outlets"];
-    }else if(str_rot13($language_manifesto)=="fgjgldkfg"){
-        return [$language_manifesto,"Outlet/addEditOutlet/".$outlet_id];
+    if(isset($language_manifesto) && $language_manifesto){
+        $outlet_id = $CI->session->userdata('outlet_id');
+        if(str_rot13($language_manifesto)=="eriutoeri"){
+            return [$language_manifesto,"Outlet/outlets"];
+        }else if(str_rot13($language_manifesto)=="fgjgldkfg"){
+            return [$language_manifesto,"Outlet/addEditOutlet/".$outlet_id];
+        }
+    }else{
+        return ['',''];
     }
+
 }
 
 //SELECT * from sma_sales  desc limit 1
@@ -251,6 +702,15 @@ function getCompanyInfo() {
     $CI->db->where("id", $company_id);
     return $CI->db->get()->row();
 }
+function get_customer_details($phone,$password) {
+    $CI = & get_instance();
+    $CI->db->select("*");
+    $CI->db->from("tbl_customers");
+    $CI->db->where("phone", $phone);
+    $CI->db->where("password_online_user", md5($password));
+    $CI->db->where("del_status", "Live");
+    return $CI->db->get()->row();
+}
 /**
  * get Company Info
  * @access public
@@ -264,6 +724,22 @@ function getCompanyInfoById($company_id='') {
     }
     $CI->db->select("*");
     $CI->db->from("tbl_companies");
+    $CI->db->where("id", $company_id);
+    return $CI->db->get()->row();
+}
+/**
+ * get first outlet Info
+ * @access public
+ * @return object
+ * @param no
+ */
+function getFirstOutletByCompany($company_id='') {
+    $CI = & get_instance();
+    if($company_id==''){
+        $company_id = $CI->session->userdata('company_id');
+    }
+    $CI->db->select("*");
+    $CI->db->from("tbl_outlets");
     $CI->db->where("id", $company_id);
     return $CI->db->get()->row();
 }
@@ -330,7 +806,7 @@ function getDomain($url){
  * @param string
  * @param string
  */
-function sendEmailOnly($txt,$to_email,$attached='',$sender_email,$subject){
+function sendEmailOnly($txt,$to_email,$attached='',$sender_email='',$subject=''){
     $company = getMainCompany();
     $smtEmail = isset($company->email_settings) && $company->email_settings?json_decode($company->email_settings):'';
     $domain_name = ''.getDomain(base_url()).'';
@@ -365,7 +841,6 @@ function sendEmailOnly($txt,$to_email,$attached='',$sender_email,$subject){
         $mail->Body = $txt;
         if($attached!=''){
             $mail->AddAttachment($attached);
-            //$mail->AddAttachment('pdf_files/', $attached);
         }
         // Send email
         if(!$mail->send()){
@@ -376,7 +851,7 @@ function sendEmailOnly($txt,$to_email,$attached='',$sender_email,$subject){
     }
     return true;
 }
-function sendEmailOnlyOld($txt,$to_email,$attached='',$sender_email,$subject){
+function sendEmailOnlyOld($txt,$to_email,$attached='',$sender_email='',$subject=''){
     $company = getMainCompany();
     $smtEmail = isset($company->email_settings) && $company->email_settings?json_decode($company->email_settings):'';
     $domain_name = ''.getDomain(base_url()).'';
@@ -456,6 +931,12 @@ if(! function_exists('printText')) {
     function printText($text, $size) {
         $line = wordwrap($text, $size, "\\n");
         return $line;
+    }
+}
+if(! function_exists('getPlanData')) {
+    function getPlanData($str) {
+        $str = $installation_url = str_replace('<br>',' ',str_replace('<span>','',str_replace('','',str_replace('</span>','',$str))));
+       return $str;
     }
 }
 
@@ -559,9 +1040,15 @@ function getAllOutlestByAssign() {
     $CI = & get_instance();
     $role = $CI->session->userdata('role');
     $company_id = $CI->session->userdata('company_id');
+    $user_id = $CI->session->userdata('user_id');
     $outlets = $CI->session->userdata('session_outlets');
-    if($company_id==1){
+
+    if(isFoodCourt()){
         $result = $CI->db->query("SELECT * FROM tbl_outlets WHERE del_status='Live'")->result();
+        return $result;
+    }
+    if($company_id==1 && $user_id==1){
+        $result = $CI->db->query("SELECT * FROM tbl_outlets WHERE company_id='$company_id' AND del_status='Live'")->result();
     }else{
         if($role=="Admin"){
             $result = $CI->db->query("SELECT * FROM tbl_outlets WHERE FIND_IN_SET(`company_id`, '$company_id') AND del_status='Live'")->result();
@@ -570,6 +1057,17 @@ function getAllOutlestByAssign() {
         }
 
     }
+    return $result;
+}
+/**
+ * get All Outlet By Assign User
+ * @access public
+ * @return object
+ * @param no
+ */
+function getAllOutlestByAssignFood() {
+    $CI = & get_instance();
+    $result = $CI->db->query("SELECT * FROM tbl_outlets WHERE del_status='Live'")->result();
     return $result;
 }
 /**
@@ -613,6 +1111,21 @@ function getOutlets($outlets){
 
     return $outlet_names;
 }
+function getKitchens($kitchens){
+    $CI = & get_instance();
+    $outlet_info1 = $CI->db->query("SELECT * FROM tbl_kitchens WHERE FIND_IN_SET(`id`, '$kitchens') AND del_status='Live'")->result();
+    $outlet_names = '';
+    if($outlet_info1){
+        foreach ($outlet_info1 as $key=>$name){
+            $outlet_names.= $name->name;
+            if($key < (sizeof($outlet_info1) -1)){
+                $outlet_names.=", ";
+            }
+        }
+    }
+
+    return $outlet_names;
+}
 /**
  * get Outlet Name By Id
  * @access public
@@ -628,6 +1141,15 @@ function getOutletNameById($outlet_id){
         return "";
     }
 }
+function getRole($role_id){
+    $CI = & get_instance();
+    $outlet_info1 = $CI->db->query("SELECT * FROM tbl_roles WHERE id='$role_id' AND del_status='Live'")->row();
+    if($outlet_info1){
+        return $outlet_info1->role_name;
+    }else{
+        return "";
+    }
+}
 /**
  * total Users
  * @access public
@@ -638,6 +1160,29 @@ function totalUsers($company_id) {
     $CI = & get_instance();
     $total_users = $CI->db->query("SELECT * FROM tbl_users where `company_id`='$company_id'")->num_rows();
     return $total_users;
+}
+
+function getRunningOrders($user_id) {
+    $CI = & get_instance();
+    $total_users = $CI->db->query("SELECT * FROM tbl_running_orders where `user_id`='$user_id'")->result();
+    return $total_users;
+}
+
+function getOrderReceivingId($id) {
+    $CI = & get_instance();
+    $data = $CI->db->query("SELECT * FROM tbl_users where `id`='$id'")->row();
+    return isset($data->order_receiving_id) && $data->order_receiving_id?$data->order_receiving_id:'';
+}
+function getOrderReceivingIdAdmin() {
+    $CI = & get_instance();
+    $company_id = $CI->session->userdata('company_id');
+    $data = $CI->db->query("SELECT * FROM tbl_users where `company_id`='$company_id' AND `role`='Admin' AND del_status='Live'")->row();
+    return isset($data->id) && $data->id?$data->id:'';
+}
+function getOnlineSelfOrderReceivingId($id) {
+    $CI = & get_instance();
+    $data = $CI->db->query("SELECT * FROM tbl_outlets where `id`='$id'")->row();
+    return isset($data->online_self_order_receiving_id) && $data->online_self_order_receiving_id?$data->online_self_order_receiving_id:'';
 }
 /**
  * get White Label for setting info
@@ -763,6 +1308,59 @@ function getFMIdsOutlet($outlet_id) {
     }
 
 }
+function updatePrice($company_id,$item_id,$price,$sale_price_take_away,$delivery_prices,$sale_price_delivery){
+    $CI = & get_instance();
+    $outlet_info1 = $CI->db->query("SELECT * FROM tbl_outlets WHERE company_id='$company_id' AND del_status='Live'")->result();
+    if(isset($outlet_info1) && $outlet_info1){
+        foreach ($outlet_info1 as $outlet_key=>$outlet){
+            $food_menus = ($outlet->food_menus);
+            $foods_prices = json_decode($outlet->food_menu_prices);
+            $delivery_price = json_decode($outlet->delivery_price);
+
+            $data_price_array = array();
+            $data_delivery_price_array = array();
+            $available_counter = 1;
+            foreach ($foods_prices as $key=>$value){
+                $key_id = explode("tmp",$key);
+                if(($key_id[1]==$item_id)){
+                    $data_price_array[$key] = $price."||".$sale_price_take_away."||".$sale_price_delivery;
+                    $available_counter++;
+                }else{
+                    $data_price_array[$key] = $value;
+                }
+            }
+            if($available_counter==1){
+                $index_name = "tmp".$item_id;
+                $data_price_array[$index_name] = $price."||".$sale_price_take_away."||".$sale_price_delivery;
+            }
+
+
+            $available_counter = 1;
+            foreach ($delivery_price as $key=>$value){
+                $key_id = explode("index_",$key);
+                if(($key_id[1]==$item_id)){
+                    $data_delivery_price_array[$key] = $delivery_prices;
+                    $available_counter++;
+                }else{
+                    $data_delivery_price_array[$key] = $value;
+                }
+            }
+            if($available_counter==1){
+                $food_menus = "$food_menus".",".$item_id;
+                $index_name = "index_".$item_id;
+                $data_delivery_price_array[$index_name] = $delivery_prices;
+            }
+            $data_u = array();
+            $data_u['food_menu_prices'] = json_encode($data_price_array);
+            $data_u['delivery_price'] = json_encode($data_delivery_price_array);
+            $data_u['food_menus'] = $food_menus;
+            $CI->db->where('id', $outlet->id);
+            $CI->db->update("tbl_outlets", $data_u);
+        }
+    }else{
+        return "";
+    }
+}
 /**
  * is LMni
  * @access public
@@ -771,6 +1369,13 @@ function getFMIdsOutlet($outlet_id) {
  */
 function isLMni() {
     $data_c = getLanguageManifesto();
+    if(isFoodCourt()){
+        $CI = & get_instance();
+        $company_id = $CI->session->userdata('company_id');
+        if($company_id==1){
+            return true;
+        }
+    }
     if(str_rot13($data_c[0])=="eriutoeri"){
         return true;
     }else{
@@ -819,6 +1424,16 @@ function getCustomerName($customer_id) {
     $information = $CI->db->query("SELECT * FROM tbl_customers where `id`='$customer_id'")->row();
     return isset($information->name) && $information->name?$information->name:'';
 }
+function getCustomerAddress($customer_id) {
+    $CI = & get_instance();
+    $information = $CI->db->query("SELECT * FROM tbl_customers where `id`='$customer_id'")->row();
+    return isset($information->address) && $information->address?$information->address:'';
+}
+function getCustomerGST($customer_id) {
+    $CI = & get_instance();
+    $information = $CI->db->query("SELECT * FROM tbl_customers where `id`='$customer_id'")->row();
+    return isset($information->gst_number) && $information->gst_number?$information->gst_number:'';
+}
 /**
  * get Order Type
  * @access public
@@ -843,7 +1458,21 @@ function getOrderType($order_type_id) {
 function getTableName($table_id) {
     $CI = & get_instance();
     $information = $CI->db->query("SELECT * FROM tbl_tables where `id`='$table_id'")->row();
-    return $information->name;
+    return isset($information->name) && $information->name?$information->name:'';
+}
+/**
+ * get area Name
+ * @access public
+ * @return string
+ * @param int
+ */
+function getAreaName($id='') {
+    if($id==''){
+        return $id;
+    }
+    $CI = & get_instance();
+    $information = $CI->db->query("SELECT * FROM tbl_areas where `id`='$id'")->row();
+    return isset($information->area_name) && $information->area_name?$information->area_name:'';
 }
 /**
  * get Consumption ID
@@ -931,6 +1560,16 @@ function foodMenuName($id) {
     $food_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
     return $food_information->name;
 }
+function foodMenuRow($id) {
+    $CI = & get_instance();
+    $food_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
+    return $food_information;
+}
+function getVariationName($id) {
+    $CI = & get_instance();
+    $food_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
+    return isset($food_information->name) && $food_information->name?$food_information->name:'';
+}
 /**
  * food Menu Name Code
  * @access public
@@ -979,6 +1618,21 @@ function foodMenuIngredients($food_menu_id) {
     $food_menu_ingredients = $CI->db->query("SELECT * FROM tbl_food_menus_ingredients where `food_menu_id`='$food_menu_id'")->result();
     return $food_menu_ingredients;
 }
+function getDetailsCombo($food_menu_id) {
+    $CI = & get_instance();
+    $food_menu_ingredients = $CI->db->query("SELECT * FROM tbl_combo_food_menus where `food_menu_id`='$food_menu_id'")->result();
+    $txt = '';
+    foreach ($food_menu_ingredients as $ky=>$value){
+        $txt.=$value->name.'(<i class="combo_class" data-qty="'.$value->quantity.'">Qty:'.$value->quantity.'</i>)';
+        if($ky < (sizeof($food_menu_ingredients) -1)){
+            $txt.=", ";
+        }
+    }
+   return $txt;
+}
+function getPlanTextFromHtml($content){
+    return (strip_tags($content));
+}
 /**
  * modifier Ingredients
  * @access public
@@ -1006,6 +1660,18 @@ function getPaymentName($id) {
     }
 
 }
+function salePaymentDetails($id,$outlet_id) {
+    $CI = & get_instance();
+    $CI->db->select('tbl_payment_methods.*,tbl_payment_methods.name as payment_name,multi_currency,usage_point,amount,currency_type,multi_currency_rate');
+    $CI->db->from('tbl_sale_payments');
+    $CI->db->join('tbl_payment_methods', 'tbl_payment_methods.id = tbl_sale_payments.payment_id', 'left');
+    $CI->db->where('tbl_sale_payments.outlet_id', $outlet_id);
+    $CI->db->where('tbl_sale_payments.sale_id', $id);
+    $CI->db->where('tbl_sale_payments.del_status', 'Live');
+    $query_result = $CI->db->get();
+    $results = $query_result->result();
+    return $results;
+}
 /**
  * get Alert Count
  * @access public
@@ -1018,28 +1684,87 @@ function getAlertCount() {
     $outlet_id = $CI->session->userdata('outlet_id');
     $where = '';
     $getFMIds = getFMIds($outlet_id);
-    $result = $CI->db->query("SELECT ingr_tbl.*,i.id as food_menu_id,ingr_cat_tbl.category_name,ingr_unit_tbl.unit_name, (select SUM(quantity_amount) from tbl_purchase_ingredients where ingredient_id=i.id AND outlet_id=$outlet_id AND del_status='Live') total_purchase, 
-    (select SUM(consumption) from tbl_sale_consumptions_of_menus where ingredient_id=i.id AND outlet_id=$outlet_id AND del_status='Live') total_consumption,
-    (select SUM(consumption) from tbl_sale_consumptions_of_modifiers_of_menus where ingredient_id=i.id AND outlet_id=$outlet_id AND  del_status='Live') total_modifiers_consumption,
-    (select SUM(waste_amount) from tbl_waste_ingredients  where ingredient_id=i.id AND outlet_id=$outlet_id AND tbl_waste_ingredients.del_status='Live') total_waste,
-    (select SUM(consumption_amount) from tbl_inventory_adjustment_ingredients  where ingredient_id=i.id AND outlet_id=$outlet_id AND  tbl_inventory_adjustment_ingredients.del_status='Live' AND  tbl_inventory_adjustment_ingredients.consumption_status='Plus') total_consumption_plus,
-    (select SUM(consumption_amount) from tbl_inventory_adjustment_ingredients  where ingredient_id=i.id AND outlet_id=$outlet_id AND  tbl_inventory_adjustment_ingredients.del_status='Live' AND  tbl_inventory_adjustment_ingredients.consumption_status='Minus') total_consumption_minus,
-            (select SUM(quantity_amount) from tbl_transfer_ingredients  where ingredient_id=i.id AND to_outlet_id=$outlet_id AND  tbl_transfer_ingredients.del_status='Live' AND  tbl_transfer_ingredients.status=1 AND tbl_transfer_ingredients.transfer_type=1) total_transfer_plus,
-            (select SUM(quantity_amount) from tbl_transfer_ingredients  where ingredient_id=i.id AND from_outlet_id=$outlet_id AND  tbl_transfer_ingredients.del_status='Live' AND (tbl_transfer_ingredients.status=1) AND tbl_transfer_ingredients.transfer_type=1) total_transfer_minus,
+    $result = $CI->db->query("SELECT ingr_tbl.*,i.id as food_menu_id,ingr_cat_tbl.category_name,ingr_unit_tbl.unit_name,ingr_unit_tbl2.unit_name as unit_name2, (select SUM(quantity_amount) from tbl_purchase_ingredients where ingredient_id=i.id AND outlet_id=$outlet_id AND del_status='Live') total_purchase, 
+(select SUM(consumption) from tbl_sale_consumptions_of_menus where ingredient_id=i.id AND outlet_id=$outlet_id AND del_status='Live') total_consumption,
+(select SUM(consumption) from tbl_sale_consumptions_of_modifiers_of_menus where ingredient_id=i.id AND outlet_id=$outlet_id AND  del_status='Live') total_modifiers_consumption,
+(select SUM(waste_amount) from tbl_waste_ingredients  where ingredient_id=i.id AND outlet_id=$outlet_id AND tbl_waste_ingredients.del_status='Live') total_waste,
+(select SUM(consumption_amount) from tbl_inventory_adjustment_ingredients  where ingredient_id=i.id AND outlet_id=$outlet_id AND  tbl_inventory_adjustment_ingredients.del_status='Live' AND  tbl_inventory_adjustment_ingredients.consumption_status='Plus') total_consumption_plus,
+(select SUM(consumption_amount) from tbl_inventory_adjustment_ingredients  where ingredient_id=i.id AND outlet_id=$outlet_id AND  tbl_inventory_adjustment_ingredients.del_status='Live' AND  tbl_inventory_adjustment_ingredients.consumption_status='Minus') total_consumption_minus,
+(select SUM(quantity_amount) from tbl_production_ingredients  where ingredient_id=i.id AND outlet_id=$outlet_id AND  tbl_production_ingredients.del_status='Live' AND tbl_production_ingredients.status=1) total_production,
+(select SUM(quantity_amount) from tbl_transfer_ingredients  where ingredient_id=i.id AND to_outlet_id=$outlet_id AND  tbl_transfer_ingredients.del_status='Live' AND  tbl_transfer_ingredients.status=1 AND tbl_transfer_ingredients.transfer_type=1) total_transfer_plus,
+(select SUM(quantity_amount) from tbl_transfer_ingredients  where ingredient_id=i.id AND from_outlet_id=$outlet_id AND  tbl_transfer_ingredients.del_status='Live' AND (tbl_transfer_ingredients.status=1) AND tbl_transfer_ingredients.transfer_type=1) total_transfer_minus,
 (select SUM(quantity_amount) from tbl_transfer_received_ingredients  where ingredient_id=i.id AND to_outlet_id=$outlet_id AND  tbl_transfer_received_ingredients.del_status='Live' AND  tbl_transfer_received_ingredients.status=1) total_transfer_plus_2,
 (select SUM(quantity_amount) from tbl_transfer_received_ingredients  where ingredient_id=i.id AND from_outlet_id=$outlet_id AND  tbl_transfer_received_ingredients.del_status='Live' AND (tbl_transfer_received_ingredients.status=1)) total_transfer_minus_2
-
-    FROM tbl_ingredients i  LEFT JOIN (select * from tbl_ingredients where del_status='Live') ingr_tbl ON ingr_tbl.id = i.id LEFT JOIN (select * from tbl_ingredient_categories where del_status='Live') ingr_cat_tbl ON ingr_cat_tbl.id = ingr_tbl.category_id LEFT JOIN (select * from tbl_units where del_status='Live') ingr_unit_tbl ON ingr_unit_tbl.id = ingr_tbl.unit_id WHERE i.company_id= '$company_id' AND i.del_status='Live' $where  GROUP BY i.id")->result();
+FROM tbl_ingredients i  LEFT JOIN (select * from tbl_ingredients where del_status='Live') ingr_tbl ON ingr_tbl.id = i.id LEFT JOIN (select * from tbl_ingredient_categories where del_status='Live') ingr_cat_tbl ON ingr_cat_tbl.id = ingr_tbl.category_id LEFT JOIN (select * from tbl_units where del_status='Live') ingr_unit_tbl ON ingr_unit_tbl.id = ingr_tbl.unit_id  LEFT JOIN (select * from tbl_units where del_status='Live') ingr_unit_tbl2 ON ingr_unit_tbl2.id = ingr_tbl.purchase_unit_id WHERE  i.company_id= '$company_id' AND i.del_status='Live' $where  GROUP BY i.id")->result();
     $alertCount = 0;
     foreach ($result as $value) {
-        $totalStock = $value->total_purchase - $value->total_consumption - $value->total_modifiers_consumption - $value->total_waste + $value->total_consumption_plus  + $value->total_transfer_plus  - $value->total_transfer_minus  +  $value->total_transfer_plus_2  -  $value->total_transfer_minus_2 - $value->total_consumption_minus + $value->total_transfer_plus  - $value->total_transfer_minus  +  $value->total_transfer_plus_2  -  $value->total_transfer_minus_2;
-        if ((int)$totalStock <= (int)$value->alert_quantity) {
+        $conversion_rate = (int)$value->conversion_rate?$value->conversion_rate:1;
+        $totalStock = ($value->total_purchase*$value->conversion_rate)  - $value->total_consumption - $value->total_modifiers_consumption - $value->total_waste + $value->total_consumption_plus - $value->total_consumption_minus + ($value->total_transfer_plus*$value->conversion_rate) - ($value->total_transfer_minus*$value->conversion_rate)  +  ($value->total_transfer_plus_2*$value->conversion_rate) -  ($value->total_transfer_minus_2*$value->conversion_rate)+ ($value->total_production*$value->conversion_rate);
+        if ($totalStock <= $value->alert_quantity) {
             if($value->id):
                 $alertCount++;
             endif;
         }
     }
     return $alertCount;
+}
+
+function getRandomCode($length = 11) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
+function getAmtPublic($id,$amount) {
+    if(!is_numeric($amount)){
+        $amount = 0;
+    }
+    $getCompanyInfo = getCompanyInfoById($id);
+    $precision = $getCompanyInfo->precision;
+    $str_amount = (number_format(isset($amount) && $amount?$amount:0,$precision,'.',''));
+    return $str_amount;
+}
+function getAmtPPublic($id,$amount) {
+    if(!is_numeric($amount)){
+        $amount = 0;
+    }
+    $getCompanyInfo = getCompanyInfoById($id);
+    $precision = $getCompanyInfo->precision;
+    $str_amount = (number_format(isset($amount) && $amount?$amount:0,$precision,'.',''));
+    return $str_amount;
+}
+function getSalePriceDetails($json_data) {
+    $plan_data_arr = (array)json_decode($json_data);
+    $return_txt = '';
+    $key_custom = 0;
+    foreach ($plan_data_arr as $key=>$value){
+        $return_txt.=$key."||".$value;
+        if($key_custom < (sizeof($plan_data_arr) -1)){
+            $return_txt.="|||";
+        }
+        $key_custom++;
+    }
+    return $return_txt;
+}
+/**
+ * food Menu Name
+ * @access public
+ * @return string
+ * @param int
+ */
+function getParentNameTemp($id) {
+    $CI = & get_instance();
+    $food_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
+    return (isset($food_information->name) && $food_information->name?getPlanText($food_information->name)." ":'');
+}
+function generateCode($number) {
+    $food_menu_code = str_pad($number, 2, '0', STR_PAD_LEFT);
+    return $food_menu_code;
+
 }
 /**
  * get Alert Count
@@ -1067,7 +1792,7 @@ function getCurrentStockById($getFMIds) {
     return $result;
 
     $alertCount = 0;
-    $totalStock = $result->total_purchase - $result->total_consumption - $result->total_modifiers_consumption - $result->total_waste + $result->total_consumption_plus  + $result->total_transfer_plus  - $result->total_transfer_minus - $result->total_consumption_minus + $result->total_transfer_plus  - $result->total_transfer_minus;
+    $totalStock = $result->total_purchase - $result->total_consumption - $result->total_modifiers_consumption - $result->total_waste + $result->total_consumption_plus  + $result->total_transfer_plus  - $result->total_transfer_minus - $result->total_consumption_minus + $result->total_transfer_plus  - $result->total_transfer_minus_2;
     return $totalStock;
 }
 /**
@@ -1085,6 +1810,74 @@ function collectGST(){
     }else{
         return "No";
     }
+}
+/**
+ * collect GST
+ * @access public
+ * @return string
+ * @param int
+ */
+function setReadonly($type,$tax){
+    $CI = & get_instance();
+    $return_value = "";
+    //iff type is 1 then system will return readonly;
+    if($type==1){
+        $tax_is_gst = $CI->session->userdata('tax_is_gst');
+        if($tax_is_gst=="Yes"){
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "readonly";
+            }
+        }else{
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "readonly";
+            }
+        }
+    }else if($type==2){
+        $tax_is_gst = $CI->session->userdata('tax_is_gst');
+        if($tax_is_gst=="Yes"){
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "none";
+            }
+        }else{
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "none";
+            }
+        }
+    }else if($type==3){
+        $tax_is_gst = $CI->session->userdata('tax_is_gst');
+        if($tax_is_gst=="Yes"){
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "gst_div";
+            }
+        }else{
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "gst_div";
+            }
+        }
+    }else if($type==4){
+        $tax_is_gst = $CI->session->userdata('tax_is_gst');
+        if($tax_is_gst=="Yes"){
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "1";
+            }
+        }else{
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+                $return_value = "1";
+            }
+        }
+    }else if($type==5){
+        $tax_is_gst = $CI->session->userdata('tax_is_gst');
+        if($tax_is_gst=="Yes"){
+            $return_value = "1";
+        }else{
+            if($tax=="CGST" || $tax=="SGST" || $tax=="IGST"){
+
+            }else{
+                $return_value = "1";
+            }
+        }
+    }
+    return $return_value;
 }/**
  * total tax
  * @access public
@@ -1120,6 +1913,36 @@ function getIngredientNameById($id) {
     }
 }
 /**
+ * get getOutletIdByArea By Id
+ * @access public
+ * @return string
+ * @param int
+ */
+function getOutletIdByArea($id) {
+    $CI = & get_instance();
+    $ig_information = $CI->db->query("SELECT * FROM tbl_areas where `id`='$id'")->row();
+    if (!empty($ig_information)) {
+        return $ig_information->outlet_id;
+    } else {
+        return '0';
+    }
+}
+/**
+ * get Ingredient
+ * @access public
+ * @return string
+ * @param int
+ */
+function getIngredient($id) {
+    $CI = & get_instance();
+    $ig_information = $CI->db->query("SELECT * FROM tbl_ingredients where `id`='$id'")->row();
+    if (!empty($ig_information)) {
+        return $ig_information;
+    } else {
+        return '';
+    }
+}
+/**
  * get Modifier Name By Id
  * @access public
  * @return string
@@ -1127,7 +1950,7 @@ function getIngredientNameById($id) {
  */
 function getModifierNameById($id) {
     $CI = & get_instance();
-    $m_information = $CI->db->query("SELECT * FROM tbl_modifier where `id`='$id'")->row();
+    $m_information = $CI->db->query("SELECT * FROM tbl_modifiers where `id`='$id'")->row();
     if (!empty($m_information)) {
         return $m_information->name;
     } else {
@@ -1138,7 +1961,16 @@ function getFoodMenuNameById($id) {
     $CI = & get_instance();
     $ig_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
     if (!empty($ig_information)) {
-        return $ig_information->name;
+        return getParentNameTemp($ig_information->parent_id).$ig_information->name;
+    } else {
+        return '';
+    }
+}
+function getFoodMenuNameCodeById($id) {
+    $CI = & get_instance();
+    $ig_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
+    if (!empty($ig_information)) {
+        return getPlanText($ig_information->name)."(".$ig_information->code.")";
     } else {
         return '';
     }
@@ -1182,6 +2014,17 @@ function getSupplierNameById($id) {
     return $supplier_information->name;
 }
 /**
+ * get Supplier Name By Id
+ * @access public
+ * @return string
+ * @param int
+ */
+function getSupplier($id) {
+    $CI = & get_instance();
+    $supplier_information = $CI->db->query("SELECT * FROM tbl_suppliers where `id`='$id'")->row();
+    return $supplier_information;
+}
+/**
  * get Unit Id By Ig Id
  * @access public
  * @return string
@@ -1192,6 +2035,15 @@ function getUnitIdByIgId($id) {
     $ig_information = $CI->db->query("SELECT * FROM tbl_ingredients where `id`='$id'")->row();
     if (!empty($ig_information)) {
         return $ig_information->unit_id;
+    } else {
+        return '';
+    }
+}
+function getPurchaseUnitIdByIgId($id) {
+    $CI = & get_instance();
+    $ig_information = $CI->db->query("SELECT * FROM tbl_ingredients where `id`='$id'")->row();
+    if (!empty($ig_information)) {
+        return $ig_information->purchase_unit_id;
     } else {
         return '';
     }
@@ -1209,7 +2061,7 @@ function getLastPurchaseAmount($id) {
     if (!empty($purchase_ingredients)) {
         $returnPrice = $purchase_ingredients->unit_price;
     } else {
-        $returnPrice = $ings->purchase_price;
+        $returnPrice = isset($ings->purchase_price) && $ings->purchase_price?$ings->purchase_price:0;
     }
     return $returnPrice;
 }
@@ -1227,7 +2079,7 @@ function getPurchaseIngredients($id) {
         $key = 1;
         $pur_ingr_all .= "<b>SN-Ingredient-Qty/Amount-Unit Price-Total</b><br>";
         foreach ($purchase_ingredients as $value) {
-            $pur_ingr_all .= $key ."-". getIngredientNameById($value->ingredient_id)."-".$value->quantity_amount ."-". $value->unit_price ."-". $value->total."<br>";
+            $pur_ingr_all .= $key ."-". getIngredientNameById($value->ingredient_id)."-".$value->quantity_amount.unitName(getPurchaseUnitIdByIgId($value->ingredient_id)) ."-". $value->unit_price ."-". $value->total."<br>";
             $key++;
         }
         return $pur_ingr_all;
@@ -1356,12 +2208,33 @@ function getCustomerDueReceive($customer_id){
  * @return float
  * @param int
  */
+
+function getOutletById($outlet_id){
+    $CI = & get_instance();
+    $outlet_info1 = $CI->db->query("SELECT * FROM tbl_outlets WHERE id='$outlet_id' AND del_status='Live'")->row();
+    if($outlet_info1){
+        return $outlet_info1;
+    }else{
+        return "";
+    }
+}
 function getSupplierDuePayment($supplier_id){
     $CI = & get_instance();
     $information = $CI->db->query("SELECT sum(amount) as amount FROM tbl_supplier_payments where `supplier_id`='$supplier_id' and del_status='Live'")->row();
     return $information->amount;
 }
 
+function checkAvailableLang($lang){
+    $dir = glob("application/language/*",GLOB_ONLYDIR);
+    $return = false;
+    foreach ($dir as $value):
+        $separete = explode("language/",$value);
+        if($separete[1]==$lang){
+            $return = true;
+        }
+    endforeach;
+    return $return;
+}
 /**
  * getSupplierDuePayment
  * @access public
@@ -1403,6 +2276,160 @@ function getPlanName($id) {
         return '';
     }
 }
+function getPrinter($id) {
+    $CI = & get_instance();
+    $ig_information = $CI->db->query("SELECT * FROM tbl_printers where `id`='$id'")->row();
+    if (!empty($ig_information)) {
+        return $ig_information->title;
+    } else {
+        return '';
+    }
+}
+function getLoyaltyPointByFoodMenu($id,$is_ignore='') {
+    $CI = & get_instance();
+    $is_loyalty_enable = $CI->session->userdata('is_loyalty_enable');
+    if($is_loyalty_enable=="enable" && $is_ignore==''){
+        $ig_information = $CI->db->query("SELECT * FROM tbl_food_menus where `id`='$id'")->row();
+        if (!empty($ig_information)) {
+            return $ig_information->loyalty_point;
+        } else {
+            return 0;
+        }
+    }else{
+        return 0;
+    }
+
+}
+function getTotalLoyaltyPoint($id,$outlet_id) {
+    $CI = & get_instance();
+    $CI->db->select('sum(usage_point) as used_loyalty_point');
+    $CI->db->from('tbl_sale_payments');
+    $CI->db->join('tbl_sales', 'tbl_sales.id = tbl_sale_payments.sale_id', 'left');
+    $CI->db->where('tbl_sales.outlet_id', $outlet_id);
+    $CI->db->where('tbl_sales.customer_id', $id);
+    $CI->db->where('tbl_sale_payments.payment_id', 5);
+    $CI->db->where('tbl_sales.order_status', 3);
+    $CI->db->where('tbl_sale_payments.del_status', 'Live');
+    $query_result = $CI->db->get();
+    $used_loyalty_point = $query_result->row();
+
+    $CI->db->select('sum(loyalty_point_earn) as loyalty_point_earn');
+    $CI->db->from('tbl_sales_details');
+    $CI->db->join('tbl_sales', 'tbl_sales.id = tbl_sales_details.sales_id', 'left');
+    $CI->db->where('tbl_sales_details.outlet_id', $outlet_id);
+    $CI->db->where('tbl_sales.customer_id', $id);
+    $CI->db->where('tbl_sales.order_status', 3);
+    $CI->db->where('tbl_sales_details.del_status', 'Live');
+    $query_result = $CI->db->get();
+    $loyalty_point_earn = $query_result->row();
+
+    $total_point = (isset($loyalty_point_earn->loyalty_point_earn) && $loyalty_point_earn->loyalty_point_earn?$loyalty_point_earn->loyalty_point_earn:0) - (isset($used_loyalty_point->used_loyalty_point) && $used_loyalty_point->used_loyalty_point?$used_loyalty_point->used_loyalty_point:0);
+    $total_usage = (isset($used_loyalty_point->used_loyalty_point) && $used_loyalty_point->used_loyalty_point?$used_loyalty_point->used_loyalty_point:0);
+    return [number_format($total_usage,0),number_format($total_point,0)];
+
+}
+function getKitchenNameAndId($cat_id) {
+    $CI = & get_instance();
+    $outlet_id = $CI->session->userdata('outlet_id');
+    $CI->db->select('tbl_kitchens.id as kitchen_id, tbl_kitchens.name as kitchen_name');
+    $CI->db->from('tbl_kitchen_categories');
+    $CI->db->join('tbl_kitchens', 'tbl_kitchens.id = tbl_kitchen_categories.kitchen_id', 'left');
+    $CI->db->where('tbl_kitchen_categories.outlet_id', $outlet_id);
+    $CI->db->where('tbl_kitchen_categories.cat_id', $cat_id);
+    $CI->db->where('tbl_kitchen_categories.del_status', 'Live');
+        $query_result = $CI->db->get();
+    $row = $query_result->row();
+
+    if($row){
+    return [$row->kitchen_id,$row->kitchen_name];
+    }else{
+        return ['',''];
+    }
+}
+function checkDeliveryPartner() {
+    $CI = & get_instance();
+    $company_id = $CI->session->userdata('company_id');
+    $CI->db->select('count(id) as total');
+    $CI->db->from('tbl_delivery_partners');
+    $CI->db->where('company_id', $company_id);
+    $CI->db->where('del_status', 'Live');
+    $query_result = $CI->db->get();
+    $row = $query_result->row();
+
+    if($row){
+    return true;
+    }else{
+        return false;
+    }
+}
+function getSMSSignupUrl($operator) {
+    if($operator==1){
+        //return the url for signup to user sms gateway
+        return escape_output("https://www.twilio.com/messaging/sms");
+    }else if($operator==2){
+        //return the url for signup to user sms gateway
+        return escape_output("http://mobishastra.com/");
+    }
+}
+
+function getPUnitIdByIgId($id) {
+    $CI = & get_instance();
+    $ig_information = $CI->db->query("SELECT * FROM tbl_ingredients where `id`='$id'")->row();
+    if (!empty($ig_information)) {
+        return $ig_information->purchase_unit_id;
+    } else {
+        return '';
+    }
+}
+function getAllPaymentMethods($is_ignore_loyalty='') {
+    $CI = & get_instance();
+    $company_id = $CI->session->userdata('company_id');
+    $CI->db->select('*');
+    $CI->db->from('tbl_payment_methods');
+    $CI->db->where("company_id", $company_id);
+    if($is_ignore_loyalty!=''){
+        $CI->db->where("id!=", '5');
+    }
+    $CI->db->where("del_status", 'Live');
+    $CI->db->order_by("order_by", 'ASC');
+    $result = $CI->db->get();
+
+    if($result != false){
+        return $result->result();
+    }else{
+        return false;
+    }
+}
+function getAttendance($user_id) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_attendance');
+    $CI->db->where('is_closed', 1);
+    $CI->db->where('employee_id', $user_id);
+    $CI->db->where('del_status', "Live");
+    $CI->db->order_by('id', "DESC");
+    $last_row =   $CI->db->get()->row();
+    if(isset($last_row) && $last_row){
+        return $last_row;
+    }else{
+        return false;
+    }
+}
+function getAttendance1($user_id) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_attendance');
+    $CI->db->where('is_closed', 2);
+    $CI->db->where('employee_id', $user_id);
+    $CI->db->where('del_status', "Live");
+    $CI->db->order_by('id', "DESC");
+    $last_row =   $CI->db->get()->row();
+    if(isset($last_row) && $last_row){
+        return $last_row;
+    }else{
+        return false;
+    }
+}
 /**
  * get plan name
  * @access public
@@ -1440,6 +2467,29 @@ function getAmt($amount) {
     }
     return $str_amount;
 }
+function getAmtCustom($amount) {
+    if(!is_numeric($amount)){
+        $amount = 0;
+    }
+    $getCompanyInfo = getCompanyInfo();
+    $currency_position = $getCompanyInfo->currency_position;
+    $currency = $getCompanyInfo->currency;
+    $precision = $getCompanyInfo->precision;
+    $str_amount = '';
+    $decimals_separator = isset($getCompanyInfo->decimals_separator) && $getCompanyInfo->decimals_separator?$getCompanyInfo->decimals_separator:'.';
+    $thousands_separator = isset($getCompanyInfo->thousands_separator) && $getCompanyInfo->thousands_separator?$getCompanyInfo->thousands_separator:'';
+    if(isset($currency_position) && $currency_position!="Before Amount"){
+        $str_amount = (number_format(isset($amount) && $amount?$amount:0,$precision,$decimals_separator,$thousands_separator)).$currency;
+    }else{
+        $str_amount = $currency.(number_format(isset($amount) && $amount?$amount:0,$precision,$decimals_separator,$thousands_separator));
+    }
+    return $str_amount;
+}
+function getCurrency($id) {
+    $getCompanyInfo = getCompanyInfoById($id);
+    $currency = $getCompanyInfo->currency;
+    return $currency;
+}
 /**
  * return amount format as per setting
  * @access public
@@ -1453,6 +2503,17 @@ function getAmtP($amount) {
     $getCompanyInfo = getCompanyInfo();
     $precision = $getCompanyInfo->precision;
     $str_amount = (number_format(isset($amount) && $amount?$amount:0,$precision,'.',''));
+    return $str_amount;
+}
+function getAmtPCustom($amount) {
+    if(!is_numeric($amount)){
+        $amount = 0;
+    }
+    $getCompanyInfo = getCompanyInfo();
+    $precision = $getCompanyInfo->precision;
+    $decimals_separator = isset($getCompanyInfo->decimals_separator) && $getCompanyInfo->decimals_separator?$getCompanyInfo->decimals_separator:'.';
+    $thousands_separator = isset($getCompanyInfo->thousands_separator) && $getCompanyInfo->thousands_separator?$getCompanyInfo->thousands_separator:'';
+    $str_amount = (number_format(isset($amount) && $amount?$amount:0,$precision,$decimals_separator,$thousands_separator));
     return $str_amount;
 }
 /**
@@ -1594,10 +2655,9 @@ function checkAttendance($date,$employee_id) {
  */
 function isAccess($user_id) {
     $CI = & get_instance();
-    $result = $CI->db->query("SELECT tbl_admin_user_menus.controller_name as controller_name
+    $result = $CI->db->query("SELECT *
               FROM tbl_user_menu_access
-              JOIN tbl_admin_user_menus ON tbl_user_menu_access.menu_id =  tbl_admin_user_menus.id
-              WHERE tbl_user_menu_access.user_id=$user_id AND tbl_admin_user_menus.menu_name='POS'
+              WHERE user_id=$user_id 
               ")->row();
     if($result){
         return true;
@@ -1632,7 +2692,7 @@ function getRemainingAccessDay($id) {
 
     if(isset($due_payment) && $due_payment){
         if($due_payment->payment_date){
-            $access_day = $value->access_day - 1;
+            $access_day = $value->access_day;
             if(!$access_day){
                 $access_day = 0;
             }
@@ -1641,7 +2701,7 @@ function getRemainingAccessDay($id) {
             $total_remaining_day = getTotalDays($today,$end_date)." day(s)";
         }
     }else{
-        $access_day = $value->access_day - 1;
+        $access_day = $value->access_day;
         if(!$access_day){
             $access_day = 0;
         }
@@ -1668,4 +2728,526 @@ function getTotalDays($startDate, $endDate){
     // Once the loop has finished, return the
     // array of days.
     return $total_days;
+}
+function getDiscountSymbol($discount){
+  $CI = & get_instance();
+  $currency = $CI->session->userdata('currency');
+  $separator = explode("%",$discount);
+
+  return isset($separator[1])?'':$currency;
+}
+function getDiscountSymbolCP($discount){
+  $CI = & get_instance();
+  $separator = explode("%",$discount);
+
+  return isset($separator[1])?$discount:(isset($separator[0]) && $separator[0]?getAmtPCustom($separator[0]):getAmtPCustom(0));
+}
+ function checkPromotionWithinDate($start_date,$end_date,$food_menu_id) {
+     $CI = & get_instance();
+    $outlet_id = $CI->session->userdata('outlet_id');
+
+    $CI->db->select('*');
+    $CI->db->from('tbl_promotions');
+    if ($start_date != '' && $end_date != '') {
+        $CI->db->where('start_date>=', $start_date);
+        $CI->db->where('start_date<=', $end_date);
+    }
+    $CI->db->where('outlet_id', $outlet_id);
+    $CI->db->where('del_status', 'Live');
+    $query_result = $CI->db->get();
+    $result = $query_result->row();
+
+     if(isset($result) && $result){
+        return $result;
+    }
+
+    $CI->db->select('*');
+    $CI->db->from('tbl_promotions');
+    if ($start_date != '' && $end_date != '') {
+        $CI->db->where('end_date>=', $start_date);
+        $CI->db->where('end_date<=', $end_date);
+    }
+     $CI->db->where('food_menu_id', $food_menu_id);
+     $CI->db->where('outlet_id', $outlet_id);
+     $CI->db->where('del_status', 'Live');
+    $query_result = $CI->db->get();
+    $result = $query_result->row();
+
+  return $result;
+}
+ function setAverageCost($id) {
+    $CI = & get_instance();
+    $outlet_id = $CI->session->userdata('outlet_id');
+
+    $CI->db->select('*');
+    $CI->db->from('tbl_purchase_ingredients');
+    $CI->db->where('outlet_id', $outlet_id);
+    $CI->db->where('ingredient_id', $id);
+    $CI->db->where('del_status', 'Live');
+    $CI->db->order_by('id', 'DESC');
+    $CI->db->limit(3);
+    $query_result = $CI->db->get();
+    $result = $query_result->result();
+
+    $consumption_unit_cost = 0;
+     $total_cost = 0;
+    if(isset($result) && $result){
+            foreach ($result as $value){
+                $total_cost+=$value->cost_per_unit;
+            }
+        $consumption_unit_cost = $total_cost/sizeof($result);
+    }else{
+        $CI->db->select('*');
+        $CI->db->from('tbl_ingredients');
+        $CI->db->where('id', $id);
+        $CI->db->where('del_status', 'Live');
+        $query_result = $CI->db->get();
+        $row = $query_result->row();
+        $consumption_unit_cost = $row->consumption_unit_cost;
+
+    }
+     $data = array();
+     $data['average_consumption_per_unit'] = $consumption_unit_cost;
+     $CI->db->where('id', $id);
+     $CI->db->update("tbl_ingredients", $data);
+     return true;
+}
+function checkPromotionWithinDatePOS($start_date,$food_menu_id) {
+    $CI = & get_instance();
+    $outlet_id = $CI->session->userdata('outlet_id');
+
+    $CI->db->select('*');
+    $CI->db->from('tbl_promotions');
+    if ($start_date != '') {
+        $CI->db->where('start_date<=', $start_date);
+        $CI->db->where('end_date>=', $start_date);
+    }
+    $CI->db->where('food_menu_id', $food_menu_id);
+    $CI->db->where('outlet_id', $outlet_id);
+    $CI->db->where('del_status', 'Live');
+    $query_result = $CI->db->get();
+    $result = $query_result->row();
+    $return_data['status'] = false;
+
+    $return_data['type'] = '';
+    $return_data['discount'] = '';
+    $return_data['food_menu_id'] = '';
+    $return_data['get_food_menu_id'] = '';
+    $return_data['qty'] = '';
+    $return_data['get_qty'] = '';
+    $return_data['string_text'] = '';
+
+    if(isset($result) && $result){
+        $return_data['type'] = $result->type;
+        $return_data['status'] = true;
+        $return_data['discount'] = $result->title;
+        if($result->type==1){
+            $return_data['discount'] = $result->discount;
+            $return_data['food_menu_id'] = $result->food_menu_id;
+            $return_data['get_food_menu_id'] = '';
+            $return_data['qty'] = '';
+            $return_data['get_qty'] = '';
+            $return_data['string_text'] = "".$result->title."<br><span><i>".getDiscountSymbol($result->discount).$result->discount." discount is available for this food menu.</i></span><br>";
+        }else{
+            $txt = '';
+            $txt.="".$result->title."<br> <span>Buy:<i> ".getFoodMenuNameById($result->food_menu_id)."(".getFoodMenuCodeById($result->food_menu_id).") - ".$result->qty."(qty)</i></span><br>";
+            $txt.="<span>Get:<i> ".getFoodMenuNameById($result->get_food_menu_id)."(".getFoodMenuCodeById($result->get_food_menu_id).") - ".$result->get_qty."(qty)</i></span>";
+
+            $return_data['discount'] = '';
+            $return_data['food_menu_id'] = '';
+            $return_data['get_food_menu_id'] = $result->get_food_menu_id;
+            $return_data['qty'] = $result->qty;
+            $return_data['get_qty'] = $result->get_qty;
+            $return_data['string_text'] = $txt;
+        }
+    }
+
+    return($return_data);
+}
+function getTodayPromoDetails() {
+    $CI = & get_instance();
+    $start_date = date("Y-m-d");
+    $outlet_id = $CI->session->userdata('outlet_id');
+
+    $CI->db->select('*');
+    $CI->db->from('tbl_promotions');
+    if ($start_date != '') {
+        $CI->db->where('start_date<=', $start_date);
+        $CI->db->where('end_date>=', $start_date);
+    }
+    $CI->db->where('outlet_id', $outlet_id);
+    $CI->db->where('del_status', 'Live');
+    $query_result = $CI->db->get();
+    $result = $query_result->result();
+    return($result);
+}
+function getOpeningDateTime(){
+    $CI = & get_instance();
+    $user_id = $CI->session->userdata('user_id');
+    $outlet_id = $CI->session->userdata('outlet_id');
+    $date = date('Y-m-d');
+    $getOpeningDateTime = $CI->Sale_model->getOpeningDateTime($user_id,$outlet_id,$date);
+    return isset($getOpeningDateTime->opening_date_time) && $getOpeningDateTime->opening_date_time?$getOpeningDateTime->opening_date_time:'';
+}
+
+function pr($arr){
+    print("<pre>");
+    print_r($arr);exit;
+}
+function getAllSaleByPaymentMultiCurrencyRows($date,$payment_id,$outlet_id){
+    $CI = & get_instance();
+    $CI->db->select("sum(amount) as total_amount,multi_currency");
+    $CI->db->from('tbl_sale_payments');
+    $CI->db->where("payment_id", $payment_id);
+    $CI->db->where("outlet_id", $outlet_id);
+    $CI->db->where("Date(date_time)", $date);
+    $CI->db->where("currency_type", 1);
+    $CI->db->group_by('multi_currency');
+    $data =  $CI->db->get()->result();
+    return $data;
+}
+
+function insertSosUser(){
+    $company = getMainCompany();
+    $CI = & get_instance();
+    if(isset($company->sos_enable_self_order) && $company->sos_enable_self_order=="Yes"){
+        $result = $CI->db->query("SELECT * FROM tbl_users WHERE id=2")->row();
+        if(isset($result) && $result){
+        } else {
+            $CI = & get_instance();
+            $data = array();
+            $data['id'] = 2;
+            $data['full_name'] = "Self Order";
+            $data['phone'] = "-";
+            $data['del_status'] = "Deleted";
+            $CI->db->insert("tbl_users", $data);
+        }
+    }
+}
+function generateRandomCode($length = 10) {
+    $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+function removeQrCode() {
+    $files = glob('qr_code/*'); // get all file names
+    foreach($files as $file){ // iterate files
+        if(is_file($file)) {
+            unlink($file); // delete file
+        }
+    }
+    return true;
+}
+function getPOSChecker($controller, $function) {
+    //start check access function
+    if(!checkAccess($controller,$function)){
+        return false;
+    }else{
+        return true;
+    }
+}
+/**
+ * check access module
+ * @return boolean
+ * @param int
+ */
+if ( ! function_exists('checkAccess')) {
+    function checkAccess($controller, $function)
+    {
+        $CI = &get_instance();
+        $role = $CI->session->userdata('role');
+        $is_online_order = $CI->session->userdata('is_online_order');
+        $is_self_order = $CI->session->userdata('is_self_order');
+        if($is_online_order=="Yes" || $is_self_order=="Yes"){
+            return false;
+        }
+        if($role=="Admin"){
+            return true;
+        }else{
+            $controllerFunction = $function . "-" . $controller;
+            $arr = $CI->session->userdata("function_access");
+
+            if(isset($arr) && $arr){
+                if (!in_array($controllerFunction, $CI->session->userdata("function_access"))) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }else{
+                return false;
+            }
+
+        }
+
+    }
+}
+if ( ! function_exists('checkAccessWaiter')) {
+    function checkAccessWaiter($controller, $function,$id)
+    {
+        $CI = & get_instance();
+        $CI->db->select("*");
+        $CI->db->from('tbl_role_access');
+        $CI->db->where("access_parent_id", $controller);
+        $CI->db->where("access_child_id", $function);
+        $CI->db->where("role_id", $id);
+        $CI->db->where("del_status", "Live");
+        $data =  $CI->db->get()->row();
+        if(isset($data) && $data){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+}
+
+function setIngredients($id,$data) {
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_ingredients');
+    $CI->db->where('food_id', $id);
+    $CI->db->where('del_status', 'Live');
+    $query_result = $CI->db->get();
+    $selected_row = $query_result->row();
+
+    if($selected_row){
+        $CI->db->where('id', $selected_row->id);
+        $CI->db->update("tbl_ingredients", $data);
+    }else{
+        $CI->db->insert("tbl_ingredients", $data);
+    }
+}
+
+function getCounter($txt) {
+    $return  = 0;
+    if($txt=="Sunday"){
+        $return = 1;
+    }else if($txt=="Monday"){
+        $return = 2;
+    }else if($txt=="Tuesday"){
+        $return = 3;
+    }else if($txt=="Wednesday"){
+        $return = 4;
+    }else if($txt=="Thursday"){
+        $return = 5;
+    }else if($txt=="Friday"){
+        $return = 6;
+    }else if($txt=="Saturday"){
+        $return = 7;
+    }
+    return $return;
+}
+function d($s,$t){
+    $str_rand="gzLGcztDgj";
+    if($t==1){
+        $return=openssl_encrypt($s,"AES-128-ECB",$str_rand);
+    }else{
+        $return=openssl_decrypt($s,"AES-128-ECB",$str_rand);
+    }
+    return $return;
+}
+
+function getSaleDate($startDate, $endDate,$type){
+    $return_array = array();
+    if($type=="day"){
+        $start  = new DateTime($startDate);
+        $end    = new DateTime($endDate);
+        $invert = $start > $end;
+
+        $dates = array();
+        $dates[] = $start->format("Y-m-d")."||".$start->format("Y-m-d")."||".(date('D, d F ',strtotime($start->format("Y-m-d"))))."||".(date('d F ',strtotime($start->format("Y-m-d"))));
+        while ($start != $end) {
+            $start->modify(($invert ? '-' : '+') . '1 day');
+            $dates[] = $start->format("Y-m-d")."||".$start->format("Y-m-d")."||".(date('D, d F ',strtotime($start->format("Y-m-d"))))."||".(date('d F ',strtotime($start->format("Y-m-d"))));
+        }
+        $return_array = $dates;
+    }else if($type=="week"){
+        $dates = array();
+        $start_date = $startDate;
+        $end_Date = $endDate;
+
+        $date1 = new DateTime($start_date);
+        $date2 = new DateTime($end_Date);
+        $interval = $date1->diff($date2);
+
+        $weeks = floor(($interval->days) / 7);
+
+        for($i = 0; $i <= $weeks; $i++){
+            $date1->add(new DateInterval('P6D'));
+            if($i<$weeks){
+                $dates[] = $start_date."||".$date1->format('Y-m-d')."||".(date('D, d F ',strtotime($start_date)))." - ".(date('D, d F ',strtotime($date1->format('Y-m-d'))))."||".(date('d F ',strtotime($start_date)))." - ".(date('d F ',strtotime($date1->format('Y-m-d'))));
+            }else{
+                $dates[] = $start_date."||".$end_Date."||".(date('D, d F ',strtotime($start_date)))." - ".(date('D, d F ',strtotime($end_Date)))."||".(date('d F ',strtotime($start_date)))." - ".(date('d F ',strtotime($end_Date)));
+            }
+
+            $date1->add(new DateInterval('P1D'));
+            $start_date = $date1->format('Y-m-d');
+        }
+        $return_array = $dates;
+    }else if($type=="month"){
+        $dates = array();
+        $start    = new DateTime($startDate);
+        $start->modify('first day of this month');
+        $end      = new DateTime($endDate);
+        $end->modify('first day of next month');
+        $interval = DateInterval::createFromDateString('1 month');
+        $period   = new DatePeriod($start, $interval, $end);
+        $total_period = iterator_count($period);
+        $i=0;
+        foreach ($period as $ky=>$dt) {
+            if($i==0 && $total_period!=1){
+                $this_month_end = date("Y-m-t",strtotime($startDate));
+                $dates[]  = $startDate."||".$this_month_end."||".(date('D, d F ',strtotime($startDate)))." - ".(date('D, d F ',strtotime($this_month_end)))."||".(date('d F ',strtotime($startDate)))." - ".(date('d F ',strtotime($this_month_end)));
+            }else{
+                if($total_period==1){
+                    $dates[]  = $startDate."||".$endDate."||".(date('D, d F ',strtotime($dt->format("Y-m-d"))))." - ".(date('D, d F ',strtotime($endDate)))."||".(date('d F ',strtotime($dt->format("Y-m-d"))))." - ".(date('d F ',strtotime($endDate)));
+                }else{
+                    if($i<($total_period-1)){
+                        $this_month_end = date("Y-m-t",strtotime($dt->format("Y-m-d")));
+                        $dates[]  = $dt->format("Y-m-d")."||".$this_month_end."||".(date('D, d F ',strtotime($dt->format("Y-m-d"))))." - ".(date('D, d F ',strtotime($this_month_end)))."||".(date('d F ',strtotime($dt->format("Y-m-d"))))." - ".(date('d F ',strtotime($this_month_end)));
+                    }else{
+                        $dates[]  = $dt->format("Y-m-d")."||".$endDate."||".(date('D, d F ',strtotime($dt->format("Y-m-d"))))." - ".(date('D, d F ',strtotime($endDate)))."||".(date('d F ',strtotime($dt->format("Y-m-d"))))." - ".(date('d F ',strtotime($endDate)));
+                    }
+                }
+            }
+            $i++;
+        }
+        $return_array = $dates;
+    }
+    return $return_array;
+}
+function removeCountryCode($phone){
+    $separate = explode("+88",$phone);
+    if(isset($separate[1]) && $separate[1]){
+        return $separate[1];
+    }else{
+        return $phone;
+    }
+}
+function smsSendOnly($msg,$to){
+    $CI = &get_instance();
+    $company_id = $CI->session->userdata('company_id');
+    $company = companyInformation($company_id);
+    if(isset($company) && $company){
+        $company_info = isset($company->sms_details) && $company->sms_details?json_decode($company->sms_details):'';
+
+        if($company->sms_service_provider==1){
+            require './Twilio/autoload.php';
+            // Your Account SID and Auth Token from twilio.com/console
+            $sid = (isset($company_info) && $company_info->field_1_0?$company_info->field_1_0:'');
+            $token = (isset($company_info) && $company_info->field_1_1?$company_info->field_1_1:'');
+            $client = new Twilio\Rest\Client($sid, $token);
+
+            $twilio_number = (isset($company_info) && $company_info->field_1_2?$company_info->field_1_2:'');
+            // Use the client to do fun stuff like send text messages!
+            $client->messages->create(
+            // the number you'd like to send the message to
+                $to,
+                array(
+                    // A Twilio phone number you purchased at twilio.com/console
+                    'from' => $twilio_number,
+                    // the body of the text message you'd like to send
+                    'body' => $msg
+                )
+            );
+        }else if($company->sms_service_provider==2){
+            // load library
+            $profile_id = (isset($company_info) && $company_info->field_2_0?$company_info->field_2_0:'');
+            $password = (isset($company_info) && $company_info->field_2_1?$company_info->field_2_1:'');
+            $sender_id = (isset($company_info) && $company_info->field_2_2?$company_info->field_2_2:'');
+            $country_code = (isset($company_info) && $company_info->field_2_3?$company_info->field_2_3:'');
+            $phone = removeCountryCode($to);
+
+            $url = "http://mshastra.com/sendurlcomma.aspx?user=".$profile_id."&pwd=".$password."&senderid=".$sender_id."&CountryCode=".$country_code."&mobileno=".$phone."&msgtext=".$msg;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_exec($ch);
+            curl_close($ch);
+        }
+    }
+}
+function getWidth100(){
+    return "width: 100%";
+}
+function DLTAllDB(){
+    $CI = &get_instance();
+    $data = array();
+    $data['personalinformation'] = '';
+    $CI->db->where('id', 1);
+    $CI->db->update("tbl_payment_methods", $data);
+}
+// Function to write the index file
+function write_index() {
+    // Config path
+    $template_path 	= 'system/libraries/index.php';
+    $output_path 	= 'index.php';
+
+    // Open the file
+    $saved = file_get_contents($template_path);
+
+    // Write the new config.php file
+    $handle = fopen($output_path,'w+');
+
+    // Chmod the file, in case the user forgot
+    @chmod($output_path,0777);
+
+    // Verify file permissions
+    if(is_writable($output_path)) {
+
+        // Write the file
+        if(fwrite($handle,$saved)) {
+            @chmod($output_path,0644);
+            return true;
+        } else {
+            return false;
+        }
+
+    } else {
+        return false;
+    }
+}
+function checkAndRemoveAllRemovedItem($object_cart,$sale_id){
+    $CI = & get_instance();
+    $CI->db->select('*');
+    $CI->db->from('tbl_kitchen_sales_details');
+    $CI->db->where('sales_id', $sale_id);
+    $CI->db->where('del_status', 'Live');
+    $CI->db->order_by('id','DESC');
+    $query_result = $CI->db->get();
+    $sale_items = $query_result->result();
+
+    $cart_ids = array();
+    $count_variation = array();
+    foreach($object_cart as $key_counter=>$item){
+        $row_fm = foodMenuRow($item->food_menu_id);
+        if(isset($row_fm->parent_id) && $row_fm->parent_id!="0"){
+            $preview_id_counter_value = isset($count_variation[$item->food_menu_id]) && $count_variation[$item->food_menu_id]?$count_variation[$item->food_menu_id]:1;
+            $cart_ids[] = $item->food_menu_id."_".$preview_id_counter_value;
+            $count_variation[$item->food_menu_id] = $preview_id_counter_value + 1;
+        }else{
+            $cart_ids[] = $item->food_menu_id;
+        }
+
+    }
+    $count_variation = array();
+    foreach ($sale_items as $key=>$value){
+        $row_fm = foodMenuRow($value->food_menu_id);
+        if(isset($row_fm->parent_id) && $row_fm->parent_id!="0"){
+            $preview_id_counter_value = isset($count_variation[$value->food_menu_id]) && $count_variation[$value->food_menu_id]?$count_variation[$value->food_menu_id]:1;
+            $selected_fm_id = $value->food_menu_id."_".$preview_id_counter_value;
+            $count_variation[$value->food_menu_id] = $preview_id_counter_value + 1;
+        }else{
+            $selected_fm_id = $value->food_menu_id;
+        }
+        if (!in_array($selected_fm_id, $cart_ids)) {
+            //remove on update if remove any item from cart
+            $CI->db->delete('tbl_kitchen_sales_details', array('id' => $value->id));
+            $CI->db->delete('tbl_kitchen_sales_details_modifiers', array('sales_details_id' => $value->id));
+        }
+    }
+
 }

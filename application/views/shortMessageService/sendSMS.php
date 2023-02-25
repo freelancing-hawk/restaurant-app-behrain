@@ -1,15 +1,3 @@
-
-<style type="text/css">
-    .required_star{
-        color: #dd4b39;
-    }
-
-    .radio_button_problem{
-        margin-bottom: 19px;
-    }
-</style>  
-
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">
@@ -37,7 +25,7 @@
                             </div>
                         </div>
                         
-                            <?php if($type == "test"){?>
+                            <?php if($type == "custom"){?>
                                 <div class="col-sm-12 col-md-6 mb-2">
                                     <div class="form-group">
                                         <label><?php echo lang('number'); ?> <span class="required_star">*</span></label><small> <?php echo lang('must_include_country_code'); ?></small>
@@ -55,7 +43,7 @@
                             <div class="form-group">
                                 <label><?php echo lang('message'); ?> <span class="required_star">*</span></label>
                                 <!--This variable could not be escaped because this is html content-->
-                                <textarea tabindex="5" class="form-control" rows="4" name="message" placeholder="<?php echo lang('enter'); ?> ..."><?php echo $message; ?></textarea>
+                                <textarea tabindex="5" class="form-control" rows="4" name="message" placeholder="<?php echo lang('enter'); ?> ..."><?php echo escape_output($message); ?></textarea>
                                 <?php if (form_error('message')) { ?>
                                     <div class="callout callout-danger my-2">
                                         <?php echo form_error('message'); ?>
@@ -64,24 +52,18 @@
 
                                 <?php if($type == 'birthday' || $type == 'anniversary'){?>
                                     <div class="form-group">
-                                        <?php echo lang('there_are'); ?> <b><?php echo count($sms_count); ?></b> <?php echo lang('customer_has'); ?> <?php echo escape_output($type); ?> <?php echo lang('today'); ?>.
-                                    </div> 
+                                        <small><?php echo lang('there_are'); ?> <b><?php echo count($sms_count); ?></b> <?php echo lang('customer_has'); ?> <?php echo escape_output($type); ?> <?php echo lang('today'); ?>.</small>
+                                    </div>
                                 <?php } ?>
 
-                                <?php if($type == 'custom'){?>
+                                <?php if($type == 'customAll'){?>
                                     <div class="form-group">
-                                        <?php echo lang('only'); ?> <b><?php echo count($sms_count); ?></b> <?php echo lang('customer_has_valid'); ?>
-                                    </div> 
+                                        <small><?php echo lang('only'); ?> <b><?php echo count($sms_count); ?></b> <?php echo lang('customer_has_valid'); ?></small>
+                                    </div>
                                 <?php } ?>
 
                             </div>
                         </div>
-                            
-                            <div class="form-group">
-                                <?php echo lang('your_current_credit'); ?> <label><b><?php echo getAmtP($balance);?></b></label>
-                                 <?php echo lang('please_make_sure'); ?>
-                            </div>  
-                            
                     </div> 
                     <!-- /.box-body --> 
                 </div>
@@ -92,12 +74,10 @@
                     </div>
                     <div class="col-sm-12 col-md-2">
 
-                        <a class="btn bg-blue-btn w-100"href="<?php echo base_url() ?>Short_message_service/smsService">
+                        <a class="btn bg-blue-btn w-100" href="<?php echo base_url() ?>Short_message_service/smsService">
                             <?php echo lang('back'); ?>
                         </a>
                     </div>
-                   
-                   
                 </div>
                 <?php echo form_close(); ?>
             </div>

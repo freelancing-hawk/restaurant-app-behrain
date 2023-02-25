@@ -73,7 +73,7 @@
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($i); ?></td>
                                 <td><?php echo escape_output($value->name) ?></td>
-                                <td><?php echo escape_output(getAmt($value->totalDue)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->totalDue)) ?></td>
                             </tr>
                             <?php
                                     endif;

@@ -13,7 +13,6 @@ $(function() {
         let tax_is_gst_yes = $('#tax_is_gst_yes');
         let tax_is_gst_no = $('#tax_is_gst_no');
         let state_code = $('#state_code');
-        let pre_or_post_payment_post = $('#pre_or_post_payment_post');
 
         if (outlet_name.val() == "") {
             error++;
@@ -48,11 +47,6 @@ $(function() {
                     $('#state_code_error').fadeIn();
                 }
             }
-        }
-
-
-        if (pre_or_post_payment_post.val() == "") {
-            error++;
         }
     });
     $(document).on('click', '.remove_this_tax_row', function(e) {
@@ -104,6 +98,4 @@ $(function() {
             $('#vat_reg_no_container').hide();
         }
     });
-
-
 });

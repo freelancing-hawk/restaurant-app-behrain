@@ -29,10 +29,37 @@ class Customer extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "249";
+        $function = "";
+
+        if($segment_2=="customers"){
+            $function = "view";
+        }elseif($segment_2=="addEditCustomer" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditCustomer"){
+            $function = "add";
+        }elseif($segment_2=="uploadCustomer" || $segment_2=="ExcelDataAddCustomers" || $segment_2=="downloadPDF"){
+            $function = "upload_customer";
+        }elseif($segment_2=="deleteCustomer"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if($segment_2=="downloadPDF"){
+
+        }else{
+            if(!checkAccess($controller,$function)){
+                $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+                redirect('Authentication/userProfile');
+            }
+        }
+
+        //end check access function
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -89,30 +116,60 @@ class Customer extends Cl_Controller {
         if ($this->input->post('submit')) {
             $this->form_validation->set_rules('name', lang('category_name'), 'required|max_length[50]');
             $this->form_validation->set_rules('phone', lang('phone'), 'required|max_length[50]');
+            if(collectGST()=="Yes"){
+                $this->form_validation->set_rules('gst_number', lang('gst_number'), 'required|max_length[50]');
+                $this->form_validation->set_rules('same_or_diff_state', lang('same_or_diff_state'), 'required|max_length[50]');
+            }
             if ($this->form_validation->run() == TRUE) {
                 $customer_info = array();
                 $customer_info['name'] = htmlspecialchars($this->input->post($this->security->xss_clean('name')));
                 $customer_info['phone'] =htmlspecialchars($this->input->post($this->security->xss_clean('phone')));
                 $customer_info['email'] =htmlspecialchars($this->input->post($this->security->xss_clean('email')));
+                $customer_info['default_discount'] =htmlspecialchars($this->input->post($this->security->xss_clean('default_discount')));
                 if(htmlspecialchars($this->input->post($this->security->xss_clean('date_of_birth')))){
                     $customer_info['date_of_birth'] =htmlspecialchars($this->input->post($this->security->xss_clean('date_of_birth')));
                 }
                 if(htmlspecialchars($this->input->post($this->security->xss_clean('date_of_anniversary')))){
                     $customer_info['date_of_anniversary'] =htmlspecialchars($this->input->post($this->security->xss_clean('date_of_anniversary')));
                 }
-                $customer_info['address'] =htmlspecialchars($this->input->post($this->security->xss_clean('address')));
+                $c_address = htmlspecialchars($this->input->post($this->security->xss_clean('address')));
+                $customer_info['address'] = preg_replace("/[\n\r]/"," ",escape_output($c_address)); #remove new line from address
+
                 if(collectGST()=="Yes"){
                     $customer_info['gst_number'] =htmlspecialchars($this->input->post($this->security->xss_clean('gst_number')));
+                    $customer_info['same_or_diff_state'] =htmlspecialchars($this->input->post($this->security->xss_clean('same_or_diff_state')));
                 }
                 $customer_info['user_id'] = $this->session->userdata('user_id');
                 $customer_info['company_id'] = $this->session->userdata('company_id');
                 if ($id == "") {
-                    $this->Common_model->insertInformation($customer_info, "tbl_customers");
+                    $id = $this->Common_model->insertInformation($customer_info, "tbl_customers");
+                    $customer_address = array();
+                    $customer_address['customer_id'] = $id;
+                    $customer_address['address'] = $customer_info['address'];
+                    $customer_address['is_active'] = 1;
+                    $this->Common_model->insertInformation($customer_address, "tbl_customer_address");
+
                     $this->session->set_flashdata('exception', lang('insertion_success'));
                 } else {
                     $this->Common_model->updateInformation($customer_info, $id, "tbl_customers");
+
+                    $customer_address = array();
+                    $customer_address['customer_id'] = $id;
+                    $customer_address['address'] = $customer_info['address'];
+                    $customer_address['is_active'] = 1;
+
+                    $getActiveAddress = $this->Common_model->getActiveAddress($id);
+                    if(isset($getActiveAddress) && $getActiveAddress){
+                        $this->Common_model->updateInformation($customer_address, $getActiveAddress->id, "tbl_customer_address");
+                    }else{
+                        $this->Common_model->insertInformation($customer_address, "tbl_customer_address");
+                    }
+
                     $this->session->set_flashdata('exception',lang('update_success'));
                 }
+
+
+
                 redirect('customer/customers');
             } else {
                 if ($id == "") {
@@ -221,9 +278,7 @@ class Customer extends Cl_Controller {
                             }
                         }
                         if ($arrayerror == '') {
-                            if(!is_null($this->input->post('remove_previous'))){
-                                $this->db->query("TRUNCATE table `tbl_customers`");
-                            }
+
                             for ($i = 4; $i <= $totalrows; $i++) {
                                 $name = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(0, $i)->getValue()));
                                 $phone = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(1, $i)->getValue()));
@@ -231,6 +286,7 @@ class Customer extends Cl_Controller {
                                 $dob = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(3, $i)->getValue()));
                                 $doa = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(4, $i)->getValue()));
                                 $delivery_address = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(5, $i)->getValue()));
+                                $default_discount = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(6, $i)->getValue()));
 
 
                                 $customer_info = array();
@@ -240,6 +296,7 @@ class Customer extends Cl_Controller {
                                 $customer_info['date_of_birth'] = $dob;
                                 $customer_info['date_of_anniversary'] = $doa;
                                 $customer_info['address'] = $delivery_address;
+                                $customer_info['default_discount'] = $default_discount;
                                 $customer_info['user_id'] = $this->session->userdata('user_id');
                                 $customer_info['company_id'] = $this->session->userdata('company_id');
                                 $this->Common_model->insertInformation($customer_info, "tbl_customers");

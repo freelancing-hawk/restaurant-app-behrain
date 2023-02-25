@@ -255,6 +255,7 @@ $(document).ready(function(){
 				}else if(response.order_type=='3'){
 					order_type = "Delivery";
 				}
+
 				let draw_table_for_order='';
 							
 				for (let key in response.items) {
@@ -330,44 +331,50 @@ $(document).ready(function(){
 	$(document).on('click','#notification_remove_all',function(){
 		
 		if($('.single_notification_checkbox:checked').length>0){
-			let r = confirm("Are you sure to delete all notifications?");
-			if (r ==false) {
-
-				return false;
-			}
-			let notifications = '';
-			let j = 1;
-			let checkbox_length = $('.single_notification_checkbox:checked').length;
-			$('.single_notification_checkbox:checked').each(function(i, obj) {
-				if(j==checkbox_length){
-					notifications += $(this).val();	
-				}else{
-					notifications += $(this).val()+',';
-				}
-				j++;
-			});
-			if(notifications!=""){
-				let notifications_array = notifications.split(",");
-				notifications_array.forEach(function(entry) {
-				    $('#single_notification_row_'+entry).remove();
-				});
-				//Then read the values from the array where 0 is the first
-				//Since we skipped the first element in the array, we start at 1
-				$.ajax({
-					url:base_url+"Waiter/remove_multiple_notification_ajax",
-					method:"POST",
-					data:{
-						notifications : notifications,
-						csrf_irestoraplus: csrf_value_
-					},
-					success:function(response) {
-						// $('#single_notification_row_'+response).remove();
-					},
-					error:function(){
-						alert("error");
-					}
-				});
-			}			
+            swal(
+                {
+                    title: 'Alert',
+                    text: "Are you sure to delete all notifications?",
+                    confirmButtonColor: "#3c8dbc",
+                    confirmButtonText: "OK",
+                    showCancelButton: true,
+                },
+                function () {
+                    let notifications = '';
+                    let j = 1;
+                    let checkbox_length = $('.single_notification_checkbox:checked').length;
+                    $('.single_notification_checkbox:checked').each(function(i, obj) {
+                        if(j==checkbox_length){
+                            notifications += $(this).val();
+                        }else{
+                            notifications += $(this).val()+',';
+                        }
+                        j++;
+                    });
+                    if(notifications!=""){
+                        let notifications_array = notifications.split(",");
+                        notifications_array.forEach(function(entry) {
+                            $('#single_notification_row_'+entry).remove();
+                        });
+                        //Then read the values from the array where 0 is the first
+                        //Since we skipped the first element in the array, we start at 1
+                        $.ajax({
+                            url:base_url+"Waiter/remove_multiple_notification_ajax",
+                            method:"POST",
+                            data:{
+                                notifications : notifications,
+                                csrf_irestoraplus: csrf_value_
+                            },
+                            success:function(response) {
+                                // $('#single_notification_row_'+response).remove();
+                            },
+                            error:function(){
+                                alert("error");
+                            }
+                        });
+                    }
+                }
+            );
 		}else{
 			swal({
 				title: 'Alert',
@@ -499,6 +506,11 @@ function new_notification_interval(){
 					$('#notification_button').css('background-color','#dc3545')
 					$('#notification_button').css('color','#fff'); 
 				}, 3500);
+
+                let bell_new_order_notification = new Howl({
+                    src: [base_url + "assets/media/kitchen_bell.mp3"],
+                });
+                bell_new_order_notification.play();
 			}
 
 			// $order_list_left = '';

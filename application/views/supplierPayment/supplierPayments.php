@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
     <?php
     if ($this->session->flashdata('exception')) {
@@ -7,7 +6,7 @@
         <div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></div>';
     }
     ?>
@@ -19,8 +18,7 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('supplier_due_payments'); ?>" data-id_name="datatable">
             </div>
             <div class="col-md-6">
-                <a class="btn_list m-right btn bg-blue-btn" href="<?php echo base_url() ?>SupplierPayment/addSupplierPayment">
-                    <i data-feather="plus"></i> <?php echo lang('add_supplier_due_payment'); ?></a>
+
             </div>
         </div>
     </section>
@@ -36,6 +34,7 @@
                                 <th class="ir_w_1"> <?php echo lang('sn'); ?></th>
                                 <th class="ir_w_9"><?php echo lang('date'); ?></th>
                                 <th class="ir_w_18"><?php echo lang('supplier'); ?></th>
+                                <th class="ir_w_11"><?php echo lang('payment_method'); ?></th>
                                 <th class="ir_w_14"><?php echo lang('amount'); ?></th>
                                 <th class="ir_w_28"><?php echo lang('note'); ?></th>
                                 <th class="ir_w_19"><?php echo lang('added_by'); ?></th>
@@ -54,7 +53,8 @@
                                 <td><?php echo escape_output(date($this->session->userdata('date_format'), strtotime($spns->date))); ?>
                                 </td>
                                 <td><?php echo escape_output(getSupplierNameById($spns->supplier_id)); ?></td>
-                                <td>   <?php echo escape_output(getAmtP($spns->amount)) ?>
+                                <td> <?php echo escape_output(getPaymentName($spns->payment_id)) ; ?></td>
+                                <td>   <?php echo escape_output(getAmtPCustom($spns->amount)) ?>
                                 </td>
                                 <td><?php if ($spns->note != NULL) echo escape_output($spns->note) ?></td>
                                 <td><?php echo escape_output(userName($spns->user_id)); ?></td>
@@ -65,7 +65,7 @@
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a class="delete"
+                                            <li data-access="delete-147" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>SupplierPayment/deleteSupplierPayment/<?php echo escape_output($this->custom->encrypt_decrypt($spns->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>

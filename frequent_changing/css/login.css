@@ -116,3 +116,25 @@
 .custom_margin_lg{
     margin-top: 16px;
 }
+.total__payment {
+    background-color: rgba(34, 191, 233, 0.2);
+    text-align: center;
+    padding: 10px 5px;
+    color: #0085a9;
+    font-weight: bold;
+    margin: 5px 0 0 0;
+    border-radius: 7px;
+    margin: 8px 6px auto;
+}
+.text_right{
+    text-align: right
+}
+.text_center{
+    text-align: center;
+}
+.text_001{
+    margin: 0px 6px auto;
+}
+.text_002{
+    width: 1%;text-align: right
+}

@@ -12,7 +12,7 @@
                 <a href="<?= base_url() . 'Inventory/index' ?>"
                     class="btn bg-blue-btn btn_list m-right"><strong><?php echo lang('back'); ?></strong></a>
             </div>
-            <div class="hidden-lg"><span class="ir_f_c">hidden text</span></div>
+            <div class="hidden-lg"><span class="ir_f_c">&nbsp;</span></div>
         </div>
 
     </section>
@@ -43,7 +43,7 @@
                         if (!empty($inventory) && isset($inventory)):
                             foreach ($inventory as $key => $value):
                             if($value->id):
-                                $totalStock = $value->total_purchase - $value->total_consumption - $value->total_modifiers_consumption - $value->total_waste + $value->total_consumption_plus - $value->total_consumption_minus + $value->total_transfer_plus  - $value->total_transfer_minus  +  $value->total_transfer_plus_2  -  $value->total_transfer_minus_2;
+                                $totalStock = ($value->total_purchase*$value->conversion_rate)  - $value->total_consumption - $value->total_modifiers_consumption - $value->total_waste + $value->total_consumption_plus - $value->total_consumption_minus + ($value->total_transfer_plus*$value->conversion_rate) - ($value->total_transfer_minus*$value->conversion_rate)  +  ($value->total_transfer_plus_2*$value->conversion_rate) -  ($value->total_transfer_minus_2*$value->conversion_rate);
                                 $totalTK = $totalStock * getLastPurchaseAmount($value->id);
                                 if ($totalStock <= $value->alert_quantity):
                                     if ($totalStock >= 0) {
@@ -56,9 +56,9 @@
                                 <td><?= escape_output($value->name . "(" . $value->code . ")") ?></td>
                                 <td><?php echo escape_output($value->category_name); ?></td>
                                 <td><span
-                                        style="<?= ($totalStock <= $value->alert_quantity) ? 'color:red' : '' ?>"><?= ($totalStock) ? getAmtP($totalStock) : getAmtP(0) ?><?= " " . escape_output($value->unit_name) ?></span>
+                                        style="<?= ($totalStock <= $value->alert_quantity) ? 'color:red' : '' ?>"><?= ($totalStock) ? getAmtPCustom($totalStock) : getAmtPCustom(0) ?><?= " " . escape_output($value->unit_name) ?></span>
                                 </td>
-                                <td><?= escape_output(getAmtP($value->alert_quantity) . " " . $value->unit_name) ?></td>
+                                <td><?= escape_output(getAmtPCustom($value->alert_quantity) . " " . $value->unit_name) ?></td>
                             </tr>
                             <?php
                                     $i++;
@@ -69,7 +69,7 @@
                         ?>
                         </tbody>
                     </table>
-                    <input type="hidden" value="<?php echo escape_output(getAmtP($grandTotal)); ?>" id="grandTotal" name="grandTotal">
+                    <input type="hidden" value="<?php echo escape_output(getAmtPCustom($grandTotal)); ?>" id="grandTotal" name="grandTotal">
                 </div>
                 <!-- /.box-body -->
             </div>

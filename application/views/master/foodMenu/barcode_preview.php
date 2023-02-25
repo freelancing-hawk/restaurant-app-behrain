@@ -1,7 +1,6 @@
 <script src="<?php echo base_url(); ?>assets/plugins/barcode/JsBarcode.all.js"></script>
 <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/css/inline_priority.css">
 <section class="main-content-wrapper">
-    
     <div class="box-wrapper">
         <div class="table-box">
             <div class="row">
@@ -21,7 +20,7 @@
                                 <td> <img class="custom_txt_6" id="barcode<?=$items[$i]['id']?><?=$j?>"/></td>
                             </tr>
                             <tr>
-                                <td class="custom_txt_7"><span><?=getAmt($items[$i]['sale_price'])?></span></td>
+                                <td class="custom_txt_7"><span><?=getAmtCustom($items[$i]['sale_price'])?></span></td>
                             </tr>
                         </table>
                     <?php
@@ -54,7 +53,7 @@
                 </div>
 
                 <div class="col-md-2">
-                        <a class="btn bg-blue-btn w-100" onclick="printDiv('printableArea')">Print</a>
+                        <a class="btn bg-blue-btn w-100" onclick="printDiv('printableArea')"><?php echo lang('print')?></a>
                    
                 </div>
             </div>

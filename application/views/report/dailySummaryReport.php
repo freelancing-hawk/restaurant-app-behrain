@@ -42,7 +42,7 @@
                         class="w-100 btn bg-blue-btn"><?php echo lang('submit'); ?></button>
                 </div>
             </div>
-            
+
             <div class="col-sm-12 mb-2 col-md-2">
                 <a class="w-100 btn bg-blue-btn"
                     href="<?php echo base_url(); ?>Report/printDailySummaryReport/<?php echo escape_output($selectedDate); ?>/<?php echo escape_output($outlet_id)?>"><?php echo lang('print'); ?>
@@ -65,9 +65,9 @@
                     <h3 class="ir_txt_center txt-color-grey"><?php echo lang('daily_summary_report'); ?></h3>
                     <h4 class="txt-color-grey"><?= isset($selectedDate) && $selectedDate ? lang('date').": " . date($this->session->userdata('date_format'), strtotime($selectedDate)) : '' ?>
                     </h4>
-                    
+
                     <h4 class="ir_fw_ta_mt20 txt-color-grey"><?php echo lang('purchases'); ?></h4>
-                   
+
                     <table id="datatable" class="table">
                         <thead>
                             <tr>
@@ -80,24 +80,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php  
+                            <?php
                                 $sum_of_gtotal = 0;
                                 $sum_of_paid = 0;
                                 $sum_of_due = 0;
+
                                 if (!empty($result['purchases']) && isset($result['purchases'])):
-                                    foreach ($result['purchases'] as $key => $value): 
-                                        $sum_of_gtotal += $value->grand_total; 
-                                        $sum_of_paid += $value->paid;  
-                                        $sum_of_due += $value->due;  
+                                    foreach ($result['purchases'] as $key => $value):
+                                        $sum_of_gtotal += $value->grand_total;
+                                        $sum_of_paid += $value->paid;
+                                        $sum_of_due += $value->due;
                                         $key++;
                                         ?>
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?php echo escape_output($value->reference_no); ?></td>
                                 <td><?= escape_output(getSupplierNameById($value->supplier_id)) ?></td>
-                                <td><?php echo escape_output(getAmt($value->grand_total)); ?></td>
-                                <td><?php echo escape_output(getAmt($value->paid)); ?></td>
-                                <td><?php echo escape_output(getAmt($value->due)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->grand_total)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->paid)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->due)); ?></td>
+                                <td><?php echo escape_output(getAmt($value->total_refund)); ?></td>
                             </tr>
                             <?php
                                     endforeach;
@@ -107,14 +109,15 @@
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_gtotal)); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_paid)); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_due)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_gtotal)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_paid)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_due)); ?></td>
+
                             </tr>
                         </tbody>
                     </table>
 
-                    
+
                     <h4 class="ir_fw_ta_mt20 txt-color-grey"><?php echo lang('sales'); ?>
                     </h4>
                     <hr>
@@ -131,20 +134,23 @@
                                 <th><?php echo lang('discount'); ?></th>
                                 <th><?php echo lang('paid'); ?></th>
                                 <th><?php echo lang('due'); ?></th>
+                                <th><?php echo lang('refund_amount'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php  
+                            <?php
                                 $sum_of_stotal_payable = 0;
                                 $sum_of_sdisc_actual = 0;
                                 $sum_of_spaid_amount = 0;
                                 $sum_of_sdue_amount = 0;
+                                $sum_of_total_refund = 0;
                                 if (!empty($result['sales']) && isset($result['sales'])):
-                                    foreach ($result['sales'] as $key => $value): 
-                                        $sum_of_stotal_payable += $value->total_payable; 
+                                    foreach ($result['sales'] as $key => $value):
+                                        $sum_of_stotal_payable += $value->total_payable;
                                         $sum_of_sdisc_actual += $value->total_discount_amount;
-                                        $sum_of_spaid_amount += $value->paid_amount;  
-                                        $sum_of_sdue_amount += $value->due_amount;  
+                                        $sum_of_spaid_amount += $value->paid_amount;
+                                        $sum_of_sdue_amount += $value->due_amount;
+                                        $sum_of_total_refund += $value->total_refund;
                                         $key++;
                                         ?>
                             <tr>
@@ -153,10 +159,11 @@
                                 <td><?php echo getOrderType($value->order_type); ?></td>
                                 <td><?php if(!empty($value->table_id)){ echo getTableName($value->table_id); } ?></td>
                                 <td><?= getCustomerName($value->customer_id) ?></td>
-                                <td><?php echo escape_output(getAmt($value->total_payable)); ?></td>
-                                <td><?php echo escape_output(getAmt($value->total_discount_amount)); ?></td>
-                                <td><?php echo escape_output(getAmt($value->paid_amount)); ?></td>
-                                <td><?php echo escape_output(getAmt($value->due_amount)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_payable)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_discount_amount)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->paid_amount)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->due_amount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_total_refund)); ?></td>
                             </tr>
                             <?php endforeach; endif; ?>
                             <tr>
@@ -165,10 +172,11 @@
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_stotal_payable)); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_sdisc_actual)); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_spaid_amount)); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_sdue_amount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_stotal_payable)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_sdisc_actual)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_spaid_amount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_sdue_amount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_total_refund)); ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -187,16 +195,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php  
-                                $sum_of_eamount = 0; 
+                            <?php
+                                $sum_of_eamount = 0;
                                 if (!empty($result['expenses']) && isset($result['expenses'])):
-                                    foreach ($result['expenses'] as $key => $value): 
-                                        $sum_of_eamount += $value->amount;  
+                                    foreach ($result['expenses'] as $key => $value):
+                                        $sum_of_eamount += $value->amount;
                                         $key++;
                                         ?>
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
-                                <td><?php echo escape_output(getAmt($value->amount)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->amount)); ?></td>
                                 <td><?php echo expenseItemName($value->category_id); ?></td>
                                 <td><?php echo employeeName($value->employee_id); ?></td>
                                 <td><?php echo escape_output($value->note); ?></td>
@@ -204,7 +212,7 @@
                             <?php endforeach; endif; ?>
                             <tr>
                                 <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_eamount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_eamount)); ?></td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
@@ -212,7 +220,7 @@
                         </tbody>
                     </table>
 
-                    
+
                     <h4 class="ir_fw_ta_mt20 txt-color-grey">
                         <?php echo lang('supplier_due_payments'); ?></h4>
                     <hr>
@@ -226,16 +234,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php  
-                                $sum_of_samount = 0; 
+                            <?php
+                                $sum_of_samount = 0;
                                 if (!empty($result['supplier_due_payments']) && isset($result['supplier_due_payments'])):
-                                    foreach ($result['supplier_due_payments'] as $key => $value): 
-                                        $sum_of_samount += $value->amount;  
+                                    foreach ($result['supplier_due_payments'] as $key => $value):
+                                        $sum_of_samount += $value->amount;
                                         $key++;
                                         ?>
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
-                                <td><?php echo escape_output(getAmt($value->amount)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->amount)); ?></td>
                                 <td><?php echo getSupplierNameById($value->supplier_id); ?></td>
                                 <td><?php echo escape_output($value->note); ?></td>
                             </tr>
@@ -245,14 +253,14 @@
                             ?>
                             <tr>
                                 <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_samount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_samount)); ?></td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    
+
                     <h4 class="ir_fw_ta_mt20 txt-color-grey">
                         <?php echo lang('customer_due_receives'); ?></h4>
                     <hr>
@@ -266,16 +274,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php  
-                                $sum_of_camount = 0; 
+                            <?php
+                                $sum_of_camount = 0;
                                 if (!empty($result['customer_due_receives']) && isset($result['customer_due_receives'])):
-                                    foreach ($result['customer_due_receives'] as $key => $value): 
-                                        $sum_of_camount += $value->amount;  
+                                    foreach ($result['customer_due_receives'] as $key => $value):
+                                        $sum_of_camount += $value->amount;
                                         $key++;
                                         ?>
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
-                                <td><?php echo escape_output(getAmt($value->amount)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->amount)); ?></td>
                                 <td><?php echo getCustomerName($value->customer_id); ?></td>
                                 <td><?php echo escape_output($value->note); ?></td>
                             </tr>
@@ -285,7 +293,7 @@
                             ?>
                             <tr>
                                 <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_camount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_camount)); ?></td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                             </tr>
@@ -306,17 +314,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php  
-                                $sum_of_wamount = 0; 
+                            <?php
+                                $sum_of_wamount = 0;
                                 if (!empty($result['wastes']) && isset($result['wastes'])):
-                                    foreach ($result['wastes'] as $key => $value): 
-                                        $sum_of_wamount += $value->total_loss;  
+                                    foreach ($result['wastes'] as $key => $value):
+                                        $sum_of_wamount += $value->total_loss;
                                         $key++;
                                         ?>
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?php echo escape_output($value->reference_no); ?></td>
-                                <td><?php echo escape_output(getAmt($value->total_loss)); ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_loss)); ?></td>
                                 <td><?php echo employeeName($value->employee_id); ?></td>
                                 <td><?php echo escape_output($value->note); ?></td>
                             </tr>
@@ -327,7 +335,7 @@
                             <tr>
                                 <td>&nbsp;</td>
                                 <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                                <td>&nbsp;<?php echo escape_output(getAmt($sum_of_wamount)); ?></td>
+                                <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_wamount)); ?></td>
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                             </tr>

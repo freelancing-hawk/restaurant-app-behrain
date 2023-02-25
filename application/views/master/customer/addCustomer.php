@@ -81,21 +81,52 @@
                                      placeholder="<?php echo lang('address'); ?>"></textarea>
                              </div>
                          </div>
-                         <?php if(collectGST()=="Yes"){?>
                          <div class="col-sm-12 mb-2 col-md-4">
                              <div class="form-group">
-                                 <label><?php echo lang('gst_number'); ?></label>
-                                 <input tabindex="3" type="text" name="gst_number" class="form-control"
-                                     placeholder="<?php echo lang('gst_number'); ?>"
-                                     value="<?php echo set_value('gst_number'); ?>">
+                                 <label><?php echo lang('default_discount'); ?></label>
+                                 <input tabindex="3" type="text" name="default_discount" class="form-control"
+                                        placeholder="<?php echo lang('default_discount_pl'); ?>"
+                                        value="<?php echo set_value('default_discount'); ?>">
                              </div>
-                             <?php if (form_error('gst_number')) { ?>
-                             <div class="callout callout-danger my-2">
-                                 <?php echo form_error('gst_number'); ?>
-                             </div>
+                             <?php if (form_error('default_discount')) { ?>
+                                 <div class="callout callout-danger my-2">
+                                     <?php echo form_error('default_discount'); ?>
+                                 </div>
                              <?php } ?>
                          </div>
+                         <?php if(collectGST()=="Yes"){?>
+                             <div class="col-sm-12 mb-2 col-md-4">
+                                 <div class="form-group">
+                                     <label> <?php echo lang('same_or_diff_state'); ?> <span class="required_star">*</span></label>
+                                     <select tabindex="4" class="form-control select2" name="same_or_diff_state"
+                                             id="same_or_diff_state">
+                                         <option value=""><?php echo lang('select'); ?></option>
+                                         <option <?php echo set_value('same_or_diff_state',1)?> value="1"><?php echo lang('same_state'); ?></option>
+                                         <option <?php echo set_value('same_or_diff_state',2)?> value="2"><?php echo lang('different_state'); ?></option>
+                                     </select>
+                                 </div>
+                                 <?php if (form_error('same_or_diff_state')) { ?>
+                                     <div class="callout callout-danger my-2">
+                                         <?php echo form_error('same_or_diff_state'); ?>
+                                     </div>
+                                 <?php } ?>
+                             </div>
+
+                             <div class="col-sm-12 mb-2 col-md-4">
+                                 <div class="form-group">
+                                     <label><?php echo lang('gst_number'); ?> <span class="required_star">*</span></label>
+                                     <input tabindex="3" type="text" name="gst_number" class="form-control"
+                                         placeholder="<?php echo lang('gst_number'); ?>"
+                                         value="<?php echo set_value('gst_number'); ?>">
+                                 </div>
+                                 <?php if (form_error('gst_number')) { ?>
+                                 <div class="callout callout-danger my-2">
+                                     <?php echo form_error('gst_number'); ?>
+                                 </div>
+                                 <?php } ?>
+                             </div>
                          <?php } ?>
+
 
                      </div>
                  </div>

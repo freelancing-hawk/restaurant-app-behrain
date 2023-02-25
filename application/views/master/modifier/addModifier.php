@@ -1,4 +1,3 @@
-
 <input type="hidden" id="ingredient_already_remain" value="<?php echo lang('ingredient_already_remain'); ?>">
 <input type="hidden" id="name_field_required" value="<?php echo lang('name_field_required'); ?>">
 <input type="hidden" id="description_field_can_not_exceed" value="<?php echo lang('description_field_can_not_exceed'); ?>">
@@ -59,14 +58,13 @@
                     <div class="row">
                         <div class="col-sm-12 mb-2 col-md-4">
                             <div class="form-group">
-                                <label><?php echo lang('ingredient_consumptions'); ?> <span
-                                        class="required_star">*</span></label>
+                                <label><?php echo lang('ingredient_consumptions'); ?> </label>
                                 <select tabindex="5" class="form-control select2 select2-hidden-accessible ir_w_100"
                                     name="ingredient_id" id="ingredient_id">
                                     <option value=""><?php echo lang('select'); ?></option>
                                     <?php foreach ($ingredients as $ingnts) { ?>
                                     <option
-                                        value="<?php echo escape_output($ingnts->id . "|" . $ingnts->name . "|" . $ingnts->unit_name) ?>"
+                                            value="<?php echo escape_output($ingnts->id . "|" . $ingnts->name . "|" . $ingnts->unit_name. "|" . $ingnts->consumption_unit_cost) ?>"
                                         <?php echo set_select('unit_id', $ingnts->id); ?>>
                                         <?php echo escape_output($ingnts->name . "(" . $ingnts->code . ")"); ?></option>
                                     <?php } ?>
@@ -99,18 +97,30 @@
                                             <th><?php echo lang('sn'); ?></th>
                                             <th><?php echo lang('ingredient'); ?></th>
                                             <th><?php echo lang('consumption'); ?></th>
+                                            <th><?php echo lang('cost'); ?></th>
+                                            <th><?php echo lang('total'); ?></th>
                                             <th><?php echo lang('actions'); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
 
                                     </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th class="pull-right padding_17"><?php echo lang('total'); ?> <?php echo lang('cost'); ?></th>
+                                        <th><input type="text" class="form-control" readonly name="grand_total_cost" placeholder="<?php echo lang('total'); ?> <?php echo lang('cost'); ?>" id="grand_total_cost"> </th>
+                                        <th></th>
+                                    </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-sm-12 col-md-6">
+                        <div class="col-sm-12 col-md-4">
                             <div class="form-group">
                                 <label><?php echo lang('description'); ?></label>
                                 <textarea tabindex="3" class="form-control" rows="2" id="description" name="description"
@@ -185,11 +195,11 @@
     </div>
   
 
-    <div class="modal fade" id="noticeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="noticeModal" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="noticeModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"> Notice</h5>
+                    <h5 class="modal-title"> <?php echo lang('notice'); ?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
                 </div>
                 <div class="modal-body">
@@ -197,18 +207,6 @@
                         <div class="col-md-12 hidden-lg hidden-sm">
                             <p class="foodMenuCartNotice">
                                 <strong class="ir_ml39"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
-                        <div class="col-md-12 hidden-xs hidden-sm">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
-                        <div class="col-md-12 hidden-xs hidden-lg">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
                                 <?php echo lang('notice_text_1'); ?>
                             </p>
                         </div>

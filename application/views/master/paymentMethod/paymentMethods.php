@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
 
     <?php
@@ -9,11 +8,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
-
+    <link rel="stylesheet" href="<?php echo base_url(); ?>frequent_changing/css/up_down.css">
 
     <section class="content-header">
         <div class="row">
@@ -22,8 +21,11 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('payment_methods'); ?>" data-id_name="datatable">
             </div>
             <div>
-                <a class="btn_list btn bg-blue-btn m-right" href="<?php echo base_url() ?>paymentMethod/addEditPaymentMethod">
-                   <i data-feather="plus"></i> <?php echo lang('add_payment_method'); ?>
+
+            </div>
+            <div>
+                <a class="btn_list btn bg-blue-btn m-right" href="<?php echo base_url() ?>paymentMethod/sorting">
+                    <i data-feather="arrow-down"></i><i data-feather="arrow-up"></i> &nbsp;<?php echo lang('sorting'); ?>
                 </a>
             </div>
         </div>
@@ -50,30 +52,33 @@
                             if ($paymentMethods && !empty($paymentMethods)) {
                                 $i = count($paymentMethods);
                             }
-                            foreach ($paymentMethods as $value) {
+                            foreach ($paymentMethods as $key=>$value) {
+                                $key++;
                                 ?>
                             <tr>
-                                <td class="ir_txt_center"><?php echo escape_output($i--); ?></td>
+                                <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?php echo escape_output($value->name) ?></td>
                                 <td><?php echo escape_output($value->description) ?></td>
                                 <td><?php echo escape_output(userName($value->user_id)); ?></td>
                                 <td class="ir_txt_center">
+                                    <?php if($value->id!=1 && $value->id!=5): ?>
                                     <div class="btn-group  actionDropDownBtn">
                                         <button type="button" class="btn bg-blue-color dropdown-toggle"
                                             id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a
+                                            <li data-access="update-260" class="menu_assign_class"><a
                                                     href="<?php echo base_url() ?>paymentMethod/addEditPaymentMethod/<?php echo escape_output($this->custom->encrypt_decrypt($value->id, 'encrypt')); ?>"><i
                                                         class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a>
                                             </li>
-                                            <li><a class="delete"
+                                            <li data-access="delete-260" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>paymentMethod/deletePaymentMethod/<?php echo escape_output($this->custom->encrypt_decrypt($value->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>
                                         </ul>
                                     </div>
+                                    <?php endif;?>
                                 </td>
                             </tr>
                             <?php
@@ -102,4 +107,4 @@
 <script src="<?php echo base_url(); ?>assets/datatable_custom/buttons.print.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/newDesign/js/forTable.js"></script>
 
-<script src="<?php echo base_url(); ?>frequent_changing/js/custom_report.js"></script>
+<script src="<?php echo base_url(); ?>frequent_changing/js/custom_report_no_sorting.js"></script>

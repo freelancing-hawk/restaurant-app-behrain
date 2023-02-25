@@ -31,10 +31,7 @@ class Master extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-            redirect('Authentication/userProfile');
-        }
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }

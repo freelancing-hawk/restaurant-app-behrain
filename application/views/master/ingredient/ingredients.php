@@ -1,14 +1,11 @@
-
-
 <section class="main-content-wrapper">
-
         <?php
         if ($this->session->flashdata('exception')) {
 
             echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception'));
+            echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
             echo '</p></div></div></section>';
         }
         ?>
@@ -22,12 +19,7 @@
                 <div class="col-md-offset-2 col-md-4">
                     
                     <div class="btn_list m-right d-flex">
-                   
-                            <a class="btn bg-blue-btn m-right" href="<?php echo base_url() ?>ingredient/addEditIngredient">
-                                <i data-feather="plus"></i> <?php echo lang('add_ingredient'); ?>
-                            </a>
-                     
-                            <a class="btn bg-blue-btn"href="<?php echo base_url() ?>ingredient/uploadingredients">
+                            <a data-access="upload_ingredient-217" class="btn bg-blue-btn menu_assign_class" href="<?php echo base_url() ?>ingredient/uploadingredients">
                                 <i data-feather="upload"></i> <?php echo lang('upload_ingredient'); ?>
                             </a>
                         
@@ -36,9 +28,6 @@
 
             </div>
         </section>
-
-
-        
         <div class="box-wrapper">
             <!-- general form elements -->
             <div class="table-box">
@@ -49,12 +38,15 @@
                             <tr>
                                 <th class="ir_w_1"> <?php echo lang('sn'); ?></th>
                                 <th class="ir_w_6"><?php echo lang('code'); ?></th>
-                                <th class="ir_w_22"><?php echo lang('name'); ?></th>
-                                <th class="ir_w_16"><?php echo lang('category'); ?></th>
+                                <th class="ir_w_15"><?php echo lang('name'); ?></th>
+                                <th class="ir_w_10"><?php echo lang('category'); ?></th>
+                                <th  class="ir_w_10"><?php echo lang('purchase_unit'); ?></th>
+                                <th  class="ir_w_10"><?php echo lang('consumption_unit'); ?></th>
+                                <th  class="ir_w_10"><?php echo lang('conversion_rate'); ?></th>
                                 <th class="ir_w_12"><?php echo lang('purchase_price'); ?></th>
-                                <th class="ir_w_15"><?php echo lang('alert_quantity_amount'); ?></th>
-                                <th  class="ir_w_4"><?php echo lang('unit'); ?></th>
-                                <th class="ir_w_15"><?php echo lang('added_by'); ?></th>
+                                <th class="ir_w_12"><?php echo lang('consumption_unit_cost'); ?></th>
+                                <th class="ir_w_8"><?php echo lang('alert_quantity_amount'); ?></th>
+                                <th class="ir_w_8"><?php echo lang('added_by'); ?></th>
                                 <th  class="ir_w_1 ir_txt_center not-export-col"><?php echo lang('actions'); ?></th>
                             </tr>
                         </thead>
@@ -70,26 +62,34 @@
                                 <td><?php echo escape_output($ingrnts->code) ?></td>
                                 <td><?php echo escape_output($ingrnts->name) ?></td>
                                 <td><?php echo escape_output(categoryName($ingrnts->category_id)); ?></td>
-                                <td>
-                                    <?php echo escape_output(getAmtP($ingrnts->purchase_price)) ?></td>
-                                <td><?php echo escape_output(getAmtP($ingrnts->alert_quantity)) ?></td>
+                                <td><?php echo escape_output(unitName($ingrnts->purchase_unit_id)); ?></td>
                                 <td><?php echo escape_output(unitName($ingrnts->unit_id)); ?></td>
+                                <td><?php echo escape_output(($ingrnts->conversion_rate)); ?></td>
+                                <td><?php echo escape_output(getAmtPCustom($ingrnts->purchase_price)) ?></td>
+                                <td><?php echo escape_output(getAmtPCustom($ingrnts->consumption_unit_cost)) ?></td>
+                                <td><?php echo escape_output(getAmtPCustom($ingrnts->alert_quantity)) ?></td>
                                 <td><?php echo escape_output(userName($ingrnts->user_id)); ?></td>
                                 <td class="ir_txt_center">
-                                    <div class="btn-group  actionDropDownBtn">
-                                        <button type="button" class="btn bg-blue-color dropdown-toggle"
-                                            id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i data-feather="more-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a
-                                                    href="<?php echo base_url() ?>ingredient/addEditIngredient/<?php echo escape_output($this->custom->encrypt_decrypt($ingrnts->id, 'encrypt')); ?>"><i
-                                                        class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a></li>
-                                            <li><a class="delete"
-                                                    href="<?php echo base_url() ?>ingredient/deleteIngredient/<?php echo escape_output($this->custom->encrypt_decrypt($ingrnts->id, 'encrypt')); ?>"><i
-                                                        class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a></li>
-                                        </ul>
-                                    </div>
+                                    <?php if($ingrnts->is_direct_food==1):?>
+                                        <div class="btn-group  actionDropDownBtn">
+                                            <button type="button" class="btn bg-blue-color dropdown-toggle"
+                                                    id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i data-feather="more-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
+                                                <li data-access="update-217" class="menu_assign_class"><a
+                                                            href="<?php echo base_url() ?>ingredient/addEditIngredient/<?php echo escape_output($this->custom->encrypt_decrypt($ingrnts->id, 'encrypt')); ?>"><i
+                                                                class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a></li>
+                                                <li data-access="delete-217" class="menu_assign_class"><a class="delete"
+                                                       href="<?php echo base_url() ?>ingredient/deleteIngredient/<?php echo escape_output($this->custom->encrypt_decrypt($ingrnts->id, 'encrypt')); ?>"><i
+                                                                class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a></li>
+                                            </ul>
+                                        </div>
+                                    <?php else:?>
+                                        <div class="tooltip_custom">
+                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('action_tooltip_product'); ?>" data-feather="help-circle"></i>
+                                        </div>
+                                    <?php endif?>
                                 </td>
                             </tr>
                             <?php
@@ -106,7 +106,7 @@
         
 </section>
 
-<div class="modal fade" id="uploadingredentsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="uploadingredentsModal" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -129,8 +129,7 @@
                         </div>
                     </div>
                 </div>
-
-                </form>
+                <?php echo form_close(); ?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="addNewGuest">

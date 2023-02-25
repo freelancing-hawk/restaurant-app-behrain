@@ -120,12 +120,11 @@ class Login extends Cl_Controller {
                     $company_info_session['invoice_footer'] = $company_info->invoice_footer;
                     $company_info_session['invoice_logo'] = $company_info->invoice_logo;
                     $company_info_session['language_manifesto'] = $company_info->language_manifesto;
-                    $company_info_session['pre_or_post_payment'] = $company_info->pre_or_post_payment;
                     $company_info_session['collect_tax'] = $company_info->collect_tax;
                     $company_info_session['tax_title'] = $company_info->tax_title;
                     $company_info_session['tax_registration_no'] = $company_info->tax_registration_no;
                     $company_info_session['tax_is_gst'] = $company_info->tax_is_gst;
-                    $company_info_session['state_code'] = $company_info->state_code;
+
 
                     $outlet_info = $this->db->query("SELECT * FROM tbl_outlets WHERE del_status='Live'")->row();
                     if(str_rot13($company_info->language_manifesto)=="fgjgldkfg"){

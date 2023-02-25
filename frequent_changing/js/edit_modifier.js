@@ -10,8 +10,8 @@ let price_field_required = $("#price_field_required").val();
 let at_least_ingredient = $("#at_least_ingredient").val();
 let are_you_sure = $("#are_you_sure").val();
 let consumption = $("#consumption").val();
-let alert = $("#alert").val();
-
+let alert_= $("#alert").val();
+let ingredient_id_container = [];
 $(function() {
     //Initialize Select2 Elements
     $('.select2').select2();
@@ -33,7 +33,47 @@ $(function() {
             (keys >= 48 && keys <= 57) ||
             (keys >= 96 && keys <= 105));
     });
+    function calculation_row() {
+        let total_cost = 0;
+        $(".rowCount").each(function() {
+            let this_value = Number($(this).attr('id').substr(4));
+            let consumption = Number($("#consumption_"+this_value).val());
+            let cost = Number($("#vr01_cost_"+this_value).val());
+            $("#vr01_total_cost_"+this_value).val((consumption*cost).toFixed(2));
+            total_cost+=(consumption*cost);
+        });
+        $("#grand_total_cost").val(total_cost.toFixed(2));
+    }
+    updateRowNo();
+    calculation_row();
+    $(document).on('keyup', '.required_checker_ing', function() {
+        calculation_row();
+    });
+    $(document).on('click', '.del_ing', function() {
+        let suffix = $(this).attr('data-suffix');
+        let id =   $(this).attr('data-ing_id');
+        let this_action = $(this);
+        swal({
+            title: warning,
+            text: are_you_sure,
+            confirmButtonColor: '#3c8dbc',
+            cancelButtonText: cancel,
+            confirmButtonText: ok,
+            showCancelButton: true
+        }, function() {
+            let ingredient_id_container_new = [];
+            this_action.parent().parent().remove();
 
+            for (let i = 0; i < ingredient_id_container.length; i++) {
+                if (ingredient_id_container[i] != id) {
+                    ingredient_id_container_new.push(ingredient_id_container[i]);
+                }
+            }
+            ingredient_id_container = ingredient_id_container_new;
+            updateRowNo();
+            calculation_row();
+        });
+    });
     let suffix =$(".rowCount").length;
 
     let tab_index = 6;
@@ -42,6 +82,20 @@ $(function() {
         let ingredient_details = $('#ingredient_id').val();
         if (ingredient_details != '') {
             let ingredient_details_array = ingredient_details.split('|');
+            console.log(ingredient_details_array);
+            let index = ingredient_id_container.indexOf(ingredient_details_array[0]);
+
+            if (index > -1) {
+                swal({
+                    title: alert_+"!",
+                    text: ingredient_already_remain,
+                    confirmButtonText: ok,
+                    confirmButtonColor: '#3c8dbc'
+                });
+                $('#ingredient_id').val('').change();
+                return false;
+            }
+
             suffix++;
             tab_index++;
 
@@ -53,22 +107,26 @@ $(function() {
                 '" name="ingredient_id[]" value="' + ingredient_details_array[0] + '"/>' +
                 '<td style="width: 30%"><input type="text" tabindex="' + tab_index +
                 '" id="consumption_' + suffix +
-                '" name="consumption[]" onfocus="this.select();"  class="form-control integerchk aligning" class="ir_w_85" placeholder="'+consumption+'"/><span class="label_aligning">' +
+                '" name="consumption[]" onfocus="this.select();"  class="form-control integerchk consumption_c aligning required_checker_ing ir_w_85" placeholder="'+consumption+'"/><span class="label_aligning">' +
                 ingredient_details_array[2] + '</span></td>' +
-                '<td class="ir_w_17"><a class="btn btn-danger btn-xs" style="margin-left: 5px; margin-top: 10px;" onclick="return deleter(' +
-                suffix + ',' + ingredient_details_array[0] +
-                ');" ><i class="fa fa-trash"></i> </a></td>' +
+                '<td style="width: 30%"><input type="text" tabindex="' + tab_index +
+                '" id="cost_' + suffix +
+                '" name="cost[]" onfocus="this.select();" value="'+ingredient_details_array[3]+'" class="form-control integerchk aligning vr01_cost add_change_value required_checker_ing" class="ir_w_85" placeholder="Cost"/></td>' +
+                '<td style="width: 30%"><input type="text" tabindex="' + tab_index +
+                '" id="total_cost_' + suffix +
+                '" name="total_cost[]" readonly onfocus="this.select();"  class="form-control integerchk aligning vr01_total_cost  required_checker_ing" class="ir_w_85" placeholder="Cost"/></td>' +
+                '<td class="ir_w_17"><a class="btn btn-danger btn-xs del_ing" data-suffix="'+suffix+'" data-ing_id="'+ingredient_details_array[0]+'" ><i class="fa fa-trash"></i> </a></td>' +
                 '</tr>';
 
             $('#ingredient_consumption_table tbody').append(cart_row);
 
+            ingredient_id_container.push(ingredient_details_array[0]);
             /*updateRowNo();*/
             $('#ingredient_id').val('').change();
             updateRowNo();
+            calculation_row();
         }
     });
-
-
     // Validate form
     $(document).on('submit', '#food_menu_form', function() {
         let name = $("#name").val();
@@ -126,4 +184,35 @@ function updateRowNo() {
     for (let r = 0; r < numRows; r++) {
         $("#ingredient_consumption_table tbody tr").eq(r).find("td:first p").text(r + 1);
     }
+    let i = 1;
+    $(".vr01_consumption").each(function() {
+        $(this).attr("id","vr01_consumption_"+i);
+        i++;
+    });
+    i = 1;
+    $(".vr01_cost").each(function() {
+        $(this).attr("id","vr01_cost_"+i);
+        i++;
+    });
+    i = 1;
+    $(".consumption_c").each(function() {
+        $(this).attr("id","consumption_"+i);
+        i++;
+    });
+    i = 1;
+    $(".vr01_total_cost").each(function() {
+        $(this).attr("id","vr01_total_cost_"+i);
+        i++;
+    });
+    i = 1;
+    $(".rowCount").each(function() {
+        $(this).attr("id","row_"+i);
+        i++;
+    });
+    i = 1;
+    $(".del_ing").each(function() {
+        $(this).attr("data-suffix",i);
+        i++;
+    });
+
 }

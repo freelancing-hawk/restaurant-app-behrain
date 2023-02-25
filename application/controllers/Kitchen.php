@@ -28,10 +28,6 @@ class Kitchen extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-            redirect('Authentication/userProfile');
-        }
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -42,12 +38,251 @@ class Kitchen extends Cl_Controller {
      * @return void
      * @param no
      */
-    public function panel(){
+    public function panel($id=''){
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "98";
+        $function = "";
+
+        if($segment_2=="kitchens"){
+            $function = "view";
+        }elseif($segment_2=="panel" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditKitchen" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditKitchen"){
+            $function = "add";
+        }elseif($segment_2=="deleteKitchen"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+        if($id==''){
+            redirect('Kitchen/kitchens');
+        }
         $data = array();
-        $data['getUnReadyOrders'] = $this->get_new_orders();
-        $data['notifications'] = $this->get_new_notification();
-        // $data['main_content'] = $this->load->view('kitchen/panel', $data, TRUE);
+        $data['kitchen'] = $this->Common_model->getDataById($id, "tbl_kitchens");
+        $data['kitchen_id'] = $id;
+        $data['notifications'] = $this->get_new_notification($id);
         $this->load->view('kitchen/panel', $data);
+    }
+    /**
+     * kitchens info
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function kitchens() {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "98";
+        $function = "";
+
+        if($segment_2=="kitchens"){
+            $function = "view";
+        }elseif($segment_2=="panel" && $segment_3){
+            $function = "enter";
+        }elseif($segment_2=="addEditKitchen" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditKitchen"){
+            $function = "add";
+        }elseif($segment_2=="deleteKitchen"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+        $company_id = $this->session->userdata('company_id');
+        $data = array();
+        $data['kitchens'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_kitchens");
+        foreach ($data['kitchens'] as $key=>$value){
+            $txt_cates = '';
+            $categories = $this->Common_model->getKitchenCategoriesById($value->id);
+            foreach ($categories as $k=>$category){
+                $txt_cates.=$category->category_name;
+                if($k<sizeof($categories)-1){
+                    $txt_cates.=", ";
+                }
+            }
+            $data['kitchens'][$key]->categories = $txt_cates;
+        }
+        $data['main_content'] = $this->load->view('kitchen/kitchens', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+    /**
+     * delete Kitchen
+     * @access public
+     * @return void
+     * @param int
+     */
+    public function deleteKitchen($id) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "98";
+        $function = "";
+
+        if($segment_2=="kitchens"){
+            $function = "view";
+        }elseif($segment_2=="panel" && $segment_3){
+            $function = "enter";
+        }elseif($segment_2=="addEditKitchen" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditKitchen"){
+            $function = "add";
+        }elseif($segment_2=="deleteKitchen"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+        $id = $this->custom->encrypt_decrypt($id, 'decrypt');
+        $this->Common_model->deleteStatusChangeWithChild($id, $id, "tbl_kitchens", "tbl_kitchen_categories", 'id', 'kitchen_id');
+        $this->session->set_flashdata('exception',lang('delete_success'));
+        redirect('Kitchen/kitchens');
+    }
+    /**
+     * add/Edit Kitchen
+     * @access public
+     * @return void
+     * @param int
+     */
+    public function addEditKitchen($encrypted_id = "") {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "98";
+        $function = "";
+
+        if($segment_2=="kitchens"){
+            $function = "view";
+        }elseif($segment_2=="panel" && $segment_3){
+            $function = "enter";
+        }elseif($segment_2=="addEditKitchen" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditKitchen"){
+            $function = "add";
+        }elseif($segment_2=="deleteKitchen"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+        $id = $this->custom->encrypt_decrypt($encrypted_id, 'decrypt');
+        $company_id = $this->session->userdata('company_id');
+        $language_manifesto = $this->session->userdata('language_manifesto');
+
+        if ($this->input->post('submit')) {
+            $this->form_validation->set_rules('name',lang('name'), 'required|max_length[50]');
+            $this->form_validation->set_rules('outlet_id',lang('outlet'), 'required|max_length[50]');
+            if ($this->form_validation->run() == TRUE) {
+                $kitchen_info = array();
+                $kitchen_info['name'] =htmlspecialchars($this->input->post($this->security->xss_clean('name')));
+                $kitchen_info['printer_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('printer_id')));
+                $kitchen_info['outlet_id'] = htmlspecialchars($this->input->post($this->security->xss_clean('outlet_id')));
+                $kitchen_info['company_id'] = $company_id;
+                if ($id == "") {
+                    $id = $this->Common_model->insertInformation($kitchen_info, "tbl_kitchens");
+                    $this->session->set_flashdata('exception', lang('insertion_success'));
+                } else {
+                    $this->Common_model->updateInformation($kitchen_info, $id, "tbl_kitchens");
+                    $this->session->set_flashdata('exception', lang('update_success'));
+                }
+                $this->Common_model->deleteStatusChangeByCustomRow($id, "kitchen_id","tbl_kitchen_categories");
+                //This variable could not be escaped because this is html content
+                $item_check =$this->input->post($this->security->xss_clean('item_check'));
+                if($item_check){
+                    foreach ($item_check as $key=>$vl){
+                        $kitchen_food_categories = array();
+                        $kitchen_food_categories['kitchen_id'] = $id;
+                        $kitchen_food_categories['cat_id'] = $vl;
+                        $kitchen_food_categories['outlet_id'] = htmlspecialchars($this->input->post($this->security->xss_clean('outlet_id')));
+                        $this->Common_model->insertInformation($kitchen_food_categories, "tbl_kitchen_categories");
+                    }
+                }
+                redirect('Kitchen/kitchens');
+
+            } else {
+                if ($id == "") {
+                    $data = array();
+                     $data['printers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_printers");
+                    $data['categories'] = $this->Common_model->getKitchenCategories('');
+                    $data['main_content'] = $this->load->view('kitchen/addKitchen', $data, TRUE);
+                    $this->load->view('userHome', $data);
+                } else {
+                    $data = array();
+                     $data['printers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_printers");
+                    $data['encrypted_id'] = $encrypted_id;
+                    $data['kitchen'] = $this->Common_model->getDataById($id, "tbl_kitchens");
+                    $data['categories'] = $this->Common_model->getKitchenCategories($encrypted_id);
+                    foreach ($data['categories'] as $key=>$value){
+                        $is_checked = $this->Common_model->checkForExist($value->id);
+                        if(isset($is_checked) && $is_checked){
+                            $data['categories'][$key]->checker = 'checked';
+                        }else{
+                            $data['categories'][$key]->checker = '';
+                        }
+                    }
+                    $data['main_content'] = $this->load->view('kitchen/editKitchen', $data, TRUE);
+                    $this->load->view('userHome', $data);
+                }
+            }
+        } else {
+            if ($id == "") {
+                $data = array();
+                 $data['printers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_printers");
+                $data['categories'] = $this->Common_model->getKitchenCategories('');
+                $data['main_content'] = $this->load->view('kitchen/addKitchen', $data, TRUE);
+                $this->load->view('userHome', $data);
+            } else {
+                $data = array();
+                 $data['printers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_printers");
+                $data['encrypted_id'] = $encrypted_id;
+                $data['kitchen'] = $this->Common_model->getDataById($id, "tbl_kitchens");
+                $data['categories'] = $this->Common_model->getKitchenCategories($encrypted_id);
+                foreach ($data['categories'] as $key=>$value){
+                    $is_checked = $this->Common_model->checkForExist($value->id);
+                    if(isset($is_checked) && $is_checked){
+                        $data['categories'][$key]->checker = 'checked';
+                    }else{
+                        $data['categories'][$key]->checker = '';
+                    }
+                }
+                $data['main_content'] = $this->load->view('kitchen/editKitchen', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+        }
     }
      /**
      * get new orders
@@ -56,7 +291,8 @@ class Kitchen extends Cl_Controller {
      * @param no
      */
     public function get_new_orders_ajax(){
-        $data1 = $this->get_new_orders();
+        $kitchen_id = escape_output($_POST['kitchen_id']);
+        $data1 = $this->get_new_orders($kitchen_id);
         echo json_encode($data1);        
     }
      /**
@@ -67,7 +303,8 @@ class Kitchen extends Cl_Controller {
      */
     public function get_order_details_kitchen_ajax(){
         $sale_id = $this->input->post('sale_id');
-        $sale_object = $this->get_all_information_of_a_sale_kitchen_type($sale_id);
+        $kitchen_id = $this->input->post('kitchen_id');
+        $sale_object = $this->get_all_information_of_a_sale_kitchen_type($sale_id,$kitchen_id);
         echo json_encode($sale_object);
     }
      /**
@@ -76,9 +313,9 @@ class Kitchen extends Cl_Controller {
      * @return object
      * @param int
      */
-    public function get_all_information_of_a_sale_kitchen_type($sales_id){
+    public function get_all_information_of_a_sale_kitchen_type($sales_id,$kitchen_id){
         $sales_information = $this->Kitchen_model->getSaleBySaleId($sales_id);
-        $items_by_sales_id = $this->Kitchen_model->getAllKitchenItemsFromSalesDetailBySalesId($sales_id);
+        $items_by_sales_id = $this->Kitchen_model->getAllKitchenItemsFromSalesDetailBySalesId($sales_id,$kitchen_id);
         foreach($items_by_sales_id as $single_item_by_sale_id){
             $modifier_information = $this->Kitchen_model->getModifiersBySaleAndSaleDetailsId($sales_id,$single_item_by_sale_id->sales_details_id);
             $single_item_by_sale_id->modifiers = $modifier_information;
@@ -94,23 +331,24 @@ class Kitchen extends Cl_Controller {
      * @return string
      * @param no
      */
-    public function get_new_orders(){
+    public function get_new_orders($kitchen_id){
         $outlet_id = $this->session->userdata('outlet_id');
         $user_id = $this->session->userdata('user_id');
-        $data1 = $this->Kitchen_model->getNewOrders($outlet_id);
+        $kitchen = $this->Common_model->getDataById($kitchen_id, "tbl_kitchens");
+        $data1 = $this->Kitchen_model->getNewOrders($kitchen->outlet_id);
         $i = 0;
         for($i;$i<count($data1);$i++){
             //update for bell
             $data_bell = array();
             $data_bell['is_kitchen_bell'] = 2;
-            $this->Common_model->updateInformation($data_bell, $data1[$i]->sale_id, "tbl_sales");
+            $this->Common_model->updateInformation($data_bell, $data1[$i]->sale_id, "tbl_kitchen_sales");
 
             $data1[$i]->total_kitchen_type_items = $this->Kitchen_model->get_total_kitchen_type_items($data1[$i]->sale_id);
             $data1[$i]->total_kitchen_type_done_items = $this->Kitchen_model->get_total_kitchen_type_done_items($data1[$i]->sale_id);
             $data1[$i]->total_kitchen_type_started_cooking_items = $this->Kitchen_model->get_total_kitchen_type_started_cooking_items($data1[$i]->sale_id);
             $data1[$i]->tables_booked = $this->Kitchen_model->get_all_tables_of_a_sale_items($data1[$i]->sale_id);
-            $items_by_sales_id = $this->Kitchen_model->getAllKitchenItemsFromSalesDetailBySalesId($data1[$i]->sale_id);    
-        
+            $items_by_sales_id = $this->Kitchen_model->getAllKitchenItemsFromSalesDetailBySalesId($data1[$i]->sale_id,$kitchen_id);
+
             foreach($items_by_sales_id as $single_item_by_sale_id){
                 $modifier_information = $this->Kitchen_model->getModifiersBySaleAndSaleDetailsId($data1[$i]->sale_id,$single_item_by_sale_id->sales_details_id);
                 $single_item_by_sale_id->modifiers = $modifier_information;
@@ -128,6 +366,7 @@ class Kitchen extends Cl_Controller {
     public function update_cooking_status_ajax()
     {
         $previous_id = $this->input->post('previous_id');
+        $kitchen_id = $this->input->post('kitchen_id');
         $previous_id_array = explode(",",$previous_id);
         $cooking_status = $this->input->post('cooking_status');
         $total_item = count($previous_id_array); 
@@ -137,31 +376,19 @@ class Kitchen extends Cl_Controller {
             $item_info = $this->Kitchen_model->getItemInfoByPreviousId($previous_id);
             $sale_id = $item_info->sales_id;
             $sale_info = $this->Kitchen_model->getSaleBySaleId($sale_id);
-            $sale_info[0]->tables_booked = $this->Kitchen_model->get_all_tables_of_a_sale_items($sale_id);
-            $tables_booked = '';
-            if(count($sale_info[0]->tables_booked)>0){
-                $w = 1;
-                foreach($sale_info[0]->tables_booked as $single_table_booked){
-                    if($w == count($sale_info[0]->tables_booked)){
-                        $tables_booked .= $single_table_booked->table_name;
-                    }else{
-                        $tables_booked .= $single_table_booked->table_name.', ';
-                    }
-                    $w++;
-                }    
-            }else{
-                $tables_booked = 'None';
-            }
+
+            $tables_booked = $sale_info[0]->orders_table_text;
+
             if($cooking_status=="Started Cooking"){
                 $cooking_status_update_array = array('cooking_status' => $cooking_status, 'cooking_start_time' => date('Y-m-d H:i:s'));
                 
                 $this->db->where('previous_id', $previous_id);
-                $this->db->update('tbl_sales_details', $cooking_status_update_array);
+                $this->db->update('tbl_kitchen_sales_details', $cooking_status_update_array);
                 
                 if($sale_info[0]->date_time==strtotime('0000-00-00 00:00:00')){
                     $cooking_update_array_sales_tbl = array('cooking_start_time' => date('Y-m-d H:i:s'));
                     $this->db->where('id', $sale_id);
-                    $this->db->update('tbl_sales', $cooking_update_array_sales_tbl);    
+                    $this->db->update('tbl_kitchen_sales', $cooking_update_array_sales_tbl);
                 }
                 
             }else{
@@ -169,19 +396,14 @@ class Kitchen extends Cl_Controller {
                 $cooking_status_update_array = array('cooking_status' => $cooking_status, 'cooking_done_time' => date('Y-m-d H:i:s'));
                 
                 $this->db->where('previous_id', $previous_id);
-                $this->db->update('tbl_sales_details', $cooking_status_update_array);
+                $this->db->update('tbl_kitchen_sales_details', $cooking_status_update_array);
 
                 $cooking_update_array_sales_tbl = array('cooking_done_time' => date('Y-m-d H:i:s'));
                 $this->db->where('id', $sale_id);
-                $this->db->update('tbl_sales', $cooking_update_array_sales_tbl);
+                $this->db->update('tbl_kitchen_sales', $cooking_update_array_sales_tbl);
 
-                if($sale_info[0]->order_type==1){
-                    $order_name = "A ".$sale_info[0]->sale_no;
-                }elseif($sale_info[0]->order_type==2){
-                    $order_name = "B ".$sale_info->sale_no;
-                }elseif($sale_info[0]->order_type==3){
-                    $order_name = "C ".$sale_info[0]->sale_no;
-                }
+                $order_name = $sale_info[0]->sale_no;
+
                 $notification = "Table: ".$tables_booked.', Customer: '.$sale_info[0]->customer_name.', Item: '.$item_info->menu_name.' is ready to serve, Order: '.$order_name;
                 $notification_data = array();        
                 $notification_data['notification'] = $notification;
@@ -192,6 +414,32 @@ class Kitchen extends Cl_Controller {
             }
         } 
     }
+    public function get_update_kitchen_status_ajax()
+    {
+        $sale_no = $this->input->post('sale_no');
+        $sale = getKitchenSaleDetailsBySaleNo($sale_no);
+        $result = $this->Kitchen_model->get_all_kitchen_items($sale->id);
+        echo json_encode($result);
+    }
+    public function check_update_kitchen_status_ajax()
+    {
+        $sale_no = $this->input->post('sale_no');
+        $sale = getKitchenSaleDetailsBySaleNo($sale_no);
+        $is_done = $this->Kitchen_model->get_total_kitchen_type_done_items($sale->id);
+        $is_cooked = $this->Kitchen_model->get_total_kitchen_type_started_cooking_items($sale->id);
+        $data['status'] = false;
+        $data['is_done'] = false;
+        $data['is_cooked'] = false;
+        if($is_done){
+            $data['status'] = true;
+            $data['is_done'] = true;
+        }
+        if($is_cooked){
+            $data['status'] = true;
+            $data['is_cooked'] = true;
+        }
+       echo json_encode($data);
+    }
      /**
      * update cooking status, delivery, take away
      * @access public
@@ -200,6 +448,7 @@ class Kitchen extends Cl_Controller {
      */
     public function update_cooking_status_delivery_take_away_ajax(){
         $previous_id = $this->input->post('previous_id');
+        $kitchen_id = $this->input->post('kitchen_id');
         $previous_id_array = explode(",",$previous_id);
         $cooking_status = $this->input->post('cooking_status');
         $total_item = count($previous_id_array);
@@ -212,31 +461,31 @@ class Kitchen extends Cl_Controller {
                 $cooking_status_update_array = array('cooking_status' => $cooking_status, 'cooking_start_time' => date('Y-m-d H:i:s'));
                 
                 $this->db->where('previous_id', $previous_id);
-                $this->db->update('tbl_sales_details', $cooking_status_update_array);
+                $this->db->update('tbl_kitchen_sales_details', $cooking_status_update_array);
                 
                 $cooking_update_array_sales_tbl = array('cooking_start_time' => date('Y-m-d H:i:s'));
                 $this->db->where('id', $sale_id);
-                $this->db->update('tbl_sales', $cooking_update_array_sales_tbl);
+                $this->db->update('tbl_kitchen_sales', $cooking_update_array_sales_tbl);
             }else{
                 $cooking_status_update_array = array('cooking_status' => $cooking_status, 'cooking_done_time' => date('Y-m-d H:i:s'));
                 
                 $this->db->where('previous_id', $previous_id);
-                $this->db->update('tbl_sales_details', $cooking_status_update_array);
+                $this->db->update('tbl_kitchen_sales_details', $cooking_status_update_array);
 
                 $cooking_update_array_sales_tbl = array('cooking_done_time' => date('Y-m-d H:i:s'));
                 $this->db->where('id', $sale_id);
-                $this->db->update('tbl_sales', $cooking_update_array_sales_tbl);
+                $this->db->update('tbl_kitchen_sales', $cooking_update_array_sales_tbl);
 
                 if($i==$total_item){
-                    $sale_info = $this->get_all_information_of_a_sale_kitchen_type($sale_id);
+                    $sale_info = $this->get_all_information_of_a_sale_kitchen_type($sale_id,$kitchen_id);
                     $order_type_operation = '';
                     if($sale_info->order_type==1){
-                        $order_name = "A ".$sale_info->sale_no;
+                        $order_name = $sale_info->sale_no;
                     }elseif($sale_info->order_type==2){
-                        $order_name = "B ".$sale_info->sale_no;
+                        $order_name = $sale_info->sale_no;
                         $order_type_operation = 'Take Away order is ready to take';
                     }elseif($sale_info->order_type==3){
-                        $order_name = "C ".$sale_info->sale_no;
+                        $order_name = $sale_info->sale_no;
                         $order_type_operation = 'Delivery order is ready to deliver';
                     }
                     $notification = 'Customer: '.$sale_info->customer_name.', Order Number: '.$order_name.' '.$order_type_operation;
@@ -312,10 +561,10 @@ class Kitchen extends Cl_Controller {
      * @return object
      * @param no
      */
-    public function get_new_notification()
+    public function get_new_notification($id)
     {
         $outlet_id = $this->session->userdata('outlet_id');
-        $notifications = $this->Kitchen_model->getNotificationByOutletId($outlet_id);
+        $notifications = $this->Kitchen_model->getNotificationByOutletId($outlet_id,$id);
         return $notifications;
     }
      /**
@@ -326,7 +575,8 @@ class Kitchen extends Cl_Controller {
      */
     public function get_new_notifications_ajax()
     {
-        echo json_encode($this->get_new_notification());        
+        $id = escape_output($_POST['kitchen_id']);
+        echo json_encode($this->get_new_notification($id));
     }
      /**
      * remove notification
@@ -353,5 +603,32 @@ class Kitchen extends Cl_Controller {
         foreach($notifications_array as $single_notification){
             $this->db->delete('tbl_notification_bar_kitchen_panel', array('id' => $single_notification));
         } 
+    }
+    public function getKitchenCategoriesByAjax()
+    {
+        /*This all variables could not be escaped because this is an array field*/
+        $id = isset($_POST['kitchen_id']) && $_POST['kitchen_id']?$_POST['kitchen_id']:'';
+        $outlet_id = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+
+        $categories = $this->Common_model->getKitchenCategoriesByAjax();
+        $html = '';
+        foreach ($categories as $key=>$value){
+            $is_checked = $this->Common_model->checkForExistUpdate($value->id,$outlet_id);
+            $checked = '';
+            if($is_checked){
+                $checked = "checked";
+            }
+            $html.='<div class="col-sm-12 mb-3 col-md-6 col-lg-3">
+                                <div class="border_custom">
+                                <label class="container txt_47" for="checker_'.$value->id.'"><b>'.$value->category_name.'</b>
+                                    <input class="checkbox_user parent_class" '.$checked.' id="checker_'.$value->id.'" data-name="'.$value->category_name.'" value="'.$value->id.'" type="checkbox" name="item_check[]">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <br>
+                                </div>
+                            </div>';
+        }
+
+        echo json_encode($html);
     }
 }

@@ -104,7 +104,7 @@ $counter_details = isset($company->counter_details) && $company->counter_details
 <?php
 if (isset($main_content)) {
     //This variable could not be escaped because this is html content
-    echo $main_content;
+    echo ($main_content);
 }
 ?>
 <!-- footer area start -->

@@ -34,9 +34,10 @@ class Transfer_model extends CI_Model {
      * @param int
      */
     public function getIngredientListWithUnitAndPrice($company_id) {
-        $result = $this->db->query("SELECT tbl_ingredients.id, tbl_ingredients.name, tbl_ingredients.code, tbl_ingredients.purchase_price, tbl_units.unit_name
+        $result = $this->db->query("SELECT tbl_ingredients.id, tbl_ingredients.name, tbl_ingredients.ing_type, tbl_ingredients.code, tbl_ingredients.purchase_price, tbl_units.unit_name, unit_tbl.unit_name as consumtion_unit_name
           FROM tbl_ingredients 
-          JOIN tbl_units ON tbl_ingredients.unit_id = tbl_units.id
+           left JOIN tbl_units ON tbl_ingredients.purchase_unit_id = tbl_units.id
+           left JOIN tbl_units unit_tbl ON tbl_ingredients.unit_id = unit_tbl.id
           WHERE tbl_ingredients.company_id=$company_id AND tbl_ingredients.del_status = 'Live'  
           ORDER BY tbl_ingredients.name ASC")->result();
         return $result;
@@ -69,6 +70,7 @@ class Transfer_model extends CI_Model {
         $this->db->from('tbl_transfer');
         $this->db->where("(outlet_id=$outlet_id OR to_outlet_id= $outlet_id AND (status='1' OR status='3'))");
         $this->db->order_by('id', 'DESC');
+        $this->db->where("del_status", 'Live');
         $result = $this->db->get();
 
         if($result != false){
@@ -79,7 +81,7 @@ class Transfer_model extends CI_Model {
     }
 
     public function getTotalCostAmount($food_menu_id) {
-        $this->db->select('purchase_price,consumption');
+        $this->db->select('purchase_price,consumption,conversion_rate,tbl_ingredients.id as ingredient_id');
         $this->db->from('tbl_food_menus_ingredients');
         $this->db->join('tbl_ingredients', 'tbl_ingredients.id = tbl_food_menus_ingredients.ingredient_id', 'left');
         $this->db->where('tbl_food_menus_ingredients.food_menu_id', $food_menu_id);

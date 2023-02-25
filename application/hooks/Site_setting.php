@@ -1,14 +1,19 @@
 <?php
-class Site_setting { 
+class Site_setting {
 
 
-    function setSetting(){ 
-
+    function setSetting(){
+        //Application mode value will be live or demo
         define('APPLICATION_MODE', 'live');
 
         if (APPLICATION_MODE == 'demo') {
             # Load the URI core class
-            $uri =& load_class('URI', 'core'); 
+            $uri =& load_class('URI', 'core');
+
+            // getting base url
+            $root=(isset($_SERVER["HTTPS"]) ? "https://" : "http://").$_SERVER["HTTP_HOST"];
+            $root.= str_replace(basename($_SERVER["SCRIPT_NAME"]), "", $_SERVER["SCRIPT_NAME"]);
+            $base_url = $root;
 
             # Get the third segment
             $get_second_uri = $uri->segment(2); // returns the id
@@ -24,12 +29,14 @@ class Site_setting {
                 if (!empty($_POST['submit'])) {
                     //There are no view page that's why used the inline css
                     echo "<h2 style='color: red; margin-top: 15%; text-align: center;'>Not allowed in demo mode!</h2>";
+                      echo "<p style='color: red; text-align: center;'><a href='".$base_url."Authentication/userProfile'</a>Click to Return</p>";
                     exit;
                 }
             }
             if ($get_first_uri == 'Update') {
                 //There are no view page that's why used the inline css
                 echo "<h2 style='color: red; margin-top: 15%; text-align: center;'>Not allowed in demo mode!</h2>";
+                  echo "<p style='color: red; text-align: center;'><a href='".$base_url."Authentication/userProfile'</a>Click to Return</p>";
                 exit;
             }
         }

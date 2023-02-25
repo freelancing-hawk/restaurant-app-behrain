@@ -30,14 +30,14 @@
 
     <div class="box-wrapper">
                 <div class="row">
-                        <div class="mb-3 col-md-3 col-sm-12">
+                        <div class="mb-3 col-md-2 col-sm-12">
                             <?php echo form_open(base_url() . 'Report/customerReport', $arrayName = array('id' => 'customerReport')) ?>
                             <div class="form-group">
                                 <input tabindex="1" type="text" id="" name="startDate" readonly class="form-control customDatepicker"
                                     placeholder="<?php echo lang('start_date'); ?>" value="<?php echo set_value('startDate'); ?>">
                             </div>
                         </div>
-                        <div class="mb-3 col-md-3 col-sm-12">
+                        <div class="mb-3 col-md-2 col-sm-12">
 
                             <div class="form-group">
                                 <input tabindex="2" type="text" id="endMonth" name="endDate" readonly
@@ -45,7 +45,7 @@
                                     value="<?php echo set_value('endDate'); ?>">
                             </div>
                         </div>
-                        <div class="mb-3 col-md-3 col-sm-12">
+                        <div class="mb-3 col-md-2 col-sm-12">
 
                             <div class="form-group">
                                 <select tabindex="2" class="form-control select2 ir_w_100" id="customer_id" name="customer_id">
@@ -74,7 +74,7 @@
                         <?php
                         if(isLMni()):
                             ?>
-                            <div class="mb-3 col-md-3 col-sm-12">
+                            <div class="mb-3 col-md-2 col-sm-12">
                                 <div class="form-group">
                                     <select tabindex="2" class="form-control select2 ir_w_100" id="outlet_id" name="outlet_id">
                                         <?php
@@ -131,9 +131,9 @@
                                 <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->sale_date))) ?>
                                 </td>
                                 <td><?php echo escape_output($value->sale_no) ?></td>
-                                <td><?php echo escape_output(getAmt($value->total_payable)) ?></td>
-                                <td><?php echo escape_output(getAmt($value->paid_amount)) ?></td>
-                                <td><?php echo escape_output(getAmt($value->due_amount)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_payable)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->paid_amount)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->due_amount)) ?></td>
                             </tr>
                             <?php
                                 }
@@ -164,7 +164,7 @@
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->date))) ?></td>
-                                <td><?php echo escape_output(getAmt($value->amount)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->amount)) ?></td>
                                 <td><?php echo escape_output($value->note) ?></td>
                             </tr>
                             <?php

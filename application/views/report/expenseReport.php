@@ -115,7 +115,7 @@
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->date))) ?></td>
-                                <td><?php echo escape_output(getAmt($value->amount)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->amount)) ?></td>
                                 <td><?php echo escape_output($value->categoryName) ?></td>
                                 <td><?php echo escape_output($value->EmployeedName) ?></td>
                             </tr>

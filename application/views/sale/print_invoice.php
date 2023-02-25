@@ -57,7 +57,7 @@
                                     $order_type = 'C';
                                 }
                             ?>
-                        <?php echo lang('Invoice_No'); ?>:<?= escape_output($order_type.' '.escape_output($sale_object->sale_no)) ?>
+                        <?php echo lang('Invoice_No'); ?>:<?= escape_output($sale_object->sale_no) ?>
                         <br>
                     </p>
                 </div>
@@ -65,19 +65,21 @@
                     <?= escape_output(date('H:i',strtotime($sale_object->order_time))) ?><br>
                     <?php echo lang('Sales_Associate'); ?>: <?php echo escape_output($sale_object->user_name) ?><br>
                     <?php echo lang('customer'); ?>: <b><?php echo escape_output("$sale_object->customer_name"); ?></b>
-                   <?= ($sale_object->waiter_name ? "<br>".lang('waiter').": <b>" . escape_output($sale_object->waiter_name)."</b>" : '') ?>
                     <?php if($sale_object->customer_address!=NULL  && $sale_object->customer_address!=""){?>
                     <br /><?php echo lang('address'); ?>:<?php echo escape_output("$sale_object->customer_address"); ?>
                     <?php } ?>
-                    <?php if($sale_object->tables_booked){?>
+                   <?php
+                   $gst_number = getCustomerGST($sale_object->customer_id);
+                   if(isset($gst_number) && $gst_number):
+                       echo '<br>'.lang('gst_number'); ?>:<?php echo escape_output("$gst_number");
+                   endif;
+                   ?>
+                   <?= ($sale_object->waiter_name ? "<br>".lang('waiter').": <b>" . escape_output($sale_object->waiter_name)."</b>" : '') ?>
+
+                    <?php if($sale_object->orders_table_text){?>
                     <br /><?php echo lang('table'); ?>:<b>
                         <?php
-                            foreach ($sale_object->tables_booked as $key1=>$val){
-                                echo escape_output($val->table_name);
-                                if($key1 < (sizeof($sale_object->tables_booked) -1)){
-                                    echo ", ";
-                                }
-                            }
+                        echo escape_output($sale_object->orders_table_text);
                             ?>
                     </b>
 
@@ -92,16 +94,23 @@
                                 $totalItems = 0;
                                 foreach ($sale_object->items as $row) {
                                     $totalItems+=$row->qty;
-                                    $menu_unit_price = getAmtP($row->menu_unit_price);
+                                    $menu_unit_price = getAmtPCustom($row->menu_unit_price);
+                                    $discount_amount = 0;
+                                    if((float)$row->discount_amount){
+                                        $discount_amount = $row->discount_amount;
+                                    }
                                     ?>
 
                         <tr>
                             <td class="no-border border-bottom ir_wid_70"># <?php echo escape_output($i++); ?>:
-                                &nbsp;&nbsp;<?php echo escape_output($row->menu_name) ?>
-                                <small></small> <?php echo escape_output("$row->qty X $menu_unit_price"); ?>
+                                <span class="arabic_text_left_is"><?php echo escape_output($row->menu_name) ?></span>
+                                <small></small> <?php echo escape_output("$row->qty X $menu_unit_price"); ?> <?php echo isset($discount_amount) && $discount_amount?'(-'.$discount_amount.')':''?>
+                                <?php if($row->menu_combo_items && $row->menu_combo_items!=null):?>
+                                    <span> <br> &nbsp;&nbsp; <?php echo lang('combo_txt'); ?>:<?php echo escape_output($row->menu_combo_items) ?></span>
+                                <?php endif;?>
                             </td>
                             <td class="no-border border-bottom text-right">
-                                <?php echo escape_output(getAmt($row->menu_price_without_discount)); ?>
+                                <?php echo escape_output(getAmtCustom($row->menu_price_with_discount)); ?>
                             </td>
                         </tr>
                         <?php if(count($row->modifiers)>0){ ?>
@@ -123,7 +132,7 @@
                                             ?>
                             </td>
                             <td class="no-border border-bottom text-right">
-                                <?php echo escape_output(getAmt($modifier_price))?></td>
+                                <?php echo escape_output(getAmtCustom($modifier_price))?></td>
                         </tr>
                         <?php } ?>
                         <?php }
@@ -139,16 +148,16 @@
                         <tr>
                            <th><?php echo lang('sub_total'); ?></th>
                             <th class="text-right">
-                                <?php echo escape_output(getAmt($sale_object->sub_total)); ?>
+                                <?php echo escape_output(getAmtCustom($sale_object->sub_total)); ?>
                             </th>
                         </tr>
                         <?php
                         if($sale_object->total_discount_amount && $sale_object->total_discount_amount!="0.00"):
                         ?>
                         <tr>
-                        <th><?php echo lang('Disc_Amt_p'); ?>:</th>
+                        <th><?php echo lang('Disc_Amt_p'); ?></th>
                         <th class="text-right">
-                            <?php echo escape_output(getAmt($sale_object->total_discount_amount)); ?>
+                            <?php echo escape_output(getAmtCustom($sale_object->total_discount_amount)); ?>
                         </th>
                         </tr>
                         <?php
@@ -177,7 +186,7 @@
                         <tr>
                             <th><?php echo escape_output($single_tax->tax_field_type) ?></th>
                             <th class="text-right">
-                                <?php echo escape_output(getAmt($single_tax->tax_field_amount)); ?>
+                                <?php echo escape_output(getAmtCustom($single_tax->tax_field_amount)); ?>
                             </th>
                         </tr>
                                 <?php
@@ -191,7 +200,7 @@
                         <tr>
                           <th><?php echo lang('grand_total'); ?></th>
                             <th class="text-right">
-                                <?php echo escape_output(getAmt($sale_object->total_payable)); ?>
+                                <?php echo escape_output(getAmtCustom($sale_object->total_payable)); ?>
                             </th>
                         </tr>
                           <?php
@@ -200,7 +209,7 @@
                         <tr>
                           <th><?php echo lang('paid_amount'); ?></th>
                             <th class="text-right">
-                                <?php echo escape_output(getAmt($sale_object->paid_amount)); ?>
+                                <?php echo escape_output(getAmtCustom($sale_object->paid_amount)); ?>
                             </th>
                         </tr>
                         <?php
@@ -212,7 +221,7 @@
                         <tr>
                            <th><?php echo lang('due_amount'); ?></th>
                             <th class="text-right">
-                                <?php echo escape_output(getAmt($sale_object->due_amount)); ?>
+                                <?php echo escape_output(getAmtCustom($sale_object->due_amount)); ?>
                             </th>
                         </tr>
                         <?php
@@ -224,7 +233,7 @@
                         <tr>
                            <th><?php echo lang('given_amount'); ?></th>
                             <th class="text-right">
-                                <?php echo escape_output(getAmt($sale_object->given_amount)); ?>
+                                <?php echo escape_output(getAmtCustom($sale_object->given_amount)); ?>
                             </th>
                         </tr>
                         <?php
@@ -236,7 +245,7 @@
                         <tr>
                            <th><?php echo lang('change_amount'); ?></th>
                             <th class="text-right">
-                                <?php echo escape_output(getAmt($sale_object->change_amount)); ?>
+                                <?php echo escape_output(getAmtCustom($sale_object->change_amount)); ?>
                             </th>
                         </tr>
                         <?php
@@ -249,13 +258,45 @@
                         <tr>
                             <td><?php echo lang('total_payable'); ?></td>
                             <td class="text-right">
-                                <?php echo escape_output(getAmt($sale_object->total_payable)); ?>
+                                <?php echo escape_output(getAmtCustom($sale_object->total_payable)); ?>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <p class="text-center"> <?php echo ($this->session->userdata('invoice_footer')) ?></p>
+                <?php
+                $outlet_id = $this->session->userdata('outlet_id');
+                $salePaymentDetails = salePaymentDetails($sale_object->id,$outlet_id);
+                if(isset($salePaymentDetails) && $salePaymentDetails):
+                    ?>
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <th><?php echo lang('payment_method'); ?>:</th>
+                            <th class="text-right">
 
+                            </th>
+                        </tr>
+                        <?php foreach ($salePaymentDetails as $payment):
+                            $txt_point = '';
+                            if($payment->id==5){
+                                $txt_point = " (Usage Point:".$payment->usage_point.")";
+                            }
+                            ?>
+                            <tr>
+                                <th><?php echo escape_output($payment->payment_name.$txt_point); ?></th>
+                                <th class="text-right">
+                                    <?php echo escape_output(getAmtCustom($payment->amount)); ?>
+                                </th>
+                            </tr>
+
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
+                    <?php
+                endif;
+                ?>
+                <p class="text-center"> <?php echo ($this->session->userdata('invoice_footer')) ?></p>
+                <div class="text-center"><img src="<?php echo base_url()?>qr_code/<?php echo escape_output($sale_object->id)?>.png"></div>
             </div>
             <div class="ir_clear"></div>
         </div>

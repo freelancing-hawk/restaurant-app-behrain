@@ -38,10 +38,30 @@ class Waste extends Cl_Controller {
             $this->session->set_userdata("clicked_method", $this->uri->segment(2));
             redirect('Outlet/outlets');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "137";
+        $function = "";
+
+        if($segment_2=="wastes"){
+            $function = "view";
+        }elseif($segment_2=="wasteDetails" && $segment_3){
+            $function = "view_details";
+        }elseif($segment_2=="addEditWaste" ||  $segment_2=="food_menus_ingredients"){
+            $function = "add";
+        }elseif($segment_2=="deleteWaste"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -117,6 +137,7 @@ class Waste extends Cl_Controller {
                     $data = array();
                     $data['pur_ref_no'] = $this->Waste_model->generateWasteRefNo($outlet_id);
                     $data['ingredients'] = $this->Waste_model->getIngredientList($outlet_id);
+                    $data['food_menus'] = $this->Waste_model->getFoodMenuList($outlet_id);
                     $data['employees'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_users");
                     $data['main_content'] = $this->load->view('waste/addWaste', $data, TRUE);
                     $this->load->view('userHome', $data);
@@ -180,7 +201,7 @@ class Waste extends Cl_Controller {
      * @return void
      * @param int
      */
-    public function WasteDetails($id) {
+    public function wasteDetails($id) {
         $encrypted_id = $id;
         $id = $this->custom->encrypt_decrypt($id, 'decrypt');
 

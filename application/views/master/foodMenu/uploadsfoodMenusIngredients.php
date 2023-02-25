@@ -11,7 +11,7 @@
                 </h4>
                 <div class="alert-body">
             <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-                echo escape_output($this->session->flashdata('exception'));
+                echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
                 echo '</p></div></div>';
             }
             if ($this->session->flashdata('exception_err')) {
@@ -23,7 +23,7 @@
                 </h4>
                 <div class="alert-body">
                     <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-                echo escape_output($this->session->flashdata('exception_err'));
+                echo escape_output($this->session->flashdata('exception_err'));unset($_SESSION['exception_err']);
                 echo '</p></div></div>';
             }
         ?>
@@ -49,14 +49,7 @@
                                      placeholder="<?php echo lang('upload_file'); ?>"
                                      value="<?php echo set_value('name'); ?>">
                              </div>
-                             <div class="checkbox my-3 form-group">
-                                 <label class="container">
-                                    <input type="checkbox" name="remove_previous"
-                                         value="1">
-                                         <span><?php echo lang('remove_all_previous_data'); ?></span>
-                                         <span class="checkmark"></span>
-                                    </label>
-                             </div>
+
                              <?php if (form_error('userfile')) { ?>
                              <div class="callout callout-danger my-2">
                                  <?php echo form_error('userfile'); ?>
@@ -88,6 +81,4 @@
                  <?php echo form_close(); ?>
         </div>
     </div>
-    
-
  </section>

@@ -628,8 +628,6 @@ class Order extends Cl_Controller {
         $data['online_order_setting_information'] = $this->Common_model->getDataById($id, "tbl_online_and_self_order_setting"); 
         $data['foodMenus'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_food_menus");
         $this->load->view('online_and_self_order/print_menu_name_qr_code', $data);
-        
-        
     }
      /**
      * save Outlet Taxes

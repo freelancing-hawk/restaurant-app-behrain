@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
 
     <section class="content-header">
@@ -6,10 +5,6 @@
             <?php echo lang('add_expense_item'); ?>
         </h3>
     </section>
-
-
-
-    
     <div class="box-wrapper">
             <!-- general form elements -->
             <div class="table-box">
@@ -59,12 +54,8 @@
                             <?php echo lang('back'); ?>
                         </a>
                     </div>
-                 
-                   
                 </div>
                 <?php echo form_close(); ?>
             </div>
     </div>
- 
-        
 </section>

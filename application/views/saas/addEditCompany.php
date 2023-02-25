@@ -1,4 +1,3 @@
-
 <!-- Main content -->
 <section class="main-content-wrapper">
 
@@ -12,7 +11,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -134,8 +133,8 @@
                             <div class="form-group">
                                 <label> <?php echo lang('Currency_Position'); ?> <span class="required_star">*</span></label>
                                 <select tabindex="2" class="form-control select2" name="currency_position" id="currency_position">
-                                    <option <?= isset($outlet_information) && $outlet_information->date_format == "Before Amount" ? 'selected' : '' ?>  value="Before Amount">Before Amount</option>
-                                    <option <?= isset($outlet_information) && $outlet_information->date_format == "After Amount" ? 'selected' : '' ?>  value="After Amount">After Amount</option>
+                                    <option <?= isset($outlet_information) && $outlet_information->date_format == "Before Amount" ? 'selected' : '' ?>  value="Before Amount"><?php echo lang('Before_Amount'); ?></option>
+                                    <option <?= isset($outlet_information) && $outlet_information->date_format == "After Amount" ? 'selected' : '' ?>  value="After Amount"><?php echo lang('After_Amount'); ?></option>
                                 </select>
                             </div>
                             <?php if (form_error('currency_position')) { ?>
@@ -165,49 +164,13 @@
                             <div class="form-group">
                                 <label> <?php echo lang('Precision'); ?> <span class="required_star">*</span></label>
                                 <select tabindex="2" class="form-control select2" name="precision" id="precision">
-                                    <option <?= isset($outlet_information) && $outlet_information->precision == "2" ? 'selected' : '' ?>  value="2">2 Digit</option>
-                                    <option <?= isset($outlet_information) && $outlet_information->precision == "3" ? 'selected' : '' ?>  value="3">3 Digit</option>
+                                    <option <?= isset($outlet_information) && $outlet_information->precision == "2" ? 'selected' : '' ?>  value="2"><?php echo lang('2_Digit'); ?></option>
+                                    <option <?= isset($outlet_information) && $outlet_information->precision == "3" ? 'selected' : '' ?>  value="3"><?php echo lang('3_Digit'); ?></option>
                                 </select>
                             </div>
                             <?php if (form_error('precision')) { ?>
                                 <div class="callout callout-danger my-2">
                                     <?php echo form_error('precision'); ?>
-                                </div>
-                            <?php } ?>
-                        </div>
-                        <div class="col-sm-12 mb-2 col-md-6">
-                            <div class="form-group radio_button_problem">
-                                <div class="d-flex align-items-start">
-                                    <label><?php echo lang('pre_or_post_payment'); ?> <span class="required_star">*</span></label>
-                                    <div class="tooltip_custom">
-                                        <i data-bs-toggle="tooltip" data-ds-placement="top" title="<?php echo lang('tooltip_txt_1'); ?>" data-feather="help-circle"></i>
-                                    </div>
-                                </div>
-
-                                <div class="radio">
-                                    <label>
-                                        <input tabindex="5" autocomplete="off" type="radio" name="pre_or_post_payment" id="pre_or_post_payment_post" value="Post Payment"
-                                            <?php
-                                            if ((isset($outlet_information->pre_or_post_payment) && $outlet_information->pre_or_post_payment?$outlet_information->pre_or_post_payment:'') == "Post Payment") {
-                                                echo "checked";
-                                            };
-                                            ?>
-                                        ><?php echo lang('post_payment'); ?> </label>
-                                    <label>
-
-                                        <input tabindex="5" autocomplete="off" type="radio" name="pre_or_post_payment" id="pre_or_post_payment_pre" value="Pre Payment"
-                                            <?php
-                                            if ((isset($outlet_information->pre_or_post_payment) && $outlet_information->pre_or_post_payment?$outlet_information->pre_or_post_payment:'') == "Pre Payment") {
-                                                echo "checked";
-                                            };
-                                            ?>
-                                        ><?php echo lang('pre_payment'); ?>
-                                    </label>
-                                </div>
-                            </div>
-                            <?php if (form_error('pre_or_post_payment')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('pre_or_post_payment'); ?>
                                 </div>
                             <?php } ?>
                         </div>
@@ -228,7 +191,9 @@
                     </div>
 
                     <div class="row">
-
+                        <?php
+                        if(!isFoodCourt()):
+                        ?>
                         <div class="col-sm-12 mb-2 col-md-4 col-lg-3">
 
                             <div class="form-group">
@@ -250,6 +215,9 @@
                                 </div>
                             <?php } ?>
                         </div>
+                        <?php
+                        endif;
+                        ?>
 
                         <div class="col-sm-12 mb-2 col-md-4 col-lg-3 display_none">
 
@@ -308,7 +276,7 @@
                                     </div>
                                 <?php } ?>
                             </div>
-
+                            <div class="clearfix"></div>
                             <div class="col-sm-12 mb-2 col-md-4 col-lg-3">
 
                                 <div class="form-group">
@@ -361,7 +329,7 @@
             </div>
     </div>
 
-    <div class="modal fade" id="logo_preview" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="logo_preview" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

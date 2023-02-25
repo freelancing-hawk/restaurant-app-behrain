@@ -1,8 +1,6 @@
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/wasteDetails.css">
 
 <section class="main-content-wrapper">
-
-
     <section class="content-header">
         <h3 class="top-left-header">
             <?php echo lang('details_waste'); ?>
@@ -63,7 +61,6 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-
                                         <?php
                                         $i = 0;
                                         if ($waste_ingredients && !empty($waste_ingredients)) {
@@ -72,8 +69,8 @@
                                                 echo '<tr id="row_' . $i . '">' .
                                                 '<td class="txt_24"><p>' . $i . '</p></td>' .
                                                 '<td class="ir_w_20 txt_18">' . getIngredientNameById($wi->ingredient_id) . ' (' . getIngredientCodeById($wi->ingredient_id) . ')</span></td>' .
-                                                '<td class="ir_w_15">' . getAmtP($wi->waste_amount) . unitName(getUnitIdByIgId($wi->ingredient_id)) . '</td>' .
-                                                '<td class="ir_w_15">' . getAmtP($wi->loss_amount) . '</td>' .
+                                                '<td class="ir_w_15">' . getAmtPCustom($wi->waste_amount) . unitName(getUnitIdByIgId($wi->ingredient_id)) . '</td>' .
+                                                '<td class="ir_w_15">' . getAmtPCustom($wi->loss_amount) . '</td>' .
                                                 '</tr>';
                                             }
                                         }
@@ -91,7 +88,7 @@
                             <div class="form-group">
                                 <h3><?php echo lang('total_loss'); ?></h3>
                                 <p class="field_value">
-                                    <?php echo escape_output(getAmtP($waste_details->total_loss)) ?>
+                                    <?php echo escape_output(getAmtPCustom($waste_details->total_loss)) ?>
                                 <div class="tooltip_custom">
                                     <i data-feather="help-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('tooltip_txt_28'); ?>"></i>
                                 </div>
@@ -111,11 +108,6 @@
                     </div>
                 </div>
                 <div class="row my-2">
-                    <div class="col-sm-12 col-md-2 mb-2">
-                        <a class="btn bg-blue-btn w-100" href="<?php echo base_url() ?>Waste/addEditWaste/<?php echo escape_output($encrypted_id); ?>">
-                            <?php echo lang('edit'); ?>
-                        </a>
-                    </div>
                     <div class="col-sm-12 col-md-2 mb-2">
                         <a class="btn bg-blue-btn w-100" href="<?php echo base_url() ?>Waste/wastes">
                             <?php echo lang('back'); ?>

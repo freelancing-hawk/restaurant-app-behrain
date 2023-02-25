@@ -85,6 +85,7 @@
                                 <th class="ir_w2_txt_center"><?php echo lang('sn'); ?></th>
                                 <th><?php echo lang('date'); ?></th>
                                 <th><?php echo lang('total_sale'); ?></th>
+                                <th><?php echo lang('total_refund'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -99,7 +100,8 @@
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->sale_date))) ?>
                                 </td>
-                                <td><?php echo escape_output(getAmt($value->total_payable)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_payable)) ?></td>
+                                <td><?php echo escape_output(getAmt($value->total_refund)) ?></td>
                             </tr>
                             <?php
                                 }

@@ -1,5 +1,3 @@
-
-
  <section class="main-content-wrapper">
 
         <?php
@@ -8,7 +6,7 @@
             echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception'));
+            echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
             echo '</p></div></div></section>';
         }
         ?>
@@ -20,17 +18,11 @@
                     <input type="hidden" class="datatable_name" data-title="<?php echo lang('inventory_Adjustments'); ?>" data-id_name="datatable">
                 </div>
                 <div class="col-md-6">
-                    <a  class="btn_list m-right btn bg-blue-btn" href="<?php echo base_url() ?>Inventory_adjustment/addEditInventoryAdjustment">
-                     <i data-feather="plus"></i> <?php echo lang('add_inventory_Adjustment'); ?></a>
+
                 </div>
             </div>
         </section>
-
-
-
      <div class="box-wrapper">
-         
-         
              <div class="table-box">
                  <!-- /.box-header -->
                  <div class="table-responsive">
@@ -95,14 +87,11 @@
                  </div>
                  <!-- /.box-body -->
              </div>
-         
-             
      </div>
  </section>
  <!-- DataTables -->
- <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
-</script>
+<script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.buttons.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.html5.min.js"></script>
@@ -111,5 +100,4 @@
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/pdfmake.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/vfs_fonts.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/newDesign/js/forTable.js"></script>
-
- <script src="<?= base_url()?>assets/dist/js/custom/common.js"></script>
+<script src="<?= base_url()?>assets/dist/js/custom/common.js"></script>

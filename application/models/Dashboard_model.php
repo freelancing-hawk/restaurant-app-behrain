@@ -224,7 +224,7 @@ FROM tbl_food_menus fm  INNER JOIN (select * from tbl_food_menu_categories where
      */
     public function top_ten_customer($start_date, $end_date,$outlet_id) {
 
-        $this->db->select('sum(tbl_sales.total_payable) as total_payable, tbl_sales.customer_id, tbl_customers.name, tbl_sales.sale_date');
+        $this->db->select('sum(tbl_sales.total_payable) as total_payable, tbl_sales.customer_id, tbl_customers.name, tbl_sales.sale_date,tbl_customers.phone');
         $this->db->from('tbl_sales');
         $this->db->join('tbl_customers', 'tbl_sales.customer_id = tbl_customers.id', 'left');
         $this->db->where('tbl_sales.sale_date>=', $start_date);
@@ -249,7 +249,7 @@ FROM tbl_food_menus fm  INNER JOIN (select * from tbl_food_menu_categories where
      * @param int
      */
     public function customer_receivable($outlet_id) {
-        $this->db->select('sum(due_amount) as due_amount, customer_id, name');
+        $this->db->select('sum(due_amount) as due_amount, customer_id, name,tbl_customers.phone');
         $this->db->from('tbl_sales');
         $this->db->join('tbl_customers', 'tbl_customers.id = tbl_sales.customer_id', 'left');
         $this->db->order_by('due_amount desc');
@@ -271,7 +271,7 @@ FROM tbl_food_menus fm  INNER JOIN (select * from tbl_food_menu_categories where
      * @param int
      */
     public function supplier_payable($outlet_id) {
-        $this->db->select('sum(due) as due, supplier_id, name');
+        $this->db->select('sum(due) as due, supplier_id, name,phone');
         $this->db->from('tbl_purchase');
         $this->db->join('tbl_suppliers', 'tbl_suppliers.id = tbl_purchase.supplier_id', 'left');
         $this->db->order_by('due desc');
@@ -479,6 +479,14 @@ FROM tbl_food_menus fm  INNER JOIN (select * from tbl_food_menu_categories where
         return $result;
     }
      /**
+     * supplier due payment sum
+     * @access public
+     * @return object
+     * @param string
+     * @param string
+     * @param int
+     */
+     /**
      * get Payable Amount By Supplier Id
      * @access public
      * @return object
@@ -661,5 +669,43 @@ FROM tbl_ingredients i  LEFT JOIN (select * from tbl_ingredients where del_statu
         $tmp  = explode(',',$data_count->food_menus);
         return sizeof($tmp);
 
+    }
+    public function sale_by_paymentsTotal($first_day_this_month, $last_day_this_month,$outlet_id) {
+        $this->db->select('sum(amount) as total_sales');
+        $this->db->from('tbl_sale_payments');
+        $this->db->join('tbl_sales', 'tbl_sales.id = tbl_sale_payments.sale_id', 'left');
+        $this->db->where('sale_date>=', $first_day_this_month);
+        $this->db->where('sale_date <=', $last_day_this_month);
+        $this->db->where('tbl_sale_payments.outlet_id', $outlet_id);
+        $this->db->where('tbl_sales.order_status', 3);
+        $this->db->where('tbl_sale_payments.del_status', 'Live');
+        $result = $this->db->get();
+
+        if($result != false){
+            return $result->row();
+        }else{
+            return false;
+        }
+    }
+
+    public function sale_by_payments($first_day_this_month, $last_day_this_month,$outlet_id) {
+        $this->db->select('sum(amount) as total_sales,tbl_payment_methods.name');
+        $this->db->from('tbl_sale_payments');
+        $this->db->join('tbl_sales', 'tbl_sales.id = tbl_sale_payments.sale_id', 'left');
+        $this->db->join('tbl_payment_methods', 'tbl_payment_methods.id = tbl_sale_payments.payment_id', 'left');
+        $this->db->where('sale_date>=', $first_day_this_month);
+        $this->db->where('sale_date <=', $last_day_this_month);
+        $this->db->where('tbl_sales.order_status', 3);
+        $this->db->where('tbl_sale_payments.outlet_id', $outlet_id);
+        $this->db->where('tbl_sale_payments.del_status', 'Live');
+        $this->db->order_by('total_sales desc');
+        $this->db->group_by('payment_id');
+        $result = $this->db->get();
+
+        if($result != false){
+            return $result->result();
+        }else{
+            return false;
+        }
     }
 } 

@@ -30,10 +30,35 @@ class Ingredient extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "217";
+        $function = "";
+
+        if($segment_2=="ingredients"){
+            $function = "view";
+        }elseif($segment_2=="addEditIngredient" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditIngredient"){
+            $function = "add";
+        }elseif($segment_2=="deleteIngredient"){
+            $function = "delete";
+        }elseif($segment_2=="uploadingredients" || $segment_2=="uploadFoodMenuingredient" || $segment_2=="ExcelDataAddIngredints" || $segment_2=="downloadPDF"){
+            $function = "upload_ingredient";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -48,7 +73,7 @@ class Ingredient extends Cl_Controller {
         $company_id = $this->session->userdata('company_id');
 
         $data = array();
-        $data['ingredients'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_ingredients");
+        $data['ingredients'] = $this->Common_model->getPreMadeIngredients($company_id, "Plain Ingredient");
         $data['main_content'] = $this->load->view('master/ingredient/ingredients', $data, TRUE);
         $this->load->view('userHome', $data);
     }
@@ -108,7 +133,10 @@ class Ingredient extends Cl_Controller {
             $this->form_validation->set_rules('category_id', lang('category'), 'required');
             $this->form_validation->set_rules('purchase_price', lang('purchase_price'), 'required|numeric|max_length[15]');
             $this->form_validation->set_rules('alert_quantity',lang('alert_quantity'), 'required|numeric|max_length[15]');
-            $this->form_validation->set_rules('unit_id',lang('unit'), 'required');
+            $this->form_validation->set_rules('code',lang('unit'), 'required');
+            $this->form_validation->set_rules('purchase_unit_id',lang('unit'), 'required');
+            $this->form_validation->set_rules('consumption_unit_id',lang('unit'), 'required');
+            $this->form_validation->set_rules('conversion_rate',lang('unit'), 'required');
             if ($this->form_validation->run() == TRUE) {
                 $fmc_info = array();
                 $fmc_info['name'] = htmlspecialchars($this->input->post($this->security->xss_clean('name')));
@@ -116,16 +144,21 @@ class Ingredient extends Cl_Controller {
                 $fmc_info['category_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('category_id')));
                 $fmc_info['purchase_price'] =htmlspecialchars($this->input->post($this->security->xss_clean('purchase_price')));
                 $fmc_info['alert_quantity'] =htmlspecialchars($this->input->post($this->security->xss_clean('alert_quantity')));
-                $fmc_info['unit_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('unit_id')));
+                $fmc_info['unit_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('consumption_unit_id')));
+                $fmc_info['purchase_unit_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('purchase_unit_id')));
+                $fmc_info['consumption_unit_cost'] =htmlspecialchars($this->input->post($this->security->xss_clean('consumption_unit_cost')));
+                $fmc_info['conversion_rate'] =htmlspecialchars($this->input->post($this->security->xss_clean('conversion_rate')));
                 $fmc_info['user_id'] = $this->session->userdata('user_id');
                 $fmc_info['company_id'] = $this->session->userdata('company_id');
                 if ($id == "") {
-                    $this->Common_model->insertInformation($fmc_info, "tbl_ingredients");
+                    $id = $this->Common_model->insertInformation($fmc_info, "tbl_ingredients");
                     $this->session->set_flashdata('exception', lang('insertion_success'));
                 } else {
                     $this->Common_model->updateInformation($fmc_info, $id, "tbl_ingredients");
                     $this->session->set_flashdata('exception',lang('update_success'));
                 }
+                //set average cost for profit loss report
+                setAverageCost($id);
                 redirect('ingredient/ingredients');
             } else {
                 if ($id == "") {
@@ -213,9 +246,12 @@ class Ingredient extends Cl_Controller {
                             $ingredint_name = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(0, $i)->getValue()));
                             $ingredint_code = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(1, $i)->getValue())); //Excel Column 1
                             $ingredint_category = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(2, $i)->getValue())); //Excel Column 2
-                            $ingredint_unit = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(3, $i)->getValue())); //Excel Column 3
-                            $ingredint_alertqty = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(4, $i)->getValue())); //Excel Column 4
-                            $ingredint_perchaseprice = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(5, $i)->getValue())); //Excel Column 5
+                            $ingredint_purchase_unit = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(3, $i)->getValue())); //Excel Column 3
+                            $ingredint_unit = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(4, $i)->getValue())); //Excel Column 3
+                            $conversion_rate = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(5, $i)->getValue())); //Excel Column 3
+                            $ingredint_perchaseprice = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(6, $i)->getValue())); //Excel Column 5
+                            $ingredint_alertqty = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(7, $i)->getValue())); //Excel Column 4
+
 
                             if ($ingredint_name == '') {
                                 if ($arrayerror == '') {
@@ -241,44 +277,63 @@ class Ingredient extends Cl_Controller {
                                 }
                             }
 
-                            if ($ingredint_unit == '') {
+                            if ($ingredint_purchase_unit == '') {
                                 if ($arrayerror == '') {
                                     $arrayerror.="Row Number $i column D required";
                                 } else {
                                     $arrayerror.="<br> Row Number $i column D required";
                                 }
                             }
-
-                            if ($ingredint_alertqty == '' || !is_numeric($ingredint_alertqty)) {
+                            if ($ingredint_unit == '') {
                                 if ($arrayerror == '') {
-                                    $arrayerror.="Row Number $i column E required or can not be text";
+                                    $arrayerror.="Row Number $i column E required";
                                 } else {
-                                    $arrayerror.="<br> Row Number $i column E required  or can not be text";
+                                    $arrayerror.="<br> Row Number $i column E required";
                                 }
                             }
 
-                            if ($ingredint_perchaseprice == '' || !is_numeric($ingredint_perchaseprice)) {
+
+                            if ($conversion_rate == '' || !is_numeric($conversion_rate)) {
                                 if ($arrayerror == '') {
                                     $arrayerror.="Row Number $i column F required or can not be text";
                                 } else {
                                     $arrayerror.="<br> Row Number $i column F required or can not be text";
                                 }
                             }
+
+
+                            if ($ingredint_perchaseprice == '' || !is_numeric($ingredint_perchaseprice)) {
+                                if ($arrayerror == '') {
+                                    $arrayerror.="Row Number $i column G required or can not be text";
+                                } else {
+                                    $arrayerror.="<br> Row Number $i column G required or can not be text";
+                                }
+                            }
+                            if ($ingredint_alertqty == '' || !is_numeric($ingredint_alertqty)) {
+                                if ($arrayerror == '') {
+                                    $arrayerror.="Row Number $i column H required or can not be text";
+                                } else {
+                                    $arrayerror.="<br> Row Number $i column H required  or can not be text";
+                                }
+                            }
                         }
                         if ($arrayerror == '') {
-                            if(!is_null($this->input->post('remove_previous'))){
-                                $this->db->query("TRUNCATE table `tbl_ingredients`");
-                            }
+
                             for ($i = 4; $i <= $totalrows; $i++) {
                                 $ingredint_name = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(0, $i)->getValue()));
                                 $ingredint_code = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(1, $i)->getValue())); //Excel Column 1
                                 $ingredint_category = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(2, $i)->getValue())); //Excel Column 2
-                                $ingredint_unit = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(3, $i)->getValue())); //Excel Column 3
-                                $ingredint_alertqty = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(4, $i)->getValue())); //Excel Column 4
-                                $ingredint_perchaseprice = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(5, $i)->getValue())); //Excel Column 5
+                                $ingredint_purchase_unit = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(3, $i)->getValue())); //Excel Column 3
+                                $ingredint_unit = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(4, $i)->getValue())); //Excel Column 3
+                                $conversion_rate = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(5, $i)->getValue())); //Excel Column 3
+                                $ingredint_perchaseprice = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(6, $i)->getValue())); //Excel Column 5
+                                $ingredint_alertqty = htmlspecialchars(trim($objWorksheet->getCellByColumnAndRow(7, $i)->getValue())); //Excel Column 4
 
                                 $ingredint_unit = $this->get_unit_id($ingredint_unit);
+                                $ingredint_purchase_unit = $this->get_unit_id($ingredint_purchase_unit);
                                 $ingredint_category = $this->get_cat_id($ingredint_category);
+
+                                $consumption_unit_cost  = $ingredint_perchaseprice/$conversion_rate;
 
                                 $fmc_info = array();
                                 $fmc_info['name'] = $ingredint_name;
@@ -286,7 +341,10 @@ class Ingredient extends Cl_Controller {
                                 $fmc_info['category_id'] = $ingredint_category;
                                 $fmc_info['purchase_price'] = $ingredint_perchaseprice;
                                 $fmc_info['alert_quantity'] = $ingredint_alertqty;
+                                $fmc_info['purchase_unit_id'] = $ingredint_purchase_unit;
                                 $fmc_info['unit_id'] = $ingredint_unit;
+                                $fmc_info['conversion_rate'] = $conversion_rate;
+                                $fmc_info['consumption_unit_cost'] = $consumption_unit_cost;
                                 $fmc_info['user_id'] = $this->session->userdata('user_id');
                                 $fmc_info['company_id'] = $this->session->userdata('company_id');
                                 $this->Common_model->insertInformation($fmc_info, "tbl_ingredients");

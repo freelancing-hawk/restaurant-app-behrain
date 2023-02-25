@@ -98,7 +98,7 @@
                                 <td>
                                     <?php 
                                                 if($value->cooking_done_time == '0000-00-00 00:00:00'){ 
-                                                    echo 'N/A'; 
+                                                    echo lang('n_a');
                                                 }else{   
                                                     $cooking_done_time = strtotime($value->cooking_done_time);
                                                     $order_time = strtotime($value->order_time);

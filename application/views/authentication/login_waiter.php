@@ -61,7 +61,7 @@ if($wl){
                             echo '<div class="topAlert alert alert-danger alert-dismissible"> 
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             <p><i class="icon fa fa-times"></i>';
-                            echo escape_output($this->session->flashdata('exception_1'));
+                            echo escape_output($this->session->flashdata('exception_1'));unset($_SESSION['exception_1']);
                             echo '</p></div>';
                         }
                     ?>

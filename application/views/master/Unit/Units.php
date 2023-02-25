@@ -5,7 +5,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -18,9 +18,7 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('units'); ?>" data-id_name="datatable">
             </div>
             <div class="col-md-offset-4 col-md-2">
-                <a class="btn_list m-right btn bg-blue-btn" href="<?php echo base_url() ?>Unit/addEditUnit">
-                    <i data-feather="plus"></i> <?php echo lang('add_unit'); ?>
-                </a>
+
             </div>
         </div>
     </section>
@@ -58,11 +56,11 @@
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a
+                                            <li data-access="update-212" class="menu_assign_class"><a
                                                     href="<?php echo base_url() ?>Unit/addEditUnit/<?php echo escape_output($this->custom->encrypt_decrypt($unit->id, 'encrypt')); ?>"><i
                                                         class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a>
                                             </li>
-                                            <li><a class="delete"
+                                            <li data-access="delete-212" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>Unit/deleteUnit/<?php echo escape_output($this->custom->encrypt_decrypt($unit->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>
@@ -86,8 +84,7 @@
 <!-- DataTables -->
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jquery-3.3.1.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
-</script>
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.buttons.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.html5.min.js"></script>
@@ -96,6 +93,5 @@
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/pdfmake.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/vfs_fonts.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/newDesign/js/forTable.js"></script>
-
 
 <script src="<?php echo base_url(); ?>frequent_changing/js/custom_report.js"></script>

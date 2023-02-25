@@ -6,4 +6,13 @@
     #wrapper {
         max-width: 685px;
     }
+    .arabic_text_left_is{
+        unicode-bidi: unset;
+    }
+}
+.arabic_text_left_is{
+    unicode-bidi: unset;
+}
+#barcode_invoice canvas{
+    width: 25% !important;
 }

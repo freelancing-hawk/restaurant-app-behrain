@@ -1,6 +1,4 @@
 <link rel="stylesheet" href="<?= base_url('assets/') ?>buttonCSS/checkBotton.css">
-
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">
@@ -16,7 +14,7 @@
                 <div>
                     <div class="row">
 
-                        <div class="col-sm-12 mb-2 col-md-4">
+                        <div class="col-sm-12 mb-2 col-md-3">
 
                             <div class="form-group">
                                 <label><?php echo lang('name'); ?> <span class="required_star">*</span></label>
@@ -30,11 +28,11 @@
                             </div>
                             <?php } ?>
                         </div>
-                        <div class="col-sm-12 mb-2 col-md-4">
+                        <div class="col-sm-12 mb-2 col-md-3">
 
                             <div class="form-group">
-                                <label><?php echo lang('email_address'); ?> <span class="required_star">*</span></label>
-                                <input tabindex="3" type="text" name="email_address" class="form-control"
+                                <label><?php echo lang('email_address'); ?> </label>
+                                <input tabindex="2" type="text" name="email_address" class="form-control"
                                     placeholder="<?php echo lang('email_address'); ?>"
                                     value="<?php echo set_value('email_address'); ?>">
                             </div>
@@ -45,11 +43,11 @@
                             <?php } ?>
 
                         </div>
-                        <div class="col-sm-12 mb-2 col-md-4">
+                        <div class="col-sm-12 mb-2 col-md-3">
 
                             <div class="form-group">
                                 <label><?php echo lang('phone'); ?> <span class="required_star">*</span></label>
-                                <input tabindex="2" type="text" name="phone" class="form-control integerchk"
+                                <input tabindex="3" type="text" name="phone" class="form-control integerchk"
                                     placeholder="<?php echo lang('phone'); ?>"
                                     value="<?php echo set_value('phone'); ?>">
                             </div>
@@ -59,13 +57,18 @@
                             </div>
                             <?php } ?>
                         </div>
-                        <div class="col-sm-12 mb-2 col-md-4">
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
-                                <label><?php echo lang('designation'); ?><span class="required_star"> *</span>
-                                    <small><?php echo lang('enter_waiter'); ?></small></label>
-                                <input tabindex="2" type="text" name="designation" class="form-control"
-                                    placeholder="<?php echo lang('designation'); ?>"
-                                    value="<?php echo set_value('designation'); ?>">
+                                <label><?php echo lang('designation'); ?><span class="required_star"> *</span></label>
+                                <select name="designation" class="form-control select2">
+                                    <option value=""><?php echo lang('select'); ?></option>
+                                    <option <?php echo set_select('designation','Admin')?> value="Admin"><?php echo lang('Admin'); ?></option>
+                                    <option <?php echo set_select('designation','Cashier')?> value="Cashier"><?php echo lang('Cashier'); ?></option>
+                                    <option <?php echo set_select('designation','Manager')?> value="Manager"><?php echo lang('Manager'); ?></option>
+                                    <option <?php echo set_select('designation','Waiter')?> value="Waiter"><?php echo lang('Waiter'); ?></option>
+                                    <option <?php echo set_select('designation','Normal User')?> value="Normal User"><?php echo lang('Normal_Users'); ?></option>
+                                    <option <?php echo set_select('designation','Others')?> value="Others"><?php echo lang('Others'); ?></option>
+                                </select>
                             </div>
                             <?php if (form_error('designation')) { ?>
                             <div class="callout callout-danger my-2">
@@ -75,12 +78,11 @@
                         </div>
                         <?php
                         $language_manifesto = $this->session->userdata('language_manifesto');
-                        if(str_rot13($language_manifesto)=="eriutoeri"):
+                        if(str_rot13($language_manifesto)=="eriutoeri" && !(isFoodCourt('sGmsJaFJE'))):
                         ?>
-                        <div class="col-sm-12 mb-2 col-md-8">
-
+                        <div class="col-sm-12 mb-2 col-md-6">
                             <div class="form-group">
-                                <label><?php echo lang('outlets'); ?><span class="required_star"> *</span></label>
+                                <label><?php echo lang('outlets'); ?></label>
                                 <br>
                                 <?php
                                 foreach ($outlets as $value) {
@@ -99,20 +101,37 @@
                             <?php
                         endif;
                         ?>
+                        <div class="col-sm-12 mb-2 col-md-6">
+                            <div class="form-group">
+                                <label><?php echo lang('kitchens'); ?><small>(<?php echo lang('user_tooltip_kitchens'); ?>)</small></label>
+                                <br>
+                                <?php
+                                foreach ($kitchens as $value) {
+                                    ?>
+                                    <label class="container mt-2">
+                                        <input class="outlet_class" type="checkbox" name="kitchens[]" <?php echo set_checkbox('kitchens[]', $value->id); ?> value="<?php echo escape_output($value->id) ?>"> <?php echo escape_output($value->name) ?>
+                                        <span class="checkmark"></span>
+
+                                    </label>
+                                <?php } ?>
+                            </div>
+                        </div>
                     </div>
+                    <p>&nbsp;</p>
                     <div class="row">
                         <div class="col-sm-12 mb-2 col-md-6">
                             <div class="form-group radio_button_problem">
-                                <label><?php echo lang('will_login'); ?> <span class="required_star">*</span></label>
+                                <label><?php echo lang('will_login'); ?>  <span class="required_star">*</span></label>
                                 <div class="radio">
-                                    <label class="me-5">
-                                        <input tabindex="5" type="radio" name="will_login" id="will_login_yes"
-                                            value="Yes">Yes </label>
                                     <label>
 
-                                        <input tabindex="6" type="radio" name="will_login" id="will_login_no" value="No"
-                                            checked>No
+                                        <input type="radio" <?php echo set_checkbox('will_login',"No")?> name="will_login" id="will_login_no" value="No"
+                                               checked><?php echo lang('no'); ?>
                                     </label>
+                                    <label class="me-5">
+                                        <input <?php echo set_checkbox('will_login',"Yes")?> tabindex="5" type="radio" name="will_login" id="will_login_yes"
+                                            value="Yes"><?php echo lang('yes'); ?> </label>
+
                                 </div>
                             </div>
                             <?php if (form_error('will_login')) { ?>
@@ -124,11 +143,53 @@
                     </div>
                     <div id="will_login_section" class="txt_11">
                         <div class="row">
-                            <div class="col-sm-12 mb-2 col-md-4">
+                            <div class="col-sm-12 mb-2 col-md-3">
+                                <div class="form-group">
+                                    <label> <?php echo lang('order_receiving'); ?></label>
+                                    <select class="form-control select2" name="order_receiving_id" id="order_receiving_id">
+                                        <option value=""><?php echo lang('select'); ?></option>
+                                        <?php
+                                        foreach ($waiters as $value):
+                                            if($value->designation=="Cashier"):
+                                                if($user_details->id!=$value->id):
+                                                    ?>
+                                                    <option <?php echo ($user_details->order_receiving_id==$value->id)?'selected':''?>  <?php echo set_select('order_receiving_id',$value->id)?> value="<?=$value->id?>"><?=$value->full_name?></option>
+                                                    <?php
+                                                endif;
+                                            endif;
+                                        endforeach;
+                                        ?>
+                                    </select>
+                                </div>
+                                <?php if (form_error('order_receiving_id')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('order_receiving_id'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+
+                            <div class="clearfix"></div>
+                            <div class="col-sm-12 mb-2 col-md-3">
+                                <div class="form-group">
+                                    <label><?php echo lang('role'); ?><span class="required_star"> *</span></label>
+                                    <select name="role_id" class="form-control select2">
+                                        <option value=""><?php echo lang('select'); ?></option>
+                                        <?php foreach ($roles as $value): ?>
+                                         <option <?php echo set_select('role_id',$value->id)?> value="<?php echo escape_output($value->id)?>"><?php echo escape_output($value->role_name)?></option>
+                                        <?php endforeach;?>
+                                    </select>
+                                </div>
+                                <?php if (form_error('role_id')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <span class="error_paragraph"><?php echo form_error('role_id'); ?></span>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="col-sm-12 mb-2 col-md-3">
 
                                 <div class="form-group">
                                     <label><?php echo lang('password'); ?> <span class="required_star">*</span></label>
-                                    <input tabindex="5" type="text" name="password" class="form-control"
+                                    <input tabindex="7" type="text" name="password" class="form-control"
                                         placeholder="<?php echo lang('password'); ?>"
                                         value="<?php echo set_value('password'); ?>">
                                 </div>
@@ -139,12 +200,12 @@
                                 <?php } ?>
                             </div>
 
-                            <div class="col-sm-12 mb-2 col-md-4">
+                            <div class="col-sm-12 mb-2 col-md-3">
 
                                 <div class="form-group">
                                     <label><?php echo lang('confirm_password'); ?> <span
                                             class="required_star">*</span></label>
-                                    <input tabindex="4" type="text" name="confirm_password" class="form-control"
+                                    <input tabindex="8" type="text" name="confirm_password" class="form-control"
                                         placeholder="<?php echo lang('confirm_password'); ?>"
                                         value="<?php echo set_value('confirm_password'); ?>">
                                 </div>
@@ -155,52 +216,22 @@
                                 <?php } ?>
                             </div>
 
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group my-2">
-                                    <label><?php echo lang('menu_access'); ?> <span
-                                                class="required_star">*</span></label>
+                            <div class="col-sm-12 mb-2 col-md-3">
+                                <div class="form-group">
+                                    <label><?php echo lang('login_pin'); ?>
+                                    </label><a class="btn btn-xs btn-primary generate_now pull-right"><?php echo lang('Generate'); ?></a>
+                                    <input tabindex="9" type="number" id="login_pin" onfocus="select();" name="login_pin" class="form-control"
+                                           placeholder="<?php echo lang('login_pin'); ?>"
+                                           value="<?php echo set_value('login_pin'); ?>">
                                 </div>
-                                <label class="container my-3"> <?php echo lang('select_all'); ?>
-                                    <input type="checkbox" id="checkbox_userAll">
-                                    <span class="checkmark"></span>
-                                </label>
-                                    <hr class="my-2">
-                                <?php
-                            if (isset($user_menus)) {
-                                foreach ($user_menus as $value) {
-                                    if($value->controller_name=="Plugin" && isServiceAccessPlugin('','','sGmsJaFJE')):
-                                        $n=str_replace(" ","_",$value->label);
-                                        $m=strtolower($n);
-                                        ?>
-                                        <label class="container"><?= lang($m) ?>
-                                            <input type="checkbox" class="checkbox_user" value="<?php echo escape_output($value->id); ?>"
-                                                   name="menu_id[]" <?= set_checkbox('menu_id[]', $value->id) ?>>
-                                            <span class="checkmark"></span>
-                                        </label>
-                                        <?php
-                                        elseif($value->controller_name!="Plugin"):
-                                    $n=str_replace(" ","_",$value->label);
-                                    $m=strtolower($n);
-                                    ?>
-                                <label class="container"><?= lang($m) ?>
-                                    <input type="checkbox" class="checkbox_user" value="<?php echo escape_output($value->id); ?>"
-                                        name="menu_id[]" <?= set_checkbox('menu_id[]', $value->id) ?>>
-                                    <span class="checkmark"></span>
-                                </label>
-                            <?php
-                            endif;
-                                }
-                            }
-                            ?>
-                            </div>
-                                <?php if (form_error('menu_id')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <span class="error_paragraph"><?php echo form_error('menu_id'); ?></span>
-                                </div>
+                                <?php if (form_error('login_pin')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <span class="error_paragraph"><?php echo form_error('login_pin'); ?></span>
+                                    </div>
                                 <?php } ?>
                             </div>
+
+                        </div>
                         </div>
                     </div>
                     <!-- /.box-body -->

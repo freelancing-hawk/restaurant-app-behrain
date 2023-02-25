@@ -1,6 +1,37 @@
+/*checking menu access and hide*/
+let company_id_indexdb  = $("#company_id_indexdb").val();
+let user_id  = $("#user_id").val();
+$(".menu_assign_class").each(function() {
+    let this_access = $(this).attr("data-access");
+    if((window.menu_objects).indexOf(this_access) > -1) {
+
+    } else {
+        if(this_access=="saas"){
+            if(company_id_indexdb!=1 && user_id!=1){
+                $(this).remove();
+            }
+        }else{
+            if(this_access!=undefined){
+                $(this).remove();
+            }
+        }
+
+    }
+
+});
+
+$(".treeview").each(function() {
+    if(!($(this).find(".treeview-menu").find("li").length)){
+        $(this).remove();
+    }
+});
+$(".check_main_menu").each(function() {
+    if(!($(this).find(".menu_assign_class").length)){
+        $(this).remove();
+    }
+});
 // material icon init
 feather.replace();
-
 $(".select_multiple").select2({
     multiple: true,
     placeholder: 'Select',
@@ -48,100 +79,6 @@ $.ajax({
         alert("error");
     }
 });
-$('#register_details').on('click', function(e) {
-    e.preventDefault();
-    $.ajax({
-        url: base_url+"Sale/registerDetailCalculationToShowAjax",
-        method: "POST",
-        data: {
-            csrf_name_: csrf_value_
-        },
-        success: function(response) {
-            console.log(response);
-            if (!IsJsonString(response)) {
-                swal(
-                    {
-                        title: warning + "!",
-                        text: register_not_open,
-                        confirmButtonColor: "#3c8dbc",
-                        confirmButtonText: ok,
-                        showCancelButton: true
-                    },
-                    function () {
-                        window.location.replace(base_url + 'Register/openRegister');
-                    }
-                );
-            }else{
-                response = JSON.parse(response);
-                $('#myModal').modal('show');
-                $('#opening_closing_register_time').show();
-                $('#opening_register_time').html(response.opening_date_time);
-                let opening_balance_text = $("#opening_balance").val();
-                let customer_due_receive_text = $("#customer_due_receive").val();
-                let sale_text = $("#sale").val();
-
-                let t1 = response.opening_date_time.split(/[- :]/);
-                let d1 = new Date(Date.UTC(t1[0], t1[1] - 1, t1[2], t1[3], t1[4], t1[5]));
-                let t2 = '';
-                if(response.closing_date_time){
-                    t2 = response.closing_date_time.split(/[- :]/);
-                }
-
-                let d2 = new Date(Date.UTC(t2[0], t2[1] - 1, t2[2], t2[3], t2[4], t2[5]));
-
-                if (d1 > d2) {
-                    $('#closing_register_time').html(not_closed_yet);
-                } else {
-                    $('#closing_register_time').html(response.closing_date_time);
-                }
-
-
-                let register_detail_modal_content = '';
-                let customer_due_receive = (response.customer_due_receive == null) ? 0 : response
-                    .customer_due_receive;
-                let opening_balance = (response.opening_balance == null) ? 0 : response
-                    .opening_balance;
-                let sale_due_amount = (response.sale_due_amount == null) ? 0 : response
-                    .sale_due_amount;
-                let sale_in_card = (response.sale_in_card == null) ? 0 : response.sale_in_card;
-                let sale_in_cash = (response.sale_in_cash == null) ? 0 : response.sale_in_cash;
-                let sale_in_paypal = (response.sale_in_paypal == null) ? 0 : response
-                    .sale_in_paypal;
-                let sale_paid_amount = (response.sale_paid_amount == null) ? 0 : response
-                    .sale_paid_amount;
-                let sale_total_payable_amount = (response.sale_total_payable_amount == null) ? 0 :
-                    response.sale_total_payable_amount;
-
-                let balance = (parseFloat(opening_balance) + parseFloat(sale_paid_amount) +
-                    parseFloat(customer_due_receive)).toFixed(ir_precision_h);
-                register_detail_modal_content += '<p>'+opening_balance_text+': ' +
-                    currency + ' ' + opening_balance + '</p>';
-                // register_detail_modal_content += '<p>Sale Total Amount: '+currency+' '+sale_total_payable_amount+'</p>';
-                register_detail_modal_content +=
-                    '<p>'+sale_text+' ('+paid_amount+'): ' +
-                    currency + ' ' + sale_paid_amount + '</p>';
-                // register_detail_modal_content += '<p>Sale Due Amount: '+currency+' '+sale_due_amount+'</p>';
-                // register_detail_modal_content += '<p>&nbsp;</p>';
-                register_detail_modal_content +=
-                    '<p>'+customer_due_receive_text+': ' + currency + ' ' +
-                    customer_due_receive + '</p>';
-                register_detail_modal_content +=
-                    '<p>Balance {'+opening_balance+' + '+sale+' ('+paid_amount+') + '+customer_due_receive+'}: ' +
-                    currency + ' ' + balance + '</p>';
-                register_detail_modal_content +=
-                    '<p style="width:100%;border-bottom:1px solid #b5d6f6;line-height:0px;">&nbsp;</p>';
-
-                register_detail_modal_content +=response.payment_html_content;
-                $('#register_details_body').html(register_detail_modal_content);
-                // $('#myModal').modal('hide');
-            }
-
-        },
-        error: function() {
-            alert("error");
-        }
-    });
-});
 
 $('#register_close').on('click', function() {
     let r = confirm("Are you sure to close register?");
@@ -167,6 +104,32 @@ $('#register_close').on('click', function() {
             }
         });
     }
+});
+
+$('.set_collapse').on('click', function() {
+    let status = Number($(this).attr("data-status"));
+    let status_tmp = '';
+    if(status==1){
+        $(this).attr('data-status',2);
+        status_tmp = "No";
+    }else{
+        $(this).attr('data-status',1);
+        status_tmp = "Yes";
+    }
+    $.ajax({
+        url: base_url+"authentication/set_collapse",
+        method: "POST",
+        data: {
+            status: status_tmp,
+            csrf_name_: csrf_value_
+        },
+        success: function(response) {
+
+        },
+        error: function() {
+            alert("error");
+        }
+    });
 });
 
 function IsJsonString(str) {
@@ -254,3 +217,6 @@ function display_date_time() {
     /* recursive call for new time*/
     getNewDateTime();
 }
+
+
+

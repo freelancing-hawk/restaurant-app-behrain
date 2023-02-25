@@ -31,10 +31,35 @@ class User extends Cl_Controller {
             redirect('Authentication/index');
         }
 
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "291";
+        $function = "";
+        if($segment_2=="users"){
+            $function = "view";
+        }elseif($segment_2=="addEditUser" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditUser"){
+            $function = "add";
+        }elseif($segment_2=="deactivateUser"){
+            $function = "deactivate";
+        }elseif($segment_2=="activateUser"){
+            $function = "activate";
+        }elseif($segment_2=="deleteUser"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -75,10 +100,13 @@ class User extends Cl_Controller {
      * @param int
      */
     public function addEditUser($encrypted_id = "") {
-        if(isServiceAccessOnly('sGmsJaFJE')){
-            if(!checkCreatePermissionUser()){
-                $this->session->set_flashdata('exception_1',lang('not_permission_user_create_error'));
-                redirect('User/users');
+        $str = $this->session->userdata('language_manifesto');
+        if($str!="fgjgldkfg"){
+            if(isServiceAccessOnly('sGmsJaFJE') && !isFoodCourt()){
+                if(!checkCreatePermissionUser()){
+                    $this->session->set_flashdata('exception_1',lang('not_permission_user_create_error'));
+                    redirect('User/users');
+                }
             }
         }
 
@@ -86,11 +114,6 @@ class User extends Cl_Controller {
         $company_id = $this->session->userdata('company_id');
         $outlet_id = $this->session->userdata('outlet_id');
         if ($id != '') {
-            $user_menu_access_obj = $this->User_model->getUserMenuAccess($id);
-            $user_menu_access_arr = array();
-            foreach ($user_menu_access_obj as $value) {
-                $user_menu_access_arr[] = $value->menu_id;
-            }
             $user_details = $this->Common_model->getDataById($id, "tbl_users");
         }
         if ($this->input->post('submit')) {
@@ -99,37 +122,45 @@ class User extends Cl_Controller {
                 $post_phone =htmlspecialchars($this->input->post($this->security->xss_clean('phone')));
                 $existing_phone = $user_details->phone;
                 if ($post_phone != $existing_phone) {
-                    $this->form_validation->set_rules('phone',  lang('phone'), "required|is_unique[tbl_users.phone]|numeric");
+                    $this->form_validation->set_rules('phone',  lang('phone'), "required|numeric");
                 } else {
                     $this->form_validation->set_rules('phone',  lang('phone'), "required|numeric");
                 }
             } else {
-                $this->form_validation->set_rules('phone', lang('phone'), "required|is_unique[tbl_users.phone]|numeric");
+                $this->form_validation->set_rules('phone', lang('phone'), "required|numeric");
             }
 
             if ($id != '') {
                 $post_email_address =htmlspecialchars($this->input->post($this->security->xss_clean('email_address')));
+                $post_login_pin =htmlspecialchars($this->input->post($this->security->xss_clean('login_pin')));
                 $existing_email_address = $user_details->email_address;
+                $existing_login_pin = $user_details->login_pin;
                 if ($post_email_address != $existing_email_address) {
-                    $this->form_validation->set_rules('email_address',  lang('email_address'), "required|max_length[50]|is_unique[tbl_users.email_address]");
+                    $this->form_validation->set_rules('email_address',  lang('email_address'), "max_length[50]");
                 } else {
-                    $this->form_validation->set_rules('email_address',  lang('email_address'), "required|max_length[50]");
+                    $this->form_validation->set_rules('email_address',  lang('email_address'), "max_length[50]");
                 }
+
+                if ($existing_login_pin != $post_login_pin) {
+                    $this->form_validation->set_rules('login_pin',  lang('login_pin'), "required|max_length[4]|min_length[4]|is_unique[tbl_users.login_pin]");
+                }
+
             } else {
-                $this->form_validation->set_rules('email_address',  lang('email_address'), "required|max_length[50]|is_unique[tbl_users.email_address]");
+                $this->form_validation->set_rules('email_address',  lang('email_address'), "max_length[50]");
             }
             $this->form_validation->set_rules('designation',  lang('designation'), "required|max_length[50]|min_length[3]");
+
             if($this->input->post($this->security->xss_clean('will_login'))=='Yes' && $id == ""){
+                $this->form_validation->set_rules('role_id',  lang('role_id'), "required|max_length[50]");
                 $this->form_validation->set_rules('password',  lang('password'), "required|max_length[50]|min_length[6]");
                 $this->form_validation->set_rules('confirm_password',  lang('confirm_password'), "required|max_length[50]|min_length[6]|matches[password]");
-                if(is_null($this->input->post('user_type')) || $this->input->post('user_type')==""){
-                    $this->form_validation->set_rules('menu_id',  lang('menu_access'), "callback_check_menu_access");
-                }    
+                $this->form_validation->set_rules('login_pin',  lang('login_pin'), "max_length[4]|min_length[4]|is_unique[tbl_users.login_pin]");
             }
             if ($this->form_validation->run() == TRUE) {
                 $ids = '';
                     $language_manifesto = $this->session->userdata('language_manifesto');
-                    if(str_rot13($language_manifesto)=="eriutoeri"):
+
+                    if(str_rot13($language_manifesto)=="eriutoeri"  && !(isFoodCourt('sGmsJaFJE'))):
                         $outlets =$this->input->post($this->security->xss_clean('outlets'));
                         foreach ($outlets as $k1 => $outlet):
                             $ids.= $outlet;
@@ -140,51 +171,49 @@ class User extends Cl_Controller {
                       else:
                           $ids = $outlet_id;
                           endif;
+                $kitchens = '';
+                $kitchens_tmp =$this->input->post($this->security->xss_clean('kitchens'));
+                if(isset($kitchens_tmp) && $kitchens_tmp){
+                    foreach ($kitchens_tmp as $k1 => $kitchen):
+                        $kitchens.= $kitchen;
+                        $kitchens.=",";
+                    endforeach;
+                }
+
                 $user_info = array();
                 $user_info['full_name'] =htmlspecialchars($this->input->post($this->security->xss_clean('full_name')));
                 $user_info['email_address'] =htmlspecialchars($this->input->post($this->security->xss_clean('email_address')));
                 $user_info['phone'] =htmlspecialchars($this->input->post($this->security->xss_clean('phone')));
                 $user_info['designation'] =htmlspecialchars($this->input->post($this->security->xss_clean('designation')));
+                $user_info['login_pin'] =htmlspecialchars($this->input->post($this->security->xss_clean('login_pin')));
                 $user_info['will_login'] =htmlspecialchars($this->input->post($this->security->xss_clean('will_login')));
+                $user_info['role_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('role_id')));
+                $user_info['order_receiving_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('order_receiving_id')));
+                $user_info['kitchens'] = $kitchens;
                 if($this->input->post($this->security->xss_clean('will_login'))=='Yes' && $this->input->post($this->security->xss_clean('password'))){
                     $user_info['password'] = md5($this->input->post($this->security->xss_clean('password')));
                     if($id==''){
                         $user_info['role'] = (is_null($this->input->post('user_type')) || $this->input->post('user_type')=="")?'User':$this->input->post('user_type');
                     }
                 }
-                $user_info['outlets'] = $ids;
-                $user_info['outlet_id'] = $ids;
+                if(!isFoodCourt()){
+                    $user_info['outlets'] = $ids;
+                    $user_info['outlet_id'] = $ids;
+                }else{
+                    $user_info['outlets'] = $this->session->userdata('outlet_id');;
+                    $user_info['outlet_id'] = $this->session->userdata('outlet_id');;
+                }
                 if ($id == "") {
                     $user_info['company_id'] = $this->session->userdata('company_id');
-                    $user_id = $this->Common_model->insertInformation($user_info, "tbl_users");
+                    $user_info['created_id'] = $this->session->userdata('user_id');
+                    $this->Common_model->insertInformation($user_info, "tbl_users");
                     if($this->input->post($this->security->xss_clean('will_login'))=='Yes'){
-                        if($user_info['role']=="POS User"){
-                            $uma = array();
-                            $uma['menu_id'] = 1;
-                            $uma['user_id'] = $user_id;
-                            $this->Common_model->insertInformation($uma, "tbl_user_menu_access");
-                            $uma = array();
-                            $uma['menu_id'] = 15;
-                            $uma['user_id'] = $user_id;
-                            $this->Common_model->insertInformation($uma, "tbl_user_menu_access");
-                        }else{
-                            if(isset($_POST['menu_id'])){
-                                $this->saveUserMenusAccess($_POST['menu_id'], $user_id, 'tbl_user_menu_access');    
-                            }
-                                
-                        }
+
                     }
                     $this->session->set_flashdata('exception',  lang('insertion_success'));
                 } else {
                     $this->Common_model->updateInformation($user_info, $id, "tbl_users");
                     $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_outlets");
-                    
-                    $this->db->delete('tbl_user_menu_access', array('user_id' => $id));
-                    if($this->input->post($this->security->xss_clean('will_login'))=='Yes'){
-                        if(isset($_POST['menu_id'])){
-                            $this->saveUserMenusAccess($_POST['menu_id'], $id, 'tbl_user_menu_access');
-                        }
-                    }
                     $this->session->set_flashdata('exception', lang('update_success'));
                 }
                 redirect('User/users');
@@ -192,18 +221,22 @@ class User extends Cl_Controller {
 
                 if ($id == "") {
                     $data = array();
+                    $data['roles'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_roles");
                     $data['user_menus'] = $this->Common_model->getUserMenus();
+                     $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
+                    $data['kitchens'] = $this->Common_model->getAllViaPanel();
                     $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_outlets");
                     $data['main_content'] = $this->load->view('user/addUser', $data, TRUE);
                     $this->load->view('userHome', $data);
                 } else {
                     $data = array();
                     $data['encrypted_id'] = $encrypted_id;
+                    $data['roles'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_roles");
                     $data['user_details'] = $this->Common_model->getDataById($id, "tbl_users");
                     $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_outlets");
                     $data['user_menus'] = $this->Common_model->getUserMenus();
-                    //$data['user_menu_access'] = $this->User_model->getUserMenuAccess($id);
-                    $data['user_menu_access'] = $user_menu_access_arr;
+                     $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
+                    $data['kitchens'] = $this->Common_model->getAllViaPanel();
                     $data['main_content'] = $this->load->view('user/editUser', $data, TRUE);
                     $this->load->view('userHome', $data);
                 }
@@ -211,37 +244,25 @@ class User extends Cl_Controller {
         } else {
             if ($id == "") {
                 $data = array();
+                $data['roles'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_roles");
                 $data['user_menus'] = $this->Common_model->getUserMenus();
                 $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_outlets");
+                $data['kitchens'] = $this->Common_model->getAllViaPanel();
+                 $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
                 $data['main_content'] = $this->load->view('user/addUser', $data, TRUE);
                 $this->load->view('userHome', $data);
             } else {
                 $data = array();
                 $data['encrypted_id'] = $encrypted_id;
+                $data['roles'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_roles");
                 $data['user_details'] = $this->Common_model->getDataById($id, "tbl_users");
                 $data['user_menus'] = $this->Common_model->getUserMenus();
                 $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_outlets");
-                $data['user_menu_access'] = $user_menu_access_arr;
+                $data['kitchens'] = $this->Common_model->getAllViaPanel();
+                 $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
                 $data['main_content'] = $this->load->view('user/editUser', $data, TRUE);
-
                 $this->load->view('userHome', $data);
             }
-        }
-    }
-     /**
-     * check menu access
-     * @access public
-     * @return boolean
-     * @param no
-     */
-    public function check_menu_access() {
-        $menu_id = $this->input->post('menu_id');
-
-        if (count($menu_id) <= 0) {
-            $this->form_validation->set_message('check_menu_access', 'At least 1 menu access should be selected');
-            return false;
-        } else {
-            return true;
         }
     }
      /**
@@ -252,14 +273,6 @@ class User extends Cl_Controller {
      * @param int
      * @param string
      */
-    public function saveUserMenusAccess($user_menu_ids, $user_id, $table_name) {
-        foreach ($user_menu_ids as $row => $umi):
-            $uma = array();
-            $uma['menu_id'] = $umi;
-            $uma['user_id'] = $user_id;
-            $this->Common_model->insertInformation($uma, "tbl_user_menu_access");
-        endforeach;
-    }
      /**
      * deactivate User
      * @access public

@@ -16,6 +16,13 @@
  */
 
 defined('BASEPATH') OR exit('No direct script access allowed');
+require APPPATH.'third_party/endroid_qrcode/autoload.php';
+
+use Endroid\QrCode\ErrorCorrectionLevel;
+//use Endroid\QrCode\LabelAlignment;
+use Endroid\QrCode\QrCode;
+//use Endroid\QrCode\Response\QrCodeResponse;
+
 
 class Setting extends Cl_Controller {
 
@@ -30,10 +37,42 @@ class Setting extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "6";
+        $function = "";
+
+        if($segment_2=="index" || $segment_2==""){
+            $function = "update";
+        }else if($segment_2=="tax"){
+            $controller = "52";
+            $function = "update_tax";
+        }else if($segment_2=="selfOrder" || $segment_2=="onlineOrder" || $segment_2=="selfOrderQrcode" || $segment_2=="onlineOrderURL" || $segment_2=="downloadQRcode"){
+            $controller = "64";
+            $function = "update";
+        }else if($segment_2=="invoicePrinterSetting"){
+               $controller = "40";
+            $function = "update";
+        }else if($segment_2=="resetTransactionalData" || $segment_2=="resettransactionaldata"){
+               $controller = "350";
+            $function = "reset";
+        }else if($segment_2=="billPrinterSetting"){
+               $controller = "43";
+            $function = "update";
+        }else if($segment_2=="KOTPrinterSetting"){
+               $controller = "46";
+            $function = "update";
+        }else{
+           $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
     }
 
      /**
@@ -47,23 +86,31 @@ class Setting extends Cl_Controller {
         $company_id = $id = $outlet_id = $this->session->userdata('company_id');
         $language_manifesto = $this->session->userdata('language_manifesto');
         $id = $this->custom->encrypt_decrypt($id, 'decrypt');
-        
+
         if ($this->input->post('submit')) {
             $this->form_validation->set_rules('business_name', lang('business_name'), 'required|max_length[50]');
+            $this->form_validation->set_rules('short_name', lang('short_name'), 'required|max_length[2]');
             $this->form_validation->set_rules('invoice_logo', lang('invoice_logo'), 'callback_validate_invoice_logo|max_length[500]');
             $this->form_validation->set_rules('date_format', lang('date_format'), 'required|max_length[250]');
             $this->form_validation->set_rules('zone_name', lang('Time_Zone'), 'required|max_length[250]');
             $this->form_validation->set_rules('currency', lang('currency'), 'required|max_length[250]');
             $this->form_validation->set_rules('invoice_footer', lang('invoice_footer'), 'max_length[250]');
             if(str_rot13($language_manifesto)!="eriutoeri"):
-                $this->form_validation->set_rules('default_waiter', lang('Default_Waiter'), 'required|max_length[11]');
+                $this->form_validation->set_rules('default_waiter', lang('Default_Waiter'), 'max_length[11]');
             endif;
             $this->form_validation->set_rules('default_customer', lang('Default_Customer'), 'required|max_length[11]');
             $this->form_validation->set_rules('default_payment', lang('Default_Payment_Method'), 'required|max_length[11]');
 
+            $is_loyalty_enable = htmlspecialchars($this->input->post($this->security->xss_clean('is_loyalty_enable')));
+            if($is_loyalty_enable=="enable"){
+                $this->form_validation->set_rules('minimum_point_to_redeem', lang('minimum_point_to_redeem'), 'required|max_length[11]');
+                $this->form_validation->set_rules('loyalty_rate', lang('loyalty_rate'), 'required|max_length[11]');
+            }
+
             if ($this->form_validation->run() == TRUE) {
                 $outlet_info = array();
                 $outlet_info['business_name'] =htmlspecialchars($this->input->post($this->security->xss_clean('business_name')));
+                $outlet_info['short_name'] =htmlspecialchars($this->input->post($this->security->xss_clean('short_name')));
                 if ($_FILES['invoice_logo']['name'] != "") {
                     $outlet_info['invoice_logo'] = $this->session->userdata('invoice_logo');
                     $this->session->unset_userdata('invoice_logo');
@@ -76,37 +123,33 @@ class Setting extends Cl_Controller {
                 $outlet_info['currency'] =htmlspecialchars($this->input->post($this->security->xss_clean('currency')));
                 $outlet_info['currency_position'] =htmlspecialchars($this->input->post($this->security->xss_clean('currency_position')));
                 $outlet_info['precision'] =htmlspecialchars($this->input->post($this->security->xss_clean('precision')));
+                if(isServiceAccessOnly('sGmsJaFJE')):
+                    $outlet_info['saas_landing_page'] =htmlspecialchars($this->input->post($this->security->xss_clean('saas_landing_page')));
+                endif;
                 if(str_rot13($language_manifesto)!="eriutoeri"):
                     $outlet_info['default_waiter'] =htmlspecialchars($this->input->post($this->security->xss_clean('default_waiter')));
                 endif;
 
                 $outlet_info['default_customer'] =htmlspecialchars($this->input->post($this->security->xss_clean('default_customer')));
                 $outlet_info['default_payment'] =htmlspecialchars($this->input->post($this->security->xss_clean('default_payment')));
-                $outlet_info['pre_or_post_payment'] =htmlspecialchars($this->input->post($this->security->xss_clean('pre_or_post_payment')));
                 $outlet_info['invoice_footer'] =htmlspecialchars($this->input->post($this->security->xss_clean('invoice_footer')));
 
-                $outlet_info['print_format_invoice'] =htmlspecialchars($this->input->post($this->security->xss_clean('print_format_invoice')));
-                $outlet_info['printing_invoice'] = htmlspecialchars($this->input->post('printing_invoice'));
-                $outlet_info['receipt_printer_invoice'] = htmlspecialchars($this->input->post('receipt_printer_invoice'));
-
-                $outlet_info['print_format_bill'] =htmlspecialchars($this->input->post($this->security->xss_clean('print_format_bill')));
-                $outlet_info['printing_bill'] = htmlspecialchars($this->input->post('printing_bill'));
-                $outlet_info['receipt_printer_bill'] = htmlspecialchars($this->input->post('receipt_printer_bill'));
-
-                $outlet_info['print_format_kot'] =htmlspecialchars($this->input->post($this->security->xss_clean('print_format_kot')));
-                $outlet_info['printing_kot'] = htmlspecialchars($this->input->post('printing_kot'));
-                $outlet_info['receipt_printer_kot'] = htmlspecialchars($this->input->post('receipt_printer_kot'));
-
-                $outlet_info['print_format_bot'] =htmlspecialchars($this->input->post($this->security->xss_clean('print_format_bot')));
-                $outlet_info['printing_bot'] = htmlspecialchars($this->input->post('printing_bot'));
-                $outlet_info['receipt_printer_bot'] = htmlspecialchars($this->input->post('receipt_printer_bot'));
-
-                $outlet_info['print_server_url_bot'] = htmlspecialchars($this->input->post('print_server_url_bot'));
-                $outlet_info['print_server_url_kot'] = htmlspecialchars($this->input->post('print_server_url_kot'));
-                $outlet_info['print_server_url_bill'] = htmlspecialchars($this->input->post('print_server_url_bill'));
-                $outlet_info['print_server_url_invoice'] = htmlspecialchars($this->input->post('print_server_url_invoice'));
-                $outlet_info['service_type'] = htmlspecialchars($this->input->post('service_type'));
                 $outlet_info['service_amount'] = htmlspecialchars($this->input->post('service_amount'));
+                $outlet_info['delivery_amount'] = htmlspecialchars($this->input->post('delivery_amount'));
+                $outlet_info['decimals_separator'] = htmlspecialchars($this->input->post('decimals_separator'));
+                $outlet_info['thousands_separator'] = htmlspecialchars($this->input->post('thousands_separator'));
+                $outlet_info['default_order_type_delivery_p'] = htmlspecialchars($this->input->post('default_order_type_delivery_p'));
+                $outlet_info['when_clicking_on_item_in_pos'] = htmlspecialchars($this->input->post('when_clicking_on_item_in_pos'));
+                $outlet_info['is_rounding_enable'] = htmlspecialchars($this->input->post('is_rounding_enable'));
+                $outlet_info['default_order_type'] = htmlspecialchars($this->input->post('default_order_type'));
+                $outlet_info['is_loyalty_enable'] = htmlspecialchars($this->input->post('is_loyalty_enable'));
+                $outlet_info['pre_or_post_payment'] = htmlspecialchars($this->input->post('pre_or_post_payment'));
+                $outlet_info['minimum_point_to_redeem'] = htmlspecialchars($this->input->post('minimum_point_to_redeem'));
+                $outlet_info['loyalty_rate'] = htmlspecialchars($this->input->post('loyalty_rate'));
+                $outlet_info['split_bill'] = htmlspecialchars($this->input->post('split_bill'));
+                $outlet_info['place_order_tooltip'] = htmlspecialchars($this->input->post('place_order_tooltip'));
+                $outlet_info['food_menu_tooltip'] = htmlspecialchars($this->input->post('food_menu_tooltip'));
+                $outlet_info['sms_send_auto'] = htmlspecialchars($this->input->post('sms_send_auto'));
 
 
                 if(!isServiceAccessOnlyLogin('sGmsJaFJE')):
@@ -114,7 +157,7 @@ class Setting extends Cl_Controller {
                     endif;
 
                 if ($id == "") {
-                    $outlet_info['starting_date'] = date("Y-m-d"); 
+                    $outlet_info['starting_date'] = date("Y-m-d");
                     $outlet_info['user_id'] = $this->session->userdata('user_id');
                     $outlet_info['company_id'] = $this->session->userdata('company_id');
                     $outlet_info['outlet_code'] = $this->Outlet_model->generateOutletCode();
@@ -152,11 +195,124 @@ class Setting extends Cl_Controller {
             if(str_rot13($language_manifesto)!="eriutoeri"):
                 $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
             endif;
+            $data['deliveryPartners'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_delivery_partners");
             $data['paymentMethods'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_payment_methods");
             $data['main_content'] = $this->load->view('authentication/setting', $data, TRUE);
             $this->load->view('userHome', $data);
         }
-        
+
+    }
+    public function invoicePrinterSetting($id = '') {
+        $encrypted_id = $id;
+        $company_id = $id = $outlet_id = $this->session->userdata('company_id');
+        $language_manifesto = $this->session->userdata('language_manifesto');
+        $id = $this->custom->encrypt_decrypt($id, 'decrypt');
+
+        if ($this->input->post('submit')) {
+            $outlet_info = array();
+            $outlet_info['print_format_invoice'] =htmlspecialchars($this->input->post($this->security->xss_clean('print_format_invoice')));
+            $outlet_info['printing_invoice'] = htmlspecialchars($this->input->post('printing_invoice'));
+            $outlet_info['receipt_printer_invoice'] = htmlspecialchars($this->input->post('receipt_printer_invoice'));
+            $outlet_info['print_server_url_invoice'] = htmlspecialchars($this->input->post('print_server_url_invoice'));
+            $outlet_info['open_cash_drawer_when_printing_invoice'] = htmlspecialchars($this->input->post('open_cash_drawer_when_printing_invoice'));
+            if ($id == "") {
+                $this->Common_model->insertInformation($outlet_info, "tbl_companies");
+                $this->session->set_flashdata('exception', lang('insertion_success'));
+            } else {
+                $this->Common_model->updateInformation($outlet_info, $id, "tbl_companies");
+                $this->session->set_flashdata('exception', lang('update_success'));
+            }
+            $this->session->set_userdata($outlet_info);
+            redirect('setting/invoicePrinterSetting');
+        } else {
+            $data = array();
+            $data['encrypted_id'] = $encrypted_id;
+            $data['outlet_information'] = $this->Common_model->getDataById($id, "tbl_companies");
+            $data['zone_names'] = $this->Common_model->getAllForDropdown("tbl_time_zone");
+            $data['customers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_customers");
+            $data['printers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_printers");
+            if(str_rot13($language_manifesto)!="eriutoeri"):
+                $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
+            endif;
+            $data['paymentMethods'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_payment_methods");
+            $data['main_content'] = $this->load->view('authentication/invoice_printer_setting', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+
+    }
+    public function billPrinterSetting($id = '') {
+        $encrypted_id = $id;
+        $company_id = $id = $outlet_id = $this->session->userdata('company_id');
+        $language_manifesto = $this->session->userdata('language_manifesto');
+        $id = $this->custom->encrypt_decrypt($id, 'decrypt');
+
+        if ($this->input->post('submit')) {
+            $outlet_info = array();
+            $outlet_info['print_format_bill'] =htmlspecialchars($this->input->post($this->security->xss_clean('print_format_bill')));
+            $outlet_info['printing_bill'] = htmlspecialchars($this->input->post('printing_bill'));
+            $outlet_info['receipt_printer_bill'] = htmlspecialchars($this->input->post('receipt_printer_bill'));
+            $outlet_info['print_server_url_bill'] = htmlspecialchars($this->input->post('print_server_url_bill'));
+            if ($id == "") {
+                $this->Common_model->insertInformation($outlet_info, "tbl_companies");
+                $this->session->set_flashdata('exception', lang('insertion_success'));
+            } else {
+                $this->Common_model->updateInformation($outlet_info, $id, "tbl_companies");
+                $this->session->set_flashdata('exception', lang('update_success'));
+            }
+            $this->session->set_userdata($outlet_info);
+            redirect('setting/billPrinterSetting');
+        } else {
+            $data = array();
+            $data['encrypted_id'] = $encrypted_id;
+            $data['outlet_information'] = $this->Common_model->getDataById($id, "tbl_companies");
+            $data['zone_names'] = $this->Common_model->getAllForDropdown("tbl_time_zone");
+            $data['customers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_customers");
+            $data['printers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_printers");
+            if(str_rot13($language_manifesto)!="eriutoeri"):
+                $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
+            endif;
+            $data['paymentMethods'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_payment_methods");
+            $data['main_content'] = $this->load->view('authentication/bill_printer_setting', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+
+    }
+    public function KOTPrinterSetting($id = '') {
+        $encrypted_id = $id;
+        $company_id = $id = $outlet_id = $this->session->userdata('company_id');
+        $language_manifesto = $this->session->userdata('language_manifesto');
+        $id = $this->custom->encrypt_decrypt($id, 'decrypt');
+
+        if ($this->input->post('submit')) {
+            $outlet_info = array();
+            $outlet_info['print_format_kot'] =htmlspecialchars($this->input->post($this->security->xss_clean('print_format_kot')));
+            $outlet_info['printing_kot'] = htmlspecialchars($this->input->post('printing_kot'));
+            $outlet_info['print_server_url_kot'] = htmlspecialchars($this->input->post('print_server_url_kot'));
+
+            if ($id == "") {
+                $this->Common_model->insertInformation($outlet_info, "tbl_companies");
+                $this->session->set_flashdata('exception', lang('insertion_success'));
+            } else {
+                $this->Common_model->updateInformation($outlet_info, $id, "tbl_companies");
+                $this->session->set_flashdata('exception', lang('update_success'));
+            }
+            $this->session->set_userdata($outlet_info);
+            redirect('setting/KOTPrinterSetting');
+        } else {
+            $data = array();
+            $data['encrypted_id'] = $encrypted_id;
+            $data['outlet_information'] = $this->Common_model->getDataById($id, "tbl_companies");
+            $data['zone_names'] = $this->Common_model->getAllForDropdown("tbl_time_zone");
+            $data['customers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_customers");
+            $data['printers'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_printers");
+            if(str_rot13($language_manifesto)!="eriutoeri"):
+                $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
+            endif;
+            $data['paymentMethods'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_payment_methods");
+            $data['main_content'] = $this->load->view('authentication/KOTPrinterSetting', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+
     }
      /**
      * validate invoice logo
@@ -205,7 +361,7 @@ class Setting extends Cl_Controller {
                 $this->form_validation->set_rules('port_address', "Port Address", "required|max_length[300]");
                 $this->form_validation->set_rules('user_name', "Username", "required|max_length[300]");
                 $this->form_validation->set_rules('password', "Password", "required|max_length[300]");
-            
+
             if ($this->form_validation->run() == TRUE) {
 
                 $data['host_name'] =htmlspecialchars($this->input->post($this->security->xss_clean('host_name')));
@@ -254,7 +410,7 @@ class Setting extends Cl_Controller {
         //truncate all transactional data
         $this->db->query("TRUNCATE tbl_sales");
         $this->db->query("TRUNCATE tbl_sales_details");
-        $this->db->query("TRUNCATE bl_sales_details_modifiers");
+        $this->db->query("TRUNCATE tbl_sales_details_modifiers");
         $this->db->query("TRUNCATE tbl_sale_consumptions");
         $this->db->query("TRUNCATE tbl_sale_consumptions_of_menus");
         $this->db->query("TRUNCATE tbl_sale_consumptions_of_modifiers_of_menus");
@@ -284,9 +440,6 @@ class Setting extends Cl_Controller {
                 $this->form_validation->set_rules('tax_title', 'Tax Title', 'required|max_length[50]');
                 $this->form_validation->set_rules('tax_registration_no', 'Tax Registration No', 'required|max_length[50]');
                 $this->form_validation->set_rules('tax_is_gst', 'Tax is GST', 'required|max_length[50]');
-                if ($this->input->post('tax_is_gst') == "Yes") {
-                    $this->form_validation->set_rules('state_code', 'State Code', 'required|max_length[50]');
-                }
                 $this->form_validation->set_rules('taxes[]', 'Taxes', 'required|max_length[10]');
             }
 
@@ -297,14 +450,12 @@ class Setting extends Cl_Controller {
                     $outlet_info['tax_title'] =htmlspecialchars($this->input->post($this->security->xss_clean('collect_tax')));
                     $outlet_info['tax_registration_no'] =htmlspecialchars($this->input->post($this->security->xss_clean('collect_tax')));
                     $outlet_info['tax_is_gst'] =htmlspecialchars($this->input->post($this->security->xss_clean('collect_tax')));
-                    if ($this->input->post('collect_tax') == "Yes") {
-                        $outlet_info['state_code'] =htmlspecialchars($this->input->post($this->security->xss_clean('state_code')));
-                    }
                 }
+                $outlet_info['tax_type'] =htmlspecialchars($this->input->post($this->security->xss_clean('tax_type')));
                 $outlet_info['tax_title'] =htmlspecialchars($this->input->post($this->security->xss_clean('tax_title')));
                 $outlet_info['tax_registration_no'] =htmlspecialchars($this->input->post($this->security->xss_clean('tax_registration_no')));
                 $outlet_info['tax_is_gst'] =htmlspecialchars($this->input->post($this->security->xss_clean('tax_is_gst')));
-                $outlet_info['state_code'] =htmlspecialchars($this->input->post($this->security->xss_clean('state_code')));
+                $this->session->set_userdata($outlet_info);
 
                 $this->Common_model->updateInformation($outlet_info, $id, "tbl_companies");
 
@@ -327,6 +478,185 @@ class Setting extends Cl_Controller {
             $data['main_content'] = $this->load->view('authentication/tax', $data, TRUE);
             $this->load->view('userHome', $data);
         }
+    }
+    public function selfOrder($id = '') {
+        if ($this->input->post('submit')) {
+            $this->form_validation->set_rules('sos_enable_self_order', lang('sos_enable_self_order'), 'required|max_length[10]');
+            if ($this->form_validation->run() == TRUE) {
+                $outlet_info = array();
+                $outlet_info['sos_enable_self_order'] =htmlspecialchars($this->input->post($this->security->xss_clean('sos_enable_self_order')));
+                $this->Common_model->updateInformation($outlet_info, $id, "tbl_companies");
+                $this->session->set_flashdata('exception', 'Information has been updated successfully!');
+
+                redirect('setting/selfOrder');
+            } else {
+                $data = array();
+                $data['company'] = getCompanyInfo();
+                $data['main_content'] = $this->load->view('authentication/selfOrderSetting', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+
+        } else {
+            $data = array();
+            $data['company'] = getCompanyInfo();
+            $data['main_content'] = $this->load->view('authentication/selfOrderSetting', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+    }
+    public function selfOrderQrcode($id = '') {
+        $outlet_id_post = htmlspecialchars($this->input->post($this->security->xss_clean('outlet_id')));
+        $outlet_id = isset($outlet_id_post) && $outlet_id_post?$outlet_id_post:$this->session->userdata('outlet_id');
+        if ($this->input->post('submit')) {
+            if(isLMni()):
+                $this->form_validation->set_rules('outlet_id', lang('outlet'), 'required|max_length[10]');
+            endif;
+
+            if ($this->form_validation->run() == TRUE) {
+                $data = array();
+                if($outlet_id){
+                    $tables = $this->Common_model->getAllByCustomId($outlet_id,"outlet_id","tbl_tables",$order='');
+                    $company_id = $this->session->userdata("company_id");
+                    foreach ($tables as $value){
+                        $url_qrcode = base_url().'self-order/'.$value->id.'/'.$outlet_id.'/'.$company_id.'/Yes/';
+                        $save_path = "qr_code/";
+                        $file_name = $save_path."table-qrcode-".$value->id.".png";
+                        $footer_text = "Table: ".$value->name;
+                        $this->create_qr($url_qrcode,$file_name,$footer_text);
+                    }
+                    $data['tables'] = $tables;
+                }
+                $data['main_content'] = $this->load->view('authentication/generate_qrcode', $data, TRUE);
+                $this->load->view('userHome', $data);
+
+            } else {
+
+                $data = array();
+                $data['company'] = getCompanyInfo();
+                $data['main_content'] = $this->load->view('authentication/generate_qrcode', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+
+        } else {
+            $data = array();
+            if($outlet_id){
+                $tables = $this->Common_model->getAllByCustomId($outlet_id,"outlet_id","tbl_tables",$order='');
+                $company_id = $this->session->userdata("company_id");
+                foreach ($tables as $value){
+                    $url_qrcode = base_url().'self-order/'.$value->id.'/'.$outlet_id.'/'.$company_id.'/Yes/';
+                    $save_path = "qr_code/";
+                    $file_name = $save_path."table-qrcode-".$value->id.".png";
+                    $footer_text = "Table: ".$value->name;
+                    $this->create_qr($url_qrcode,$file_name,$footer_text);
+                }
+                $data['tables'] = $tables;
+            }
+            $data['company'] = getCompanyInfo();
+            $data['main_content'] = $this->load->view('authentication/generate_qrcode', $data, TRUE);
+            $this->load->view('userHome', $data);
+
+        }
+    }
+    public function onlineOrder($id = '') {
+        if ($this->input->post('submit')) {
+            $this->form_validation->set_rules('sos_enable_online_order', lang('sos_enable_online_order'), 'required|max_length[10]');
+            if ($this->form_validation->run() == TRUE) {
+                $outlet_info = array();
+                $outlet_info['sos_enable_online_order'] =htmlspecialchars($this->input->post($this->security->xss_clean('sos_enable_online_order')));
+                $this->Common_model->updateInformation($outlet_info, $id, "tbl_companies");
+                $this->session->set_flashdata('exception', 'Information has been updated successfully!');
+
+                redirect('setting/onlineOrder');
+            } else {
+                $data = array();
+                $data['company'] = getCompanyInfo();
+                $data['main_content'] = $this->load->view('authentication/onlineOrderSetting', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+
+        } else {
+            $data = array();
+            $data['company'] = getCompanyInfo();
+            $data['main_content'] = $this->load->view('authentication/onlineOrderSetting', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+    }
+    public function onlineOrderURL($id = '') {
+        $outlet_id_post = htmlspecialchars($this->input->post($this->security->xss_clean('outlet_id')));
+        $outlet_id = isset($outlet_id_post) && $outlet_id_post?$outlet_id_post:$this->session->userdata('outlet_id');
+        if ($this->input->post('submit')) {
+            if(isLMni()):
+                $this->form_validation->set_rules('outlet_id', lang('outlet'), 'required|max_length[10]');
+            endif;
+
+            if ($this->form_validation->run() == TRUE) {
+                $data = array();
+                if($outlet_id){
+                    $tables = $this->Common_model->getAllByCustomId($outlet_id,"outlet_id","tbl_tables",$order='');
+                    $company_id = $this->session->userdata("company_id");
+                    foreach ($tables as $value){
+                        $url_qrcode = base_url().'self-order/'.$value->id.'/'.$outlet_id.'/'.$company_id.'/Yes/';
+                        $save_path = "qr_code/";
+                        $file_name = $save_path."table-qrcode-".$value->id.".png";
+                        $footer_text = "Table: ".$value->name;
+                        $this->create_qr($url_qrcode,$file_name,$footer_text);
+                    }
+                    $data['tables'] = $tables;
+                }
+                $data['main_content'] = $this->load->view('authentication/generate_url', $data, TRUE);
+                $this->load->view('userHome', $data);
+
+            } else {
+
+                $data = array();
+                $data['company'] = getCompanyInfo();
+                $data['main_content'] = $this->load->view('authentication/generate_url', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+
+        } else {
+            $data = array();
+            if($outlet_id){
+                $tables = $this->Common_model->getAllByCustomId($outlet_id,"outlet_id","tbl_tables",$order='');
+                $company_id = $this->session->userdata("company_id");
+                foreach ($tables as $value){
+                    $url_qrcode = base_url().'self-order/'.$value->id.'/'.$outlet_id.'/'.$company_id.'/Yes/';
+                    $save_path = "qr_code/";
+                    $file_name = $save_path."table-qrcode-".$value->id.".png";
+                    $footer_text = "Table: ".$value->name;
+                    $this->create_qr($url_qrcode,$file_name,$footer_text);
+                }
+                $data['tables'] = $tables;
+            }
+            $data['company'] = getCompanyInfo();
+            $data['main_content'] = $this->load->view('authentication/generate_url', $data, TRUE);
+            $this->load->view('userHome', $data);
+
+        }
+    }
+    public function downloadQRcode($file = "") {
+        // load ci download helder
+        $this->load->helper('download');
+        $data = file_get_contents("qr_code/" . $file); // Read the file's
+        $name = $file;
+        force_download($name, $data);
+    }
+    function create_qr($datanya,$filename,$footer_text){
+        // Create a basic QR code
+        $data = $datanya;
+        $qrCode = new QrCode($data);
+        $qrCode->setSize(230);
+
+        // Set advanced options
+        $qrCode->setWriterByName('png');
+        $qrCode->setMargin(15);
+        $qrCode->setEncoding('UTF-8');
+        $qrCode->setLabel($footer_text,'18');
+        $qrCode->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH);
+        $qrCode->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0]);
+        $qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
+        $qrCode->setValidateResult(false);
+        $qrCode->writeFile($filename);
+        return $filename;
     }
      /**
      * save Outlet Taxes
@@ -450,6 +780,6 @@ class Setting extends Cl_Controller {
             $this->load->view('userHome', $data);
         }
     }
-    
-    
+
+
 }

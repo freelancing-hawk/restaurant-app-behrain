@@ -1,7 +1,4 @@
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/report.css">
-
-
-
 <section class="main-content-wrapper">
         
     <section class="content-header">
@@ -91,42 +88,41 @@
                                 <td>
                                     <?php 
                                         if($value->out_time == '00:00:00'){ 
-                                            echo 'N/A<br>';  
+                                             echo lang('n_a').'<br>';;
                                         }else{ 
                                             echo escape_output($value->out_time);
                                         } 
                                         ?>
                                 </td>
                                 <td>
-                                    <?php  
-                                        if($value->out_time == '00:00:00'){ 
-                                            echo 'N/A'; 
-                                        }else{ 
-                                            $to_time = strtotime($value->out_time);
-                                            $from_time = strtotime($value->in_time);
-                                            $minute = round(abs($to_time - $from_time) / 60,2); 
-                                            $hour = round(abs($minute) / 60,2);
-                                            echo escape_output($hour)." ".lang('hour');
-                                            $total_hours += $hour;
-                                        }
+                                    <?php
+                                    if($value->out_time == '00:00:00'){
+                                        echo lang('n_a');
+                                    }else{
+                                        $get_hour = (float)(getTotalHour($value->out_time,$value->in_time));
+                                        echo escape_output(isset($get_hour) && $get_hour?$get_hour:'0')." ".lang('hour_s');
+                                        $total_hours += $get_hour;
+                                    }
 
-                                        ?>
+                                    ?>
                                 </td>
                             </tr>
                             <?php
                             } }
                             ?>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td><b><?php echo lang('total'); ?> <?php echo lang('hours'); ?></b></td>
-                                <td><?php echo escape_output($total_hours) . " ".lang('hours'); ?></td>
-                            </tr>
+
                         </tbody>
-                       
+                       <tfoot>
+                       <tr>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td><b><?php echo lang('total'); ?> <?php echo lang('hours'); ?></b></td>
+                           <td><?php echo escape_output($total_hours) . " ".lang('hour_s'); ?></td>
+                       </tr>
+                       </tfoot>
                     </table>
                 </div>
                 <!-- /.box-body -->
@@ -137,8 +133,7 @@
 <!-- DataTables -->
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jquery-3.3.1.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
-</script>
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.buttons.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.html5.min.js"></script>

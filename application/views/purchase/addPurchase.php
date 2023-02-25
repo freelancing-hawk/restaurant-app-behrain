@@ -6,6 +6,7 @@
 <input type="hidden" id="date_field_required" value="<?php echo lang('date_field_required'); ?>">
 <input type="hidden" id="at_least_ingredient" value="<?php echo lang('at_least_ingredient'); ?>">
 <input type="hidden" id="paid_field_required" value="<?php echo lang('paid_field_required'); ?>">
+<input type="hidden" id="payment_id_field_required" value="<?php echo lang('payment_id_field_required'); ?>">
 <input type="hidden" id="base_url" value="<?php echo base_url(); ?>">
 <input type="hidden" id="are_you_sure" value="<?php echo lang('are_you_sure'); ?>">
 <input type="hidden" id="alert" value="<?php echo lang('alert'); ?>">
@@ -110,7 +111,7 @@
                                     <option value=""><?php echo lang('select'); ?></option>
                                     <?php foreach ($ingredients as $ingnts) { ?>
                                     <option
-                                        value="<?php echo escape_output($ingnts->id . "|" . $ingnts->name . " (" . $ingnts->code . ")|" . $ingnts->unit_name . "|" . $ingnts->purchase_price) ?>"
+                                        value="<?php echo escape_output($ingnts->id . "|" . $ingnts->name . " (" . $ingnts->code . ")|" . $ingnts->unit_name . "|" . $ingnts->purchase_price. "|" . $ingnts->unit_name) ?>"
                                         <?php echo set_select('unit_id', $ingnts->id); ?>>
                                         <?php echo escape_output($ingnts->name . "(" . $ingnts->code . ")") ?></option>
                                     <?php } ?>
@@ -144,10 +145,10 @@
                                             <th>
                                                 <?php echo lang('ingredient'); ?>(<?php echo lang('code'); ?>)</th>
                                             <th><?php echo lang('unit_price'); ?> <span
-                                                    class="ir_c_transparent">fdf</span></th>
+                                                    class="ir_c_transparent">&nbsp;</span></th>
                                             <th><?php echo lang('quantity_amount'); ?></th>
                                             <th><?php echo lang('total'); ?> <span
-                                                    class="ir_c_transparent">Hiddentext</span></th>
+                                                    class="ir_c_transparent">&nbsp;</span></th>
                                             <th><?php echo lang('actions'); ?></th>
                                         </tr>
                                     </thead>
@@ -199,6 +200,33 @@
                             </div>
                         </div>
                         <div class="col-md-1"></div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-8"></div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label><?php echo lang('payment_method'); ?> <span class="required_star">*</span></label>
+                                <select tabindex="3" class="form-control select2 ir_w_100" id="payment_id"
+                                        name="payment_id">
+                                    <option value=""><?php echo lang('select'); ?></option>
+                                    <?php foreach (getAllPaymentMethods(5) as $value) {
+                                        ?>
+                                        <option value="<?php echo escape_output($value->id) ?>"
+                                            <?php echo set_select('payment_id', $value->id); ?>>
+                                            <?php echo escape_output($value->name)?></option>
+                                        <?php
+                                    } ?>
+                                </select>
+                            </div>
+                            <?php if (form_error('payment_id')) { ?>
+                                <div class="callout callout-danger my-2">
+                                    <?php echo form_error('payment_id'); ?>
+                                </div>
+                            <?php } ?>
+                            <div class="callout callout-danger my-2 error-msg payment_id_err_msg_contnr">
+                                <p id="payment_id_err_msg"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
                     </div>
 
                     <div class="row">
@@ -207,6 +235,7 @@
 
                     </div>
                 </div>
+            <p>&nbsp;</p>
                 <input type="hidden" name="suffix_hidden_field" id="suffix_hidden_field" />
                 <div class="box-footer">
                     <div class="row">
@@ -228,7 +257,7 @@
         </div>
 
 
-    <div class="modal fade" id="supplierModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="supplierModal" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -320,11 +349,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="noticeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="noticeModal" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="noticeModal">
             <div class="modal-content">
                 <div class="modal-header">
-                <h4 class="modal-title">Notice</h4>
+                <h4 class="modal-title"><?php echo lang('notice'); ?></h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true"><i data-feather="x"></i></span></button>
                 </div>
@@ -333,18 +362,6 @@
                         <div class="col-md-12 hidden-lg hidden-sm">
                             <p class="foodMenuCartNotice">
                                 <strong class="ir_ml39"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
-                        <div class="col-md-12 hidden-xs hidden-sm">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
-                        <div class="col-md-12 hidden-xs hidden-lg">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
                                 <?php echo lang('notice_text_1'); ?>
                             </p>
                         </div>

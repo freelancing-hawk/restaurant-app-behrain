@@ -128,9 +128,9 @@
                                 <td class="ir_txt_center"><?php echo escape_output($i--); ?></td>
                                 <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->date))) ?></td>
                                 <td><?php echo escape_output($value->reference_no) ?></td>
-                                <td><?php echo escape_output(getAmt($value->paid)) ?></td>
-                                <td><?php echo escape_output(getAmt($value->due)) ?></td>
-                                <td><?php echo escape_output(getAmt($value->grand_total)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->paid)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->due)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->grand_total)) ?></td>
                             </tr>
                             <?php
                                 }
@@ -142,9 +142,9 @@
                             <th class="ir_w2_txt_center"></th>
                             <th></th>
                             <th class="ir_txt_right"><?php echo lang('total'); ?> </th>
-                            <th><?php echo escape_output(getAmt($paidGrandTotal)); ?></th>
-                            <th><?php echo escape_output(getAmt($dueGrandTotal)); ?></th>
-                            <th><?php echo escape_output(getAmt($pGrandTotal)); ?></th>
+                            <th><?php echo escape_output(getAmtCustom($paidGrandTotal)); ?></th>
+                            <th><?php echo escape_output(getAmtCustom($dueGrandTotal)); ?></th>
+                            <th><?php echo escape_output(getAmtCustom($pGrandTotal)); ?></th>
                             <th></th>
                         </tr>
                         </tfoot>

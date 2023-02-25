@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
 
         <?php
@@ -7,7 +6,7 @@
             echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception'));
+            echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
             echo '</p></div></div></section>';
         }
         ?>
@@ -18,7 +17,7 @@
             echo '<section class="alert-wrapper"><div class="alert alert-danger alert-dismissible"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <p><i class="icon fa fa-times"></i>';
-            echo escape_output($this->session->flashdata('exception_r'));
+            echo escape_output($this->session->flashdata('exception_r'));unset($_SESSION['exception_r']);
             echo '</p></div></div></section>';
         }
         ?>
@@ -29,9 +28,7 @@
                     <h2 class="top-left-header"><?php echo lang('Printers'); ?></h2>
                 </div>
                 <div class="col-md-offset-4 col-md-2">
-                    <a class="btn bg-blue-btn btn_list m-right"href="<?php echo base_url() ?>printer/addEditPrinter">
-                        <i data-feather="plus"></i> <?php echo lang('AddPrinter'); ?>
-                    </a>
+
                 </div>
             </div>
         </section>
@@ -50,7 +47,6 @@
                                 <th class="width_1_p"><?php echo lang('sn'); ?></th>
                                 <th class="width_10_p" ><?php echo lang('title'); ?></th>
                                 <th class="width_10_p" ><?php echo lang('type'); ?></th>
-                                <th class="width_10_p" ><?php echo lang('profile'); ?></th>
                                 <th class="width_10_p" ><?php echo lang('characters_per_line'); ?></th>
                                 <th class="width_10_p" ><?php echo lang('printer_ip_address'); ?></th>
                                 <th class="width_10_p" ><?php echo lang('printer_port'); ?></th>
@@ -69,7 +65,6 @@
                                         <td class="c_center"><?php echo escape_output($i--); ?></td>
                                         <td><?php echo escape_output($usrs->title); ?></td>
                                         <td><?php echo escape_output($usrs->type); ?></td>
-                                        <td><?php echo escape_output($usrs->profile_); ?></td>
                                         <td><?php echo escape_output($usrs->characters_per_line); ?></td>
                                         <td><?php echo escape_output($usrs->printer_ip_address); ?></td>
                                         <td><?php echo escape_output($usrs->printer_port); ?></td>
@@ -81,10 +76,10 @@
                                                 </button>
 
                                                 <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                                    <li>
+                                                    <li data-access="update-35" class="menu_assign_class">
                                                         <a href="<?php echo base_url() ?>printer/addEditPrinter/<?php echo escape_output($this->custom->encrypt_decrypt($usrs->id, 'encrypt')); ?>" ><i class="fa fa-edit"></i><?php echo lang('edit'); ?></a>
                                                     </li>
-                                                    <li>
+                                                    <li data-access="delete-35" class="menu_assign_class">
                                                         <a  class="delete"  href="<?php echo base_url() ?>printer/deletePrinter/<?php echo escape_output($this->custom->encrypt_decrypt($usrs->id, 'encrypt')); ?>" ><i class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                                     </li>
 

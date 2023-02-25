@@ -8,7 +8,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -18,7 +18,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-danger alert-dismissible"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception_1'));
+        echo escape_output($this->session->flashdata('exception_1'));unset($_SESSION['exception_1']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -232,16 +232,4 @@
     </div>
 
 </section>
-
-<script>
-    function setDiv() {
-        var enable_status = $("#enable_status").val();
-        //hide all div on first time
-        $(".div_hide").hide();
-        $(".div_"+enable_status).show(300)
-    }
-    setDiv();
-    $(document).on('change', '#enable_status', function(e)    {
-        setDiv();
-    });
-</script>
+<script type="text/javascript" src="<?php echo base_url('frequent_changing/js/sms_setting.js'); ?>"></script>

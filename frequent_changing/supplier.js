@@ -67,7 +67,7 @@ $(document).ready(function(){
                                 $('#supplier_id').val(supplier_id).change();
 			                }
 			            });
-                    $('.close').click();
+                    $('.btn-close').click();
 				}
 			});
 		}

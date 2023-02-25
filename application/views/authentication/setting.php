@@ -3,8 +3,6 @@ $base_color = '';
 ?>
 <script type="text/javascript" src="<?php echo base_url('frequent_changing/js/setting.js'); ?>"></script>
 
-
-
 <!-- Main content -->
 <section class="main-content-wrapper">
 <?php
@@ -13,7 +11,7 @@ if ($this->session->flashdata('exception')) {
     echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-    echo escape_output($this->session->flashdata('exception'));
+    echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
     echo '</p></div></div></section>';
 }
 ?>
@@ -21,7 +19,7 @@ if ($this->session->flashdata('exception')) {
 
     <section class="content-header">
         <h3 class="top-left-header">
-            <?php echo lang('Setting'); ?> 
+            <?php echo lang('Setting'); ?>
         </h3>
     </section>
     <div class="box-wrapper">
@@ -52,6 +50,21 @@ if ($this->session->flashdata('exception')) {
                                 </div>
                                 <?php } ?>
                             </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label><?php echo lang('short_name'); ?> <span
+                                            class="required_star">*</span></label>
+                                    <input tabindex="1" autocomplete="off" type="text" id="short_name"
+                                        name="short_name" class="form-control"
+                                        placeholder="<?php echo lang('short_name'); ?>"
+                                        value="<?php echo escape_output($outlet_information->short_name); ?>">
+                                </div>
+                                <?php if (form_error('short_name')) { ?>
+                                <div class="callout callout-danger my-2">
+                                    <?php echo form_error('short_name'); ?>
+                                </div>
+                                <?php } ?>
+                            </div>
 
                             <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
                                 <div class="form-group">
@@ -78,7 +91,7 @@ if ($this->session->flashdata('exception')) {
                                     <label><?php echo lang('Website'); ?></label>
                                     <input tabindex="3" autocomplete="off" type="text" id="website" name="website"
                                         class="form-control" placeholder="<?php echo lang('Website'); ?>"
-                                        value="<?= $outlet_information->website; ?>">
+                                        value="<?= escape_output($outlet_information->website); ?>">
                                 </div>
                                 <?php if (form_error('website')) { ?>
                                 <div class="callout callout-danger my-2">
@@ -111,7 +124,7 @@ if ($this->session->flashdata('exception')) {
                                 </div>
                                 <?php } ?>
                             </div>
-                           
+
                             <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
                                 <div class="form-group">
                                     <label><?php echo lang('Time_Zone'); ?> <span class="required_star">*</span></label>
@@ -157,10 +170,10 @@ if ($this->session->flashdata('exception')) {
                                         id="currency_position">
                                         <option
                                             <?= isset($outlet_information) && $outlet_information->currency_position == "Before Amount" ? 'selected' : '' ?>
-                                            value="Before Amount">Before Amount</option>
+                                            value="Before Amount"><?php echo lang('Before_Amount'); ?></option>
                                         <option
                                             <?= isset($outlet_information) && $outlet_information->currency_position == "After Amount" ? 'selected' : '' ?>
-                                            value="After Amount">After Amount</option>
+                                            value="After Amount"><?php echo lang('After_Amount'); ?></option>
                                     </select>
                                 </div>
                                 <?php if (form_error('currency_position')) { ?>
@@ -169,6 +182,29 @@ if ($this->session->flashdata('exception')) {
                                 </div>
                                 <?php } ?>
                             </div>
+                            <div class="clearfix"></div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 display_none">
+
+                                <div class="form-group">
+                                    <label> <?php echo lang('Rounding'); ?> <span
+                                                class="required_star">*</span></label>
+                                    <select tabindex="8" class="form-control select2" name="is_rounding_enable" id="is_rounding_enable">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->is_rounding_enable == "0" ? 'selected' : '' ?>
+                                                value="0"><?php echo lang('disable'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->is_rounding_enable == "1" ? 'selected' : '' ?>
+                                                value="1"><?php echo lang('enable'); ?></option>
+
+                                    </select>
+                                </div>
+                                <?php if (form_error('is_rounding_enable')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('is_rounding_enable'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+
                             <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
 
                                 <div class="form-group">
@@ -177,10 +213,10 @@ if ($this->session->flashdata('exception')) {
                                     <select tabindex="8" class="form-control select2" name="precision" id="precision">
                                         <option
                                             <?= isset($outlet_information) && $outlet_information->precision == "2" ? 'selected' : '' ?>
-                                            value="2">2 Digit</option>
+                                            value="2"><?php echo lang('2_Digit'); ?></option>
                                         <option
                                             <?= isset($outlet_information) && $outlet_information->precision == "3" ? 'selected' : '' ?>
-                                            value="3">3 Digit</option>
+                                            value="3"><?php echo lang('3_Digit'); ?></option>
                                     </select>
                                 </div>
                                 <?php if (form_error('precision')) { ?>
@@ -189,7 +225,122 @@ if ($this->session->flashdata('exception')) {
                                 </div>
                                 <?php } ?>
                             </div>
-                         
+
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+
+                                <div class="form-group">
+                                    <label> <?php echo lang('decimals_separator'); ?> <span
+                                                class="required_star">*</span></label>
+                                    <select tabindex="7" class="form-control select2" name="decimals_separator"
+                                            id="decimals_separator">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->decimals_separator == "." ? 'selected' : '' ?>
+                                                value="."><?php echo lang('separator_dot'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->decimals_separator == "," ? 'selected' : '' ?>
+                                                value=","><?php echo lang('separator_comma'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->decimals_separator == " " ? 'selected' : '' ?>
+                                                value=" "><?php echo lang('space'); ?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('decimals_separator')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('decimals_separator'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+
+                                <div class="form-group">
+                                    <label> <?php echo lang('thousands_separator'); ?> <span
+                                                class="required_star">*</span></label>
+                                    <select tabindex="7" class="form-control select2" name="thousands_separator"
+                                            id="thousands_separator">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->thousands_separator == "." ? 'selected' : '' ?>
+                                                value="."><?php echo lang('separator_dot'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->thousands_separator == "," ? 'selected' : '' ?>
+                                                value=","><?php echo lang('separator_comma'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->thousands_separator == " " ? 'selected' : '' ?>
+                                                value=" "><?php echo lang('space'); ?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('thousands_separator')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('thousands_separator'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+
+                                <div class="form-group">
+                                    <label> <?php echo lang('when_clicking_on_item_in_pos'); ?>  <div class="tooltip_custom">
+                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('when_clicking_on_item_in_pos_tooltip'); ?>" data-feather="help-circle"></i>
+                                        </div></label>
+                                    <select tabindex="12" class="form-control select2" name="when_clicking_on_item_in_pos"
+                                            id="when_clicking_on_item_in_pos">
+
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->when_clicking_on_item_in_pos == "1" ? 'selected' : '' ?>
+                                                value="1"><?php echo lang('show_options'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->when_clicking_on_item_in_pos == "2" ? 'selected' : '' ?>
+                                                value="2"><?php echo lang('dont_show_options'); ?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('when_clicking_on_item_in_pos')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('when_clicking_on_item_in_pos'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+
+                                <div class="form-group">
+                                    <label> <?php echo lang('default_order_type'); ?>  <div class="tooltip_custom">
+                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('default_order_type_tooltip'); ?>" data-feather="help-circle"></i>
+                                        </div></label>
+                                    <select tabindex="12" class="form-control select2" name="default_order_type"
+                                            id="default_order_type">
+                                        <option value=""><?php echo lang('None'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->default_order_type == "1" ? 'selected' : '' ?>
+                                                value="1"><?php echo lang('dine'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->default_order_type == "2" ? 'selected' : '' ?>
+                                                value="2"><?php echo lang('take_away'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->default_order_type == "3" ? 'selected' : '' ?>
+                                                value="3"><?php echo lang('delivery'); ?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('default_order_type')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('default_order_type'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+
+                                <div class="form-group">
+                                    <label> <?php echo lang('default_order_type_delivery_p'); ?> </label>
+                                    <select tabindex="12" class="form-control select2" name="default_order_type_delivery_p"
+                                            id="default_order_type_delivery_p">
+                                        <option value=""><?php echo lang('None'); ?></option>
+                                        <?php foreach ($deliveryPartners as $value):?>
+                                            <option <?php echo set_select('default_order_type_delivery_p',$value->id)?>  <?= isset($outlet_information) && $outlet_information->default_order_type_delivery_p == $value->id ? 'selected' : '' ?>  value="<?php echo escape_output($value->id)?>"><?php echo escape_output($value->name)?></option>
+                                        <?php endforeach;?>
+                                    </select>
+                                </div>
+                                <?php if (form_error('default_order_type_delivery_p')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('default_order_type_delivery_p'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
                             <?php
                             $language_manifesto = $this->session->userdata('language_manifesto');
                             $check_walk_in_customer = 1;
@@ -198,8 +349,7 @@ if ($this->session->flashdata('exception')) {
                             <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
 
                                 <div class="form-group">
-                                    <label> <?php echo lang('Default_Waiter'); ?> <span
-                                            class="required_star">*</span></label>
+                                    <label> <?php echo lang('Default_Waiter'); ?>  </label>
                                     <select tabindex="9" class="form-control select2" name="default_waiter"
                                         id="default_waiter">
                                         <option value=""><?php echo lang('select'); ?></option>
@@ -268,7 +418,7 @@ if ($this->session->flashdata('exception')) {
                                         id="default_payment">
                                         <option value=""><?php echo lang('select'); ?></option>
                                         <?php
-                                    foreach ($paymentMethods as $value):
+                                    foreach (getAllPaymentMethods(5) as $value):
                                         ?>
                                         <option
                                             <?=($outlet_information->default_payment==$value->id?'selected':($value->name=="Cash"?'selected':''))?>
@@ -285,43 +435,120 @@ if ($this->session->flashdata('exception')) {
                                 </div>
                                 <?php } ?>
                             </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label> <?php echo lang('place_order_tooltip'); ?> <span
+                                                class="required_star">*</span></label>
+                                    <select tabindex="7" class="form-control select2" name="place_order_tooltip"
+                                            id="place_order_tooltip">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->place_order_tooltip== "show" ? 'selected' : '' ?>
+                                                value="show"><?php echo lang('show')?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->place_order_tooltip== "hide" ? 'selected' : '' ?>
+                                                value="hide"><?php echo lang('hide')?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('place_order_tooltip')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('place_order_tooltip'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label> <?php echo lang('food_menu_tooltip'); ?> <span
+                                                class="required_star">*</span></label>
+                                    <select tabindex="7" class="form-control select2" name="food_menu_tooltip"
+                                            id="food_menu_tooltip">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->food_menu_tooltip== "show" ? 'selected' : '' ?>
+                                                value="show"><?php echo lang('show')?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->food_menu_tooltip== "hide" ? 'selected' : '' ?>
+                                                value="hide"><?php echo lang('hide')?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('food_menu_tooltip')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('food_menu_tooltip'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label> <?php echo lang('sms_send_auto'); ?> </label>
+                                    <select tabindex="7" class="form-control select2" name="sms_send_auto"
+                                            id="sms_send_auto">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->sms_send_auto== "1" ? 'selected' : '' ?>
+                                                value="1"><?php echo lang('no')?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->sms_send_auto== "2" ? 'selected' : '' ?>
+                                                value="2"><?php echo lang('yes')?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('sms_send_auto')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('sms_send_auto'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
                             <?php
                             $company_id = $this->session->userdata('company_id');
                             if($company_id==1):
                             ?>
 
                             <?php  endif; ?>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 display_none">
                                 <div class="form-group">
-                                    <label> <?php echo lang('service_type'); ?>  <div class="tooltip_custom">
-                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('charge_type_tooltip'); ?>" data-feather="help-circle"></i>
+                                    <label><?php echo lang('split_bill'); ?> <div class="tooltip_custom">
+                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('split_bill_tooltip'); ?>" data-feather="help-circle"></i>
                                         </div></label>
-                                    <select tabindex="12" class="form-control select2" name="service_type"
-                                        id="service_type">
+                                    <select tabindex="8" class="form-control select2" name="split_bill" id="split_bill">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->split_bill == "0" ? 'selected' : '' ?>
+                                                value="0"><?php echo lang('no'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->split_bill == "1" ? 'selected' : '' ?>
+                                                value="1"><?php echo lang('yes'); ?></option>
 
-                                        <option
-                                            <?= isset($outlet_information) && $outlet_information->service_type == "delivery" ? 'selected' : '' ?>
-                                            value="delivery"><?php echo lang('delivery'); ?></option>
-                                        <option
-                                            <?= isset($outlet_information) && $outlet_information->service_type == "service" ? 'selected' : '' ?>
-                                            value="service"><?php echo lang('service'); ?></option>
                                     </select>
                                 </div>
-                                <?php if (form_error('service_type')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('service_type'); ?>
+                                <?php if (form_error('split_bill')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('split_bill'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label> <?php echo lang('pre_or_post_payment'); ?> <span
+                                                class="required_star">*</span></label>
+                                    <select tabindex="11" class="form-control select2" name="pre_or_post_payment"
+                                            id="pre_or_post_payment">
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->pre_or_post_payment == "1" ? 'selected' : '' ?>
+                                                value="1"><?php echo lang('post_payment'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->pre_or_post_payment == "2" ? 'selected' : '' ?>
+                                                value="2"><?php echo lang('pre_payment'); ?></option>
+                                    </select>
                                 </div>
+                                <?php if (form_error('pre_or_post_payment')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('pre_or_post_payment'); ?>
+                                    </div>
                                 <?php } ?>
                             </div>
                             <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
                                 <div class="form-group">
                                     <label><?php echo lang('service_amount'); ?> <div class="tooltip_custom">
-                                        <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('charge_tooltip'); ?>" data-feather="help-circle"></i>
+                                        <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('service_charge_tooltip'); ?>" data-feather="help-circle"></i>
                                 </div></label>
                                     <input tabindex="13" autocomplete="off" type="text" id="service_amount"
                                         name="service_amount" class="form-control"
-                                        placeholder="<?php echo lang('service_amount'); ?>"
+                                        placeholder="<?php echo lang('default_discount_pl'); ?>"
                                         value="<?php echo escape_output($outlet_information->service_amount); ?>">
                                 </div>
                                 <?php if (form_error('service_amount')) { ?>
@@ -330,45 +557,103 @@ if ($this->session->flashdata('exception')) {
                                 </div>
                                 <?php } ?>
                             </div>
-                            <div class="my-2"></div>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="form-group radio_button_problem">
-                                        <div class="d-flex align-items-start">
-                                            <label><?php echo lang('pre_or_post_payment'); ?> <span
-                                                    class="required_star">*</span></label>
-                                            <div class="tooltip_custom">
-                                                <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('tooltip_txt_1'); ?>" data-feather="help-circle"></i>
-                                            </div>
-                                        </div>
-
-                                        <div class="radio">
-                                            <label>
-                                                <input tabindex="14" autocomplete="off" type="radio"
-                                                    name="pre_or_post_payment" id="pre_or_post_payment_post"
-                                                    value="Post Payment" <?php
-                                                if ($outlet_information->pre_or_post_payment == "Post Payment") {
-                                                    echo "checked";
-                                                };
-                                                ?>><?php echo lang('post_payment'); ?> </label>
-                                            <label>
-                                                <input tabindex="15" autocomplete="off" type="radio"
-                                                    name="pre_or_post_payment" id="pre_or_post_payment_pre"
-                                                    value="Pre Payment" <?php
-                                                if ($outlet_information->pre_or_post_payment == "Pre Payment") {
-                                                    echo "checked";
-                                                };
-                                                ?>><?php echo lang('pre_payment'); ?>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <?php if (form_error('pre_or_post_payment')) { ?>
-                                    <div class="callout callout-danger my-2">
-                                        <?php echo form_error('pre_or_post_payment'); ?>
-                                    </div>
-                                    <?php } ?>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label><?php echo lang('delivery_amount'); ?> <div class="tooltip_custom">
+                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('delivery_charge_tooltip'); ?>" data-feather="help-circle"></i>
+                                        </div></label>
+                                    <input tabindex="13" autocomplete="off" type="text" id="delivery_amount"
+                                           name="delivery_amount" class="form-control"
+                                           placeholder="<?php echo lang('default_discount_pl'); ?>"
+                                           value="<?php echo escape_output($outlet_information->delivery_amount); ?>">
                                 </div>
+                                <?php if (form_error('delivery_amount')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('delivery_amount'); ?>
+                                    </div>
+                                <?php } ?>
                             </div>
+                            <?php if(isServiceAccessOnly('sGmsJaFJE')):?>
+                                <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label> <?php echo lang('saas_landing_page'); ?>  <div class="tooltip_custom">
+                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('saas_landing_page_tooltip'); ?>" data-feather="help-circle"></i>
+                                        </div></label>
+                                    <select tabindex="12" class="form-control select2" name="saas_landing_page"
+                                            id="saas_landing_page">
+
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->saas_landing_page == "1" ? 'selected' : '' ?>
+                                                value="1"><?php echo lang('show'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->saas_landing_page == "2" ? 'selected' : '' ?>
+                                                value="2"><?php echo lang('hide'); ?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('saas_landing_page')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('saas_landing_page'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <?php endif?>
+                            <div class="clearfix"></div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
+                                <div class="form-group">
+                                    <label><?php echo lang('is_loyalty_enable'); ?> <div class="tooltip_custom">
+                                        <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('is_loyalty_enable_tooltip'); ?>" data-feather="help-circle"></i>
+                                </div></label>
+                                    <select tabindex="12" class="form-control select2" name="is_loyalty_enable"
+                                            id="is_loyalty_enable">
+
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->is_loyalty_enable == "disable" ? 'selected' : '' ?>
+                                                value="disable"><?php echo lang('disable'); ?></option>
+                                        <option
+                                            <?= isset($outlet_information) && $outlet_information->is_loyalty_enable == "enable" ? 'selected' : '' ?>
+                                                value="enable"><?php echo lang('enable'); ?></option>
+                                    </select>
+                                </div>
+                                <?php if (form_error('is_loyalty_enable')) { ?>
+                                <div class="callout callout-danger my-2">
+                                    <?php echo form_error('is_loyalty_enable'); ?>
+                                </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 div_loyalty">
+                                <div class="form-group">
+                                    <label><?php echo lang('minimum_point_to_redeem'); ?> <span
+                                                class="required_star">*</span></label>
+                                    <input tabindex="13" autocomplete="off" type="number" id="minimum_point_to_redeem"
+                                           name="minimum_point_to_redeem" class="form-control"
+                                           placeholder="<?php echo lang('minimum_point_to_redeem'); ?>"
+                                           value="<?php echo escape_output($outlet_information->minimum_point_to_redeem); ?>">
+                                </div>
+                                <?php if (form_error('minimum_point_to_redeem')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('minimum_point_to_redeem'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 div_loyalty">
+                                <div class="form-group">
+                                    <label><?php echo lang('loyalty_rate'); ?> <span
+                                                class="required_star">*</span> <div class="tooltip_custom">
+                                            <i data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo lang('loyalty_rate_tooltip'); ?>" data-feather="help-circle"></i>
+                                        </div> </label>
+                                    <input tabindex="13" autocomplete="off" type="text" id="loyalty_rate"
+                                           name="loyalty_rate" class="form-control integerchk"
+                                           placeholder="<?php echo lang('loyalty_rate'); ?>"
+                                           value="<?php echo escape_output($outlet_information->loyalty_rate); ?>">
+                                </div>
+                                <?php if (form_error('loyalty_rate')) { ?>
+                                    <div class="callout callout-danger my-2">
+                                        <?php echo form_error('loyalty_rate'); ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                            <div class="my-2"></div>
+
                             <?php  if(!isServiceAccessOnlyLogin('sGmsJaFJE')): ?>
                             <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
                                 <div class="form-group">
@@ -397,9 +682,9 @@ if ($this->session->flashdata('exception')) {
                             <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
                                 <div class="form-group">
                                     <label></label>
-                                    <table class="ir_w_100">
+                                    <table data-access="reset-350" class="menu_assign_class ir_w_100">
                                         <tr>
-                                            <td><a class="btn bg-blue-btn delete"
+                                            <td><a  class="btn bg-blue-btn delete"
                                                     href="<?php echo base_url(); ?>setting/resetTransactionalData"><?php echo lang('ResetTransactionalData'); ?></a>
                                             </td>
                                             <td class="ir_w_1">
@@ -415,51 +700,6 @@ if ($this->session->flashdata('exception')) {
                             </div>
                             <?php  endif; ?>
                             <div class="clearfix"></div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>WhiteLabel"><?php echo lang('WhiteLabel'); ?> </a>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>printer/printers"><?php echo lang('Printers'); ?>
-                                </a>
-                            </div>
-
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>setting/tax"><?php echo lang('Tax_Setting'); ?></a>
-                            </div>
-                            <?php if($company_id==1): ?>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>Update/index"><?php echo lang('software_update'); ?></a>
-                            </div>
-                            <div class="clearfix"></div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>Update/UninstallLicense"><?php echo lang('Uninstall_License'); ?></a>
-                            </div>
-                            <?php endif; ?>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>setting/smtpEmailSetting"><?php echo lang('SMTP_Email_Setting'); ?></a>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>setting/smsSetting"><?php echo lang('SMS_Setting'); ?></a>
-                            </div>
-
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>setting/whatsappSetting"><?php echo lang('WhatsApp_Setting'); ?></a>
-                            </div>
-                            
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11">
-                                <a target="_blank" class="btn bg-blue-btn"
-                                    href="<?php echo base_url(); ?>setting/menuRearrange"><?php echo lang('Menu_Rearrange'); ?></a>
-                            </div>
-                            
-
                         </div>
 
                         <div class="row">
@@ -477,433 +717,9 @@ if ($this->session->flashdata('exception')) {
                                 <?php } ?>
                             </div>
                         </div>
-                        
-                        <div class="my-5"></div>
+
                         <div class="row">
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <div class="form-group">
-                                    <label><?php echo lang('printing'); ?> (<?php echo lang('invoice'); ?>)</label>
-                                    <select class="form-control printing select2" id="printing_invoice"
-                                        name="printing_invoice">
-                                        <option
-                                            <?php echo isset($outlet_information->printing_invoice) && $outlet_information->printing_invoice == "web_browser"?"selected":'' ?>
-                                            <?php echo set_select('printing_invoice',"web_browser") ?> value="web_browser">
-                                            <?php echo lang('web_browser'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_invoice) && $outlet_information->printing_invoice == "direct_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_invoice',"direct_print") ?>
-                                            value="direct_print"><?php echo lang('direct_print'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_invoice) && $outlet_information->printing_invoice == "live_server_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_invoice',"live_server_print") ?>
-                                            value="live_server_print"><?php echo lang('live_server_print'); ?></option>
-                                    </select>
-                                </div>
-                                <?php if (form_error('printer_invoice')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('printer_invoice'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 receipt_printer_div_invoice">
-                                <div class="form-group">
-                                    <label><?php echo lang('receipt_printer'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <select class="form-control select2" id="receipt_printer_invoice"
-                                        name="receipt_printer_invoice">
-                                        <option value=""><?php echo lang('select'); ?></option>
-                                        <?php
-                                    foreach ($printers as $value):
-                                        ?>
-                                        <option
-                                            <?php echo  isset($outlet_information->receipt_printer_invoice) && $outlet_information->receipt_printer_invoice == $value->id?"selected":'' ?>
-                                            <?php echo set_select('receipt_printer_invoice',$value->id) ?>
-                                            value="<?php echo escape_output($value->id) ?>">
-                                            <?php echo escape_output($value->title) ?>
-                                            (<?php echo escape_output($value->path) ?>)</option>
-                                        <?php
-                                    endforeach;
-                                    ?>
-                                    </select>
-                                </div>
-                                <?php if (form_error('receipt_printer_invoice')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('receipt_printer_invoice'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11 print_server_url_div_invoice">
-
-                                <div class="form-group">
-                                    <label><?php echo lang('print_server_url'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <input tabindex="1" autocomplete="off" type="text" id="print_server_url_invoice"
-                                        name="print_server_url_invoice" class="form-control"
-                                        placeholder="<?php echo lang('print_server_url_exm'); ?>"
-                                        value="<?= $outlet_information->print_server_url_invoice; ?>">
-                                </div>
-                                <?php if (form_error('print_server_url_invoice')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_server_url_invoice'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 print_format_div_invoice">
-                                <div class="form-group radio_button_problem">
-                                    <label><?php echo lang('print_format'); ?> <span class="required_star">*</span></label>
-                                    <div class="radio">
-                                        <label>
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_invoice"
-                                                id="print_format_thermal" value="No Print" <?php
-                                            if ($outlet_information->print_format_invoice == "No Print") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('No_Print'); ?> </label>
-
-                                        <label>
-                                            
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_invoice"
-                                                id="print_format_thermal" value="56mm" <?php
-                                            if ($outlet_information->print_format_invoice == "56mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('56mm'); ?> </label>
-                                        <label>
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_invoice"
-                                                id="print_format_a4" value="80mm" <?php
-                                            if ($outlet_information->print_format_invoice == "80mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('80mm'); ?>
-                                        </label>
-                                    </div>
-                                </div>
-                                <?php if (form_error('print_format')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_format'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="clearfix"></div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <div class="form-group">
-                                    <label><?php echo lang('printing'); ?> (<?php echo lang('bill'); ?>)</label>
-                                    <select class="form-control printing select2" id="printing_bill" name="printing_bill">
-                                        <option
-                                            <?php echo isset($outlet_information->printing_bill) && $outlet_information->printing_bill == "web_browser"?"selected":'' ?>
-                                            <?php echo set_select('printing_bill',"web_browser") ?> value="web_browser">
-                                            <?php echo lang('web_browser'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_bill) && $outlet_information->printing_bill == "direct_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_bill',"direct_print") ?> value="direct_print">
-                                            <?php echo lang('direct_print'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_bill) && $outlet_information->printing_bill == "live_server_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_bill',"live_server_print") ?>
-                                            value="live_server_print"><?php echo lang('live_server_print'); ?></option>
-                                    </select>
-                                </div>
-                                <?php if (form_error('printer_bill')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('printer_bill'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 display_none receipt_printer_div_bill">
-                                <div class="form-group">
-                                    <label><?php echo lang('receipt_printer'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <select class="form-control select2" id="receipt_printer_bill"
-                                        name="receipt_printer_bill">
-                                        <option value=""><?php echo lang('select'); ?></option>
-                                        <?php
-                                    foreach ($printers as $value):
-                                        ?>
-                                        <option
-                                            <?php echo  isset($outlet_information->receipt_printer_bill) && $outlet_information->receipt_printer_bill == $value->id?"selected":'' ?>
-                                            <?php echo set_select('receipt_printer_bill',$value->id) ?>
-                                            value="<?php echo escape_output($value->id) ?>">
-                                            <?php echo escape_output($value->title) ?>
-                                            (<?php echo escape_output($value->path) ?>)</option>
-                                        <?php
-                                    endforeach;
-                                    ?>
-                                    </select>
-                                </div>
-                                <?php if (form_error('receipt_printer_bill')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('receipt_printer_bill'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11 print_server_url_div_bill">
-
-                                <div class="form-group">
-                                    <label><?php echo lang('print_server_url'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <input tabindex="1" autocomplete="off" type="text" id="print_server_url_bill"
-                                        name="print_server_url_bill" class="form-control"
-                                        placeholder="<?php echo lang('print_server_url_exm'); ?>"
-                                        value="<?= $outlet_information->print_server_url_bill; ?>">
-                                </div>
-                                <?php if (form_error('print_server_url_bill')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_server_url_bill'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 print_format_div_bill">
-                                <div class="form-group radio_button_problem">
-                                    <label><?php echo lang('print_format'); ?> <span class="required_star">*</span></label>
-                                    <div class="radio">
-                                        <label>
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_bill"
-                                                id="print_format_thermal" value="No Print" <?php
-                                            if ($outlet_information->print_format_bill == "No Print") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('No_Print'); ?> </label>
-
-                                        <label>
-                                            
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_bill"
-                                                id="print_format_thermal" value="56mm" <?php
-                                            if ($outlet_information->print_format_bill == "56mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('56mm'); ?> </label>
-                                        <label>
-
-                                            
-
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_bill"
-                                                id="print_format_a4" value="80mm" <?php
-                                            if ($outlet_information->print_format_bill == "80mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('80mm'); ?>
-                                        </label>
-                                    </div>
-                                </div>
-                                <?php if (form_error('print_format_bill')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_format_bill'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="clearfix"></div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <div class="form-group">
-                                    <label><?php echo lang('printing'); ?> (<?php echo lang('kot'); ?>)</label>
-                                    <select class="form-control printing select2" id="printing_kot" name="printing_kot">
-                                        <option
-                                            <?php echo isset($outlet_information->printing_kot) && $outlet_information->printing_kot == "web_browser"?"selected":'' ?>
-                                            <?php echo set_select('printing_kot',"web_browser") ?> value="web_browser">
-                                            <?php echo lang('web_browser'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_kot) && $outlet_information->printing_kot == "direct_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_kot',"direct_print") ?> value="direct_print">
-                                            <?php echo lang('direct_print'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_kot) && $outlet_information->printing_kot == "live_server_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_kot',"live_server_print") ?>
-                                            value="live_server_print"><?php echo lang('live_server_print'); ?></option>
-                                    </select>
-                                </div>
-                                <?php if (form_error('printer_kot')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('printer_kot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 display_none receipt_printer_div_kot">
-                                <div class="form-group">
-                                    <label><?php echo lang('receipt_printer'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <select class="form-control select2" id="receipt_printer_kot"
-                                        name="receipt_printer_kot">
-                                        <option value=""><?php echo lang('select'); ?></option>
-                                        <?php
-                                    foreach ($printers as $value):
-                                        ?>
-                                        <option
-                                            <?php echo  isset($outlet_information->receipt_printer_kot) && $outlet_information->receipt_printer_kot == $value->id?"selected":'' ?>
-                                            <?php echo set_select('receipt_printer_kot',$value->id) ?>
-                                            value="<?php echo escape_output($value->id) ?>">
-                                            <?php echo escape_output($value->title) ?>
-                                            (<?php echo escape_output($value->path) ?>)</option>
-                                        <?php
-                                    endforeach;
-                                    ?>
-                                    </select>
-                                </div>
-                                <?php if (form_error('receipt_printer_kot')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('receipt_printer_kot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11 print_server_url_div_kot">
-                                <div class="form-group">
-                                    <label><?php echo lang('print_server_url'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <input tabindex="1" autocomplete="off" type="text" id="print_server_url_kot"
-                                        name="print_server_url_kot" class="form-control"
-                                        placeholder="<?php echo lang('print_server_url_exm'); ?>"
-                                        value="<?= $outlet_information->print_server_url_kot; ?>">
-                                </div>
-                                <?php if (form_error('print_server_url_kot')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_server_url_kot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 print_format_div_kot">
-                                <div class="form-group radio_button_problem">
-                                    <label><?php echo lang('print_format'); ?> <span class="required_star">*</span></label>
-                                    <div class="radio">
-                                        <label>
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_kot"
-                                                id="print_format_thermal" value="No Print" <?php
-                                            if ($outlet_information->print_format_kot == "No Print") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('No_Print'); ?> </label>
-
-                                        <label>
-                                            
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_kot"
-                                                id="print_format_thermal" value="56mm" <?php
-                                            if ($outlet_information->print_format_kot == "56mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('56mm'); ?> </label>
-                                        <label>
-
-                                            
-
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_kot"
-                                                id="print_format_a4" value="80mm" <?php
-                                            if ($outlet_information->print_format_kot == "80mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('80mm'); ?>
-                                        </label>
-                                    </div>
-                                </div>
-                                <?php if (form_error('print_format_kot')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_format_kot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="clearfix"></div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3">
-                                <div class="form-group">
-                                    <label><?php echo lang('printing'); ?> (<?php echo lang('BOT'); ?>)</label>
-                                    <select class="form-control printing select2" id="printing_bot" name="printing_bot">
-                                        <option
-                                            <?php echo isset($outlet_information->printing_bot) && $outlet_information->printing_bot == "web_browser"?"selected":'' ?>
-                                            <?php echo set_select('printing_bot',"web_browser") ?> value="web_browser">
-                                            <?php echo lang('web_browser'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_bot) && $outlet_information->printing_bot == "direct_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_bot',"direct_print") ?> value="direct_print">
-                                            <?php echo lang('direct_print'); ?></option>
-                                        <option
-                                            <?php echo isset($outlet_information->printing_bot) && $outlet_information->printing_bot == "live_server_print"?"selected":'' ?>
-                                            <?php echo set_select('printing_bot',"live_server_print") ?>
-                                            value="live_server_print"><?php echo lang('live_server_print'); ?></option>
-                                    </select>
-                                </div>
-                                <?php if (form_error('printing_bot')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('printing_bot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 display_none receipt_printer_div_bot">
-                                <div class="form-group">
-                                    <label><?php echo lang('receipt_printer'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <select class="form-control select2" id="receipt_printer_bot"
-                                        name="receipt_printer_bot">
-                                        <option value=""><?php echo lang('select'); ?></option>
-                                        <?php
-                                    foreach ($printers as $value):
-                                        ?>
-                                        <option
-                                            <?php echo  isset($outlet_information->receipt_printer_bot) && $outlet_information->receipt_printer_bot == $value->id?"selected":'' ?>
-                                            <?php echo set_select('receipt_printer_bot',$value->id) ?>
-                                            value="<?php echo escape_output($value->id) ?>">
-                                            <?php echo escape_output($value->title) ?>
-                                            (<?php echo escape_output($value->path) ?>)</option>
-                                        <?php
-                                    endforeach;
-                                    ?>
-                                    </select>
-                                </div>
-                                <?php if (form_error('receipt_printer_bot')) { ?>
-                                <div class="alert alert-error txt-uh-21">
-                                    <?php echo form_error('receipt_printer_bot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 txt_11 print_server_url_div_bot">
-                                <div class="form-group">
-                                    <label><?php echo lang('print_server_url'); ?> <span
-                                            class="required_star">*</span></label>
-                                    <input tabindex="1" autocomplete="off" type="text" id="print_server_url_bot"
-                                        name="print_server_url_bot" class="form-control"
-                                        placeholder="<?php echo lang('print_server_url_exm'); ?>"
-                                        value="<?= $outlet_information->print_server_url_bot; ?>">
-                                </div>
-                                <?php if (form_error('print_server_url_bot')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_server_url_bot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="mb-3 col-sm-12 col-md-4 col-lg-3 print_format_div_bot">
-                                <div class="form-group radio_button_problem">
-                                    <label><?php echo lang('print_format'); ?> <span class="required_star">*</span></label>
-                                    <div class="radio">
-                                        <label>
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_bot"
-                                                id="print_format_thermal" value="No Print" <?php
-                                            if ($outlet_information->print_format_bot == "No Print") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('No_Print'); ?> </label>
-
-                                        <label>
-                                            
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_bot"
-                                                id="print_format_thermal" value="56mm" <?php
-                                            if ($outlet_information->print_format_bot == "56mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('56mm'); ?> </label>
-                                        <label>
-
-                                            
-
-                                            <input tabindex="5" autocomplete="off" type="radio" name="print_format_bot"
-                                                id="print_format_a4" value="80mm" <?php
-                                            if ($outlet_information->print_format_bot == "80mm") {
-                                                echo "checked";
-                                            };
-                                            ?>><?php echo lang('80mm'); ?>
-                                        </label>
-                                    </div>
-                                </div>
-                                <?php if (form_error('print_format_bot')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('print_format_bot'); ?>
-                                </div>
-                                <?php } ?>
-                            </div>
-                            <div class="clearfix"></div>
+                            <div class="clearfix">&nbsp;</div>
                             <div class="col-sm-3">
                                  <button type="submit" name="submit" value="submit"
                                         class="btn bg-blue-btn w-100"><?php echo lang('submit'); ?></button>
@@ -912,14 +728,14 @@ if ($this->session->flashdata('exception')) {
                     </div>
                     <!-- /.box-body -->
 
-                    
+
                     <?php echo form_close(); ?>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="logo_preview" tabindex="-1" aria-hidden="true" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="logo_preview" aria-hidden="true" aria-labelledby="myModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

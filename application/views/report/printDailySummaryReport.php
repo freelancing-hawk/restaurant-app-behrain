@@ -50,9 +50,9 @@
                                     <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                     <td><?php echo escape_output($value->reference_no); ?></td>
                                     <td><?= escape_output(getSupplierNameById($value->supplier_id)) ?></td>
-                                    <td><?php echo escape_output(getAmt($value->grand_total)); ?></td>
-                                    <td><?php echo escape_output(getAmt($value->paid)); ?></td>
-                                    <td><?php echo escape_output(getAmt($value->due)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->grand_total)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->paid)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->due)); ?></td>
                                 </tr>
                                 <?php
                             endforeach;
@@ -62,9 +62,9 @@
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
                             <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                            <td>&nbsp;<?php echo escape_output(getAmt($sum_of_gtotal)); ?></td>
-                            <td>&nbsp;<?php echo escape_output(getAmt($sum_of_paid)); ?></td>
-                            <td>&nbsp;<?php echo escape_output(getAmt($sum_of_due)); ?></td>
+                            <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_gtotal)); ?></td>
+                            <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_paid)); ?></td>
+                            <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_due)); ?></td>
                         </tr>
                     </table>
 
@@ -103,10 +103,10 @@
                                     <td><?php echo getOrderType($value->order_type); ?></td>
                                     <td><?php if(!empty($value->table_id)){ echo getTableName($value->table_id); } ?></td>
                                     <td><?= escape_output(getCustomerName($value->customer_id)) ?></td>
-                                    <td><?php echo escape_output(getAmt($value->total_payable)); ?></td>
-                                    <td><?php echo escape_output(getAmt($value->total_discount_amount)); ?></td>
-                                    <td><?php echo escape_output(getAmt($value->paid_amount)); ?></td>
-                                    <td><?php echo escape_output(getAmt($value->due_amount)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->total_payable)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->total_discount_amount)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->paid_amount)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->due_amount)); ?></td>
                                 </tr>
                                 <?php
                             endforeach;
@@ -118,10 +118,10 @@
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
                             <td class="ir_fw_txt_right"><?php echo lang('sum'); ?></td>
-                            <td>&nbsp;<?php echo escape_output(getAmt($sum_of_stotal_payable)); ?></td>
-                            <td>&nbsp;<?php echo escape_output(getAmt($sum_of_sdisc_actual)); ?></td>
-                            <td>&nbsp;<?php echo escape_output(getAmt($sum_of_spaid_amount)); ?></td>
-                            <td>&nbsp;<?php echo escape_output(getAmt($sum_of_sdue_amount)); ?></td>
+                            <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_stotal_payable)); ?></td>
+                            <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_sdisc_actual)); ?></td>
+                            <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_spaid_amount)); ?></td>
+                            <td>&nbsp;<?php echo escape_output(getAmtCustom($sum_of_sdue_amount)); ?></td>
                         </tr>
                     </table>
 

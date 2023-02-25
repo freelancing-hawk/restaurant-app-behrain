@@ -1,5 +1,3 @@
-
-
 <section class="main-content-wrapper">
 
     <section class="content-header lang_arabic">
@@ -7,18 +5,15 @@
             <?php echo lang('edit_expense'); ?>
         </h3>
     </section>
-
-
         <div class="box-wrapper">
             <!-- general form elements -->
             <div class="table-box">
-
                 <!-- /.box-header -->
                 <!-- form start -->
                 <?php echo form_open(base_url('Expense/addEditExpense/' . $encrypted_id)); ?>
                 <div>
                     <div class="row">
-                        <div class="col-sm-12 mb-2 col-md-6">
+                        <div class="col-sm-12 mb-2 col-md-3">
 
                             <div class="form-group">
                                 <label><?php echo lang('date'); ?> <span class="required_star">*</span></label>
@@ -31,7 +26,8 @@
                                 <?php echo form_error('date'); ?>
                             </div>
                             <?php } ?>
-
+                        </div>
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('amount'); ?> <span class="required_star">*</span></label>
                                 <input tabindex="2" type="text" name="amount" onfocus="this.select();"
@@ -43,7 +39,8 @@
                                 <?php echo form_error('amount'); ?>
                             </div>
                             <?php } ?>
-
+                        </div>
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('category'); ?> <span class="required_star">*</span></label>
                                 <select tabindex="3" class="form-control select2 ir_w_100" name="category_id">
@@ -65,7 +62,7 @@
                             <?php } ?>
 
                         </div>
-                        <div class="col-sm-12 mb-2 col-md-6">
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('responsible_person'); ?> <span
                                         class="required_star">*</span></label>
@@ -86,7 +83,33 @@
                                 <?php echo form_error('employee_id'); ?>
                             </div>
                             <?php } ?>
-
+                        </div>
+                        <div class="col-sm-12 mb-2 col-md-3">
+                            <div class="form-group">
+                                <label><?php echo lang('payment_method'); ?> <span class="required_star">*</span></label>
+                                <select tabindex="3" class="form-control select2 ir_w_100" id="payment_id"
+                                        name="payment_id">
+                                    <option value=""><?php echo lang('select'); ?></option>
+                                    <?php foreach (getAllPaymentMethods(5) as $value) {
+                                        ?>
+                                        <option value="<?php echo escape_output($value->id) ?>"
+                                            <?php echo set_select('payment_id', $value->id); ?>  <?php
+                                        if ($expense_information->payment_id == $value->id) {
+                                            echo "selected";
+                                        }
+                                        ?>>
+                                            <?php echo escape_output($value->name)?></option>
+                                        <?php
+                                    } ?>
+                                </select>
+                            </div>
+                            <?php if (form_error('payment_id')) { ?>
+                                <div class="callout callout-danger my-2">
+                                    <?php echo form_error('payment_id'); ?>
+                                </div>
+                            <?php } ?>
+                        </div>
+                        <div class="col-sm-12 mb-2 col-md-3">
                             <div class="form-group">
                                 <label><?php echo lang('note'); ?></label>
                                 <textarea tabindex="5" class="form-control" rows="4" name="note"
@@ -97,8 +120,6 @@
                                 <?php echo form_error('note'); ?>
                             </div>
                             <?php } ?>
-
-
                         </div>
                     </div>
                     <!-- /.box-body -->

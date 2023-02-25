@@ -1,5 +1,3 @@
-
-
 <section class="main-content-wrapper">
 
         <?php
@@ -8,11 +6,10 @@
             echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-            echo escape_output($this->session->flashdata('exception'));
+            echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
             echo '</p></div></div></section>';
         }
         ?>
-
 
         <?php
         if ($this->session->flashdata('exception_err')) {
@@ -20,7 +17,7 @@
             echo '<section class="alert-wrapper"><div class="alert alert-danger alert-dismissible"> 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             <p><i class="icon fa fa-times"></i>';
-            echo escape_output($this->session->flashdata('exception_err'));
+            echo escape_output($this->session->flashdata('exception_err'));unset($_SESSION['exception_err']);
             echo '</p></div></div></section>';
         }
         ?>
@@ -32,9 +29,7 @@
                     <input type="hidden" class="datatable_name" data-title="<?php echo lang('modifiers'); ?>" data-id_name="datatable">
                 </div> 
                 <div class="col-md-offset-8 col-md-2">
-                    <a class="btn bg-blue-btn m-right btn_list"href="<?php echo base_url() ?>modifier/addEditModifier">
-                       <i data-feather="plus"></i> <?php echo lang('add'); ?> <?php echo lang('modifier'); ?>
-                    </a>
+
                 </div> 
             </div> 
         </section> 
@@ -53,6 +48,7 @@
                                 <th class="ir_w_13"><?php echo lang('price'); ?></th>
                                 <th class="ir_w_13"><?php echo lang('description'); ?></th>
                                 <th class="ir_w_13"><?php echo lang('total'); ?> <?php echo lang('ingredients'); ?></th>
+                                <th class="ir_w_13"><?php echo lang('total'); ?> <?php echo lang('cost'); ?></th>
                                 <th class="ir_w_18"><?php echo lang('added_by'); ?></th>
                                 <th  class="ir_w_1 ir_txt_center not-export-col"><?php echo lang('actions'); ?></th>
                             </tr>
@@ -67,9 +63,10 @@
                                 <tr> 
                                     <td class="ir_txt_center"><?php echo escape_output($i--); ?></td>
                                     <td><?php echo escape_output($fdmns->name) ?></td>
-                                    <td><?php echo escape_output(getAmtP($fdmns->price)) ?></td>
+                                    <td><?php echo escape_output(getAmtPCustom($fdmns->price)) ?></td>
                                     <td><?php echo escape_output($fdmns->description) ?></td>
                                     <td class="ir_txt_center"><?php echo count(modifierIngredients($fdmns->id)); ?></td>
+                                    <td><?php echo escape_output(getAmtPCustom($fdmns->total_cost)) ?></td>
                                     <td><?php echo escape_output(userName($fdmns->user_id)); ?></td>
                                     <td class="ir_txt_center">
                                         <div class="btn-group  actionDropDownBtn">
@@ -77,9 +74,9 @@
                                                 <i data-feather="more-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu"> 
-                                                <li><a href="<?php echo base_url() ?>modifier/modifierDetails/<?php echo escape_output($this->custom->encrypt_decrypt($fdmns->id, 'encrypt')); ?>" ><i class="fa fa-eye tiny-icon"></i><?php echo lang('view_details'); ?></a></li>
-                                                <li><a href="<?php echo base_url() ?>modifier/addEditModifier/<?php echo escape_output($this->custom->encrypt_decrypt($fdmns->id, 'encrypt')); ?>" ><i class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a></li>
-                                                <li><a class="delete" href="<?php echo base_url() ?>modifier/deleteModifier/<?php echo escape_output($this->custom->encrypt_decrypt($fdmns->id, 'encrypt')); ?>" ><i class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a></li>
+                                                <li data-access="view_details-223" class="menu_assign_class"><a href="<?php echo base_url() ?>modifier/modifierDetails/<?php echo escape_output($this->custom->encrypt_decrypt($fdmns->id, 'encrypt')); ?>" ><i class="fa fa-eye tiny-icon"></i><?php echo lang('view_details'); ?></a></li>
+                                                <li data-access="update-223" class="menu_assign_class"><a href="<?php echo base_url() ?>modifier/addEditModifier/<?php echo escape_output($this->custom->encrypt_decrypt($fdmns->id, 'encrypt')); ?>" ><i class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a></li>
+                                                <li data-access="delete-223" class="menu_assign_class"><a class="delete" href="<?php echo base_url() ?>modifier/deleteModifier/<?php echo escape_output($this->custom->encrypt_decrypt($fdmns->id, 'encrypt')); ?>" ><i class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a></li>
                                             </ul> 
                                         </div>
                                     </td>
@@ -99,8 +96,7 @@
 <!-- DataTables -->
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jquery-3.3.1.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
-</script>
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.buttons.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.html5.min.js"></script>

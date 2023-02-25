@@ -1,4 +1,3 @@
-
 <!-- Main content -->
 <section class="main-content-wrapper">
 
@@ -9,7 +8,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -21,7 +20,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception_1'));
+        echo escape_output($this->session->flashdata('exception_1'));unset($_SESSION['exception_1']);
         echo '</p></div></div></section>';
     }
     ?>

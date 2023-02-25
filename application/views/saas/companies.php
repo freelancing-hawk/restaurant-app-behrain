@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
 
     <?php
@@ -7,7 +6,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -19,7 +18,7 @@
         echo '<section class="alert-wrapper"><div class="alert alert-danger alert-dismissible"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <p><i class="icon fa fa-times"></i>';
-        echo escape_output($this->session->flashdata('exception_err'));
+        echo escape_output($this->session->flashdata('exception_err'));unset($_SESSION['exception_err']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -31,9 +30,7 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('companies'); ?>" data-id_name="datatable">
             </div>
             <div class="col-md-6">
-                <a class="m-right btn_list btn bg-blue-btn" href="<?php echo base_url() ?>Service/addEditCompany">
-                   <i data-feather="plus"></i> <?php echo lang('add_company')?>
-                </a>
+
             </div>
         </div>
     </section>
@@ -49,12 +46,14 @@
                             <tr>
                                 <th class="ir_w_1"><?php echo lang('sn'); ?></th>
                                 <th class="ir_w_9"><?php echo lang('business_name')?></th>
-                                <th class="ir_w_6"><?php echo lang('plan')?></th>
-                                <th class="ir_w_6"><?php echo lang('last_payment')?></th>
-                                <th class="ir_w_10"><?php echo lang('access_remaining')?></th>
                                 <th class="ir_w_6"><?php echo lang('phone')?></th>
                                 <th class="ir_w_9"><?php echo lang('address')?></th>
-                                <th class="ir_w_5 not-export-col"><?php echo lang('outlets')?></th>
+                                <?php  if(!isFoodCourt()): ?>
+                                    <th class="ir_w_6"><?php echo lang('plan')?></th>
+                                    <th class="ir_w_6"><?php echo lang('last_payment')?></th>
+                                    <th class="ir_w_10"><?php echo lang('access_remaining')?></th>
+                                    <th class="ir_w_5 not-export-col"><?php echo lang('outlets')?></th>
+                                <?php endif; ?>
                                 <th class="ir_w_6 not-export-col text-center"><?php echo lang('actions')?></th>
                             </tr>
                         </thead>
@@ -69,26 +68,30 @@
                             <tr style="background-color: <?php echo isset($spns->payment_clear) && $spns->payment_clear=="No"?'#af1f1f29':''?>">
                                 <td><?php echo escape_output($i--); ?></td>
                                 <td>   <?php echo escape_output($spns->business_name) ?></td>
-                                <td>   <?php echo escape_output(getPlanName($spns->plan_id)) ?></td>
-                                <td>   <?php echo escape_output(getLastPaymentDate($spns->id)) ?></td>
-                                <td>
-                                    <?php
-                                    if(isset($spns->payment_clear) && $spns->payment_clear=="No"):
-                                        echo "0 day(s)";
-                                    else:
-                                    ?>
-                                        <?php echo escape_output(getRemainingAccessDay($spns->id)) ?>
+
+                                <td>   <?php echo escape_output($spns->phone) ?></td>
+                                <td>   <?php echo escape_output($spns->address) ?></td>
+                                <?php  if(!isFoodCourt()): ?>
+                                    <td>   <?php echo escape_output(getPlanName($spns->plan_id)) ?></td>
+                                    <td>   <?php echo escape_output(getLastPaymentDate($spns->id)) ?></td>
+                                    <td>
                                         <?php
+                                        if(isset($spns->payment_clear) && $spns->payment_clear=="No"):
+                                            echo "0 day(s)";
+                                        else:
+                                            ?>
+                                            <?php echo escape_output(getRemainingAccessDay($spns->id)) ?>
+                                            <?php
                                         endif;
                                         ?>
 
                                     </td>
-                                <td>   <?php echo escape_output($spns->phone) ?></td>
-                                <td>   <?php echo escape_output($spns->address) ?></td>
-                                <td>
-                                    <a href="<?php echo base_url() ?>Service/companies/<?php echo escape_output($spns->id)?>/outlets"><button type="button"
-                                                                                             class="btn btn-xs btn-primary"><?php echo lang('show_all'); ?></button></a>
-                                </td>
+                                    <td>
+                                        <a href="<?php echo base_url() ?>Service/companies/<?php echo escape_output($spns->id)?>/outlets"><button type="button"
+                                                                                                                                                  class="btn btn-xs btn-primary"><?php echo  (isFoodCourt()?lang('show'):lang('show_all'))?></button></a>
+                                    </td>
+                                <?php endif; ?>
+
                                 <td class="ir_txt_center">
                                     <div class="btn-group  actionDropDownBtn">
                                         <button type="button" class="btn bg-blue-color dropdown-toggle"
@@ -140,7 +143,7 @@
         </div>
 
 </section>
-<div class="modal fade" id="add_payment_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="add_payment_modal" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog modal-xs" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -185,8 +188,7 @@
 <!-- DataTables -->
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jquery-3.3.1.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
-</script>
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.buttons.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.html5.min.js"></script>

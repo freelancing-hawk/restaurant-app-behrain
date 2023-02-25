@@ -18,8 +18,7 @@ $(function () {
   let dinein_count = Number($("#dinein_count").val());
   let take_away_count = Number($("#take_away_count").val());
   let delivery_count = Number($("#delivery_count").val());
-  base_url = $("#base_url_").val();
-
+  let base_url = $("#base_url_").val();
   let bar = new Morris.Bar({
     element: "operational_comparision",
     resize: true,

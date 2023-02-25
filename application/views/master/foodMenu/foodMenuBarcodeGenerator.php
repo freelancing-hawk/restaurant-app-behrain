@@ -11,7 +11,7 @@ if ($this->session->flashdata('exception')) {
     echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <p><i class="fa fa-check"></i>';
-    echo escape_output($this->session->flashdata('exception'));
+    echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
     echo '</p></div></div></section>';
 }
 ?>
@@ -102,7 +102,7 @@ if ($this->session->flashdata('exception')) {
                              <td><?php echo escape_output($ingrnts->code); ?></td>
                              <td><?php echo escape_output($ingrnts->name); ?></td>
                              <td><?php echo foodMenucategoryName($ingrnts->category_id); ?></td>
-                             <td> <?php echo getAmt($sale_price); ?></td>
+                             <td> <?php echo getAmtCustom($sale_price); ?></td>
                          </tr>
                          <?php
                      }
@@ -128,8 +128,7 @@ if ($this->session->flashdata('exception')) {
  </section>
  <!-- DataTables -->
  <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
-</script>
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.buttons.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.html5.min.js"></script>
@@ -138,6 +137,4 @@ if ($this->session->flashdata('exception')) {
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/pdfmake.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/vfs_fonts.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/newDesign/js/forTable.js"></script>
-
-
 <script src="<?php echo base_url(); ?>frequent_changing/js/foodmenubarcode.js"></script>

@@ -1,6 +1,6 @@
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/report.css">
+ <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/report.css">
 <?php
-    
+
     $show_register_report = "";
     if(isset($register_info) && count($register_info)>0){
         
@@ -18,22 +18,39 @@
             }
             if(isset($payment_methods_sale) && $payment_methods_sale){
                 foreach ($payment_methods_sale as $key=>$value){
-                    $html_p .= $key.": ".getAmtP($value);
+                    $html_p .= $key.": ".getAmtPCustom($value);
                     if($j < ($total_used_payment -1)){
                         $html_p .= ", ";
                     }
                     $j++;
                 }
             }
+            $html_others = '';
+            if(isset($single_register_info->others_currency) && $single_register_info->others_currency){
+
+                $others_details = json_decode($single_register_info->others_currency);
+                foreach ($others_details as $key=>$vl){
+                    $html_others .= $vl->payment_name.": ".($vl->amount);
+                    if($key < (sizeof($others_details) -1)){
+                        $html_others .= ", ";
+                    }
+                }
+            }
 
             $show_register_report .= "<tr>";
             $show_register_report .= '<td>'.$i.'</td>';
+            $show_register_report .= '<td>'.$single_register_info->user_name.'</td>';
             $show_register_report .= '<td>'.$single_register_info->opening_balance_date_time.'</td>';
-            $show_register_report .= '<td>'.getAmtP($single_register_info->opening_balance).'</td>';
-            $show_register_report .= '<td>'.getAmtP($single_register_info->sale_paid_amount).'</td>';
-            $show_register_report .= '<td>'.getAmtP($single_register_info->customer_due_receive).'</td>';
+            $show_register_report .= '<td>'.getAmtPCustom($single_register_info->opening_balance).'</td>';
+            $show_register_report .= '<td>'.getAmtPCustom($single_register_info->sale_paid_amount).'</td>';
+            $show_register_report .= '<td>'.getAmtP($single_register_info->refund_amount).'</td>';
+            $show_register_report .= '<td>'.getAmtPCustom($single_register_info->customer_due_receive).'</td>';
+            $show_register_report .= '<td>'.getAmtPCustom($single_register_info->total_purchase).'</td>';
+            $show_register_report .= '<td>'.getAmtPCustom($single_register_info->total_expense).'</td>';
+            $show_register_report .= '<td>'.getAmtPCustom($single_register_info->total_due_payment).'</td>';
+            $show_register_report .= '<td>'.$html_others.'</td>';
             $show_register_report .= '<td>'.$single_register_info->closing_balance_date_time.'</td>';
-            $show_register_report .= '<td>'.getAmtP($single_register_info->closing_balance).'</td>';
+            $show_register_report .= '<td>'.getAmtPCustom($single_register_info->closing_balance).'</td>';
             $show_register_report .= '<td>'.$html_p.'</td>';
             $show_register_report .= "</tr>";        
             $i++;
@@ -134,11 +151,17 @@
                         <thead>
                             <tr>
                                 <th class="title" class="ir_w_5"><?php echo lang('sn'); ?></th>
+                                <th class="title" class="ir_w_10"><?php echo lang('user'); ?></th>
                                 <th class="title" class="ir_w_10"><?php echo lang('opening_date_time'); ?></th>
                                 <th class="title" class="ir_w_15"><?php echo lang('opening_balance'); ?></th>
                                 <th class="title" class="ir_w_15"><?php echo lang('sale'); ?>
                                     (<?php echo lang('paid_amount'); ?>)</th>
+                                <th class="title" class="ir_w_15"><?php echo lang('refund_amount'); ?></th>
                                 <th class="title" class="ir_w_15"><?php echo lang('customer_due_receive'); ?></th>
+                                <th class="title" class="ir_w_15"><?php echo lang('purchase'); ?></th>
+                                <th class="title" class="ir_w_15"><?php echo lang('expense'); ?></th>
+                                <th class="title" class="ir_w_15"><?php echo lang('due_payment'); ?></th>
+                                <th class="title" class="ir_w_15"><?php echo lang('others_currency'); ?></th>
                                 <th class="title" class="ir_w_10"><?php echo lang('closing_date_time'); ?></th>
                                 <th class="title" class="ir_w_15"><?php echo lang('closing_balance'); ?></th>
                                 <th class="title" class="ir_w_15"><?php echo lang('sale_in_payment_method'); ?></th>
@@ -147,7 +170,7 @@
                         <tbody>
                             <?php
                             /*This variable could not be escaped because this is base url content*/
-                            echo $show_register_report;
+                            echo ($show_register_report);
                             ?>
                         </tbody>
                        
@@ -173,4 +196,4 @@
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/vfs_fonts.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/newDesign/js/forTable.js"></script>
 
-<script src="<?php echo base_url(); ?>frequent_changing/js/custom_report.js"></script>
+<script src="<?php echo base_url(); ?>frequent_changing/js/custom_report_no_sorting.js"></script>

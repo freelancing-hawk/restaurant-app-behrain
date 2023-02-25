@@ -39,10 +39,33 @@ class Inventory_adjustment extends Cl_Controller {
             redirect('Outlet/outlets');
         }
 
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "131";
+        $function = "";
+
+        if($segment_2=="inventoryAdjustments"){
+            $function = "view";
+        }elseif(($segment_2=="addEditInventoryAdjustment") && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="inventoryAdjustmentDetails" && $segment_3){
+            $function = "view_details";
+        }elseif($segment_2=="addEditInventoryAdjustment"){
+            $function = "add";
+        }elseif($segment_2=="deleteInventoryAdjustment"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }

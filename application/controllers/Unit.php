@@ -28,10 +28,32 @@ class Unit extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "212";
+        $function = "";
+
+        if($segment_2=="Units"){
+            $function = "view";
+        }elseif($segment_2=="addEditUnit" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditUnit"){
+            $function = "add";
+        }elseif($segment_2=="deleteUnit"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -43,7 +65,7 @@ class Unit extends Cl_Controller {
      * @return void
      * @param no
      */
-    public function Units() {
+    public function units() {
         $company_id = $this->session->userdata('company_id');
         $data = array();
         $data['Units'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_units");

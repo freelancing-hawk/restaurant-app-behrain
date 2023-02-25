@@ -189,11 +189,11 @@
             </div>
         </div>
 
-        <div class="modal fade" id="noticeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal fade" id="noticeModal" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="noticeModal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Notice</h4>
+                        <h4 class="modal-title"><?php echo lang('notice'); ?></h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true"><i data-feather="x"></i></span></button>
                     </div>
@@ -202,18 +202,6 @@
                             <div class="col-md-12 hidden-lg hidden-sm">
                                 <p class="foodMenuCartNotice">
                                     <strong class="ir_ml39"><?php echo lang('notice'); ?></strong><br>
-                                    <?php echo lang('notice_text_1'); ?>
-                                </p>
-                            </div>
-                            <div class="col-md-12 hidden-xs hidden-sm">
-                                <p class="foodMenuCartNotice">
-                                    <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
-                                    <?php echo lang('notice_text_1'); ?>
-                                </p>
-                            </div>
-                            <div class="col-md-12 hidden-xs hidden-lg">
-                                <p class="foodMenuCartNotice">
-                                    <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
                                     <?php echo lang('notice_text_1'); ?>
                                 </p>
                             </div>

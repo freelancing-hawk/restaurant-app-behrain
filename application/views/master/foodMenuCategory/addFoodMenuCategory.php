@@ -1,11 +1,9 @@
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">
             <?php echo lang('add_food_menu_category'); ?>
         </h3>
     </section>
-
 
     <div class="box-wrapper">
         <div class="table-box">
@@ -39,7 +37,6 @@
                     </div>
                 </div>
                 <!-- /.box-body -->
-
                 <div class="row my-2">
                     <div class="col-sm-12 col-md-2 mb-2">
                         <button type="submit" name="submit" value="submit"
@@ -54,5 +51,4 @@
                 <?php echo form_close(); ?>
         </div>
     </div>
-
 </section>

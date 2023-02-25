@@ -1,9 +1,4 @@
-<?php
-$base_color = '';
-?>
 <script type="text/javascript" src="<?php echo base_url('frequent_changing/js/setting.js'); ?>"></script>
-
-
 <!-- Main content -->
 <section class="main-content-wrapper">
 
@@ -13,7 +8,7 @@ $base_color = '';
         echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -24,7 +19,6 @@ $base_color = '';
         </h3>
 
     </section>
-
 
     <div class="box-wrapper">
             <div class="table-box">
@@ -87,7 +81,7 @@ $base_color = '';
     </div>
 
 
-    <div class="modal fade" id="logo_preview" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="logo_preview" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -99,8 +93,8 @@ $base_color = '';
                 </div>
                 <div class="modal-bod">
                     <div class="row">
-                        <div class="col-md-12" style="background-color: <?php echo escape_output($base_color)?>;text-align: center;padding: 10px;">
-                            <img src="" id="show_id">
+                        <div class="col-md-12 site_logo_parent_div">
+                            <img class="site_logo_parent_img" src="" id="show_id">
                         </div>
                     </div>
                 </div>

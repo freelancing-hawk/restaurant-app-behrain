@@ -1,6 +1,4 @@
 <link rel="stylesheet" href="<?= base_url('assets/') ?>buttonCSS/checkBotton.css">
-
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">
@@ -63,10 +61,6 @@
                             <?php } ?>
                         </div>
                     </div>
-
-
-
-
                     <!-- /.box-body -->
 
                     <div class="row mt-2">

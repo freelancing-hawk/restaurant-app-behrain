@@ -1,5 +1,3 @@
-
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">
@@ -7,7 +5,6 @@
         </h3>
     </section>
 
-    
     <div class="box-wrapper">
             <!-- general form elements -->
             <div class="table-box">

@@ -103,9 +103,9 @@
                                     <td><?php echo escape_output($value->reference_no) ?></td>
                                     <td><?= escape_output(date($this->session->userdata('date_format'), strtotime($value->date))) ?></td>
                                     <td><?php echo escape_output(getSupplierNameById($value->supplier_id)); ?></td>
-                                    <td><?php echo escape_output(getAmt($value->grand_total)) ?></td>
-                                    <td><?php echo escape_output(getAmt($value->paid)) ?></td>
-                                    <td><?php echo escape_output(getAmt($value->due)) ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->grand_total)) ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->paid)) ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($value->due)) ?></td>
                                     <td><?php print_r(getPurchaseIngredients($value->id)) ?></td>
                                     <td><?php echo escape_output(userName($value->user_id)) ?></td>
                                 </tr>
@@ -118,9 +118,9 @@
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
                                     <td class="ir_txt_right"><?php echo lang('total'); ?> </td>
-                                    <td><?php echo escape_output(getAmt($sum_of_grand_total)); ?></td>
-                                    <td><?php echo escape_output(getAmt($sum_of_paid)); ?></td>
-                                    <td><?php echo escape_output(getAmt($sum_of_due)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($sum_of_grand_total)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($sum_of_paid)); ?></td>
+                                    <td><?php echo escape_output(getAmtCustom($sum_of_due)); ?></td>
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
                                 </tr>
@@ -132,7 +132,7 @@
     </div>
 
 
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="filterModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
             <div class="modal-header">

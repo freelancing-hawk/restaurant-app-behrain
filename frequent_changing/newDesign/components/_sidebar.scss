@@ -161,6 +161,35 @@
           }
         }
       }
+      .sub_sub{
+        &.menu-open {
+          & > a::after {
+            transform: rotate(270deg);
+          }
+        }
+        & > a {
+          &::after {
+            content: "\f104";
+            font-family: "fontAwesome";
+            font-size: 17px;
+            color: #6e6b7b;
+            position: absolute;
+            right: 15px;
+            top: 5px;
+            transform: rotate(180deg);
+            z-index: 1;
+            transition: all 0.3s;
+          }
+        }
+        .sub-menu{
+          display: none;
+          padding-left: 40px;
+          li a{
+            padding: 7px 5px;
+          }
+        }
+      }
+
       &.treeview {
         &.menu-open {
           & > a::after {

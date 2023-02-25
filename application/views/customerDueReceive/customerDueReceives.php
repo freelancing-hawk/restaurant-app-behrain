@@ -19,9 +19,7 @@ if ($value =$this->session->flashdata('exception')) {
             <input type="hidden" class="datatable_name" data-title="<?php echo lang('customer_due_receives'); ?>" data-id_name="datatable">
         </div>
         <div class="col-md-6">
-            <a class="btn_list m-right btn bg-blue-btn" href="<?php echo base_url() ?>Customer_due_receive/addCustomerDueReceive">
-                  <i data-feather="plus"></i>  <?php echo lang('add_customer_due_receive'); ?>
-            </a>
+
         </div>
     </div>
 </section>
@@ -55,10 +53,10 @@ if ($value =$this->session->flashdata('exception')) {
                             <tr>
                                 <td><?php echo escape_output($i--); ?></td>
                                 <td><?php echo escape_output($value->reference_no) ?></td>
-                                <td><?php echo escape_output(date($this->session->userdata('date_format'), strtotime($value->date))); ?>
+                                <td><?php echo escape_output(date($this->session->userdata('date_format'), strtotime($value->only_date))); ?>
                                 </td>
                                 <td><?php echo escape_output(getCustomerName($value->customer_id)); ?></td>
-                                <td> <?php echo escape_output(getAmtP($value->amount)) ?>
+                                <td> <?php echo escape_output(getAmtPCustom($value->amount)) ?>
                                 </td>
                                 <td> <?php echo escape_output((getPaymentName($value->payment_id))) ?>
                                 <td><?php if ($value->note != NULL) echo escape_output($value->note) ?></td>

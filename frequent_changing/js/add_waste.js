@@ -81,7 +81,7 @@ $(function() {
                         let qty = 0;
                         let los_amount = 0;
                         qty = quantity * v.consumption;
-                        los_amount = quantity * v.consumption * v.unit_price;
+                        los_amount = quantity * v.consumption * v.consumption_unit_cost;
                         total_loss = total_loss + los_amount;
                         j++;
                         i++;
@@ -111,7 +111,7 @@ $(function() {
                             ' " readonly /><span class="label_aligning">' +
                             currency + '</span><span id="unit_price_ingredient_' +
                             i + '" class="unit_price_ingredient ir_display_none">' +
-                            v.unit_price + '</span></td>' +
+                            v.consumption_unit_cost + '</span></td>' +
                             '</tr>';
 
                     });
@@ -299,7 +299,7 @@ function calculateAll() {
 
 function deleter(suffix, ingredient_id) {
     swal({
-        title: alert,
+        title: warning,
         text: are_you_sure,
         confirmButtonColor: '#3c8dbc',
         cancelButtonText: cancel,

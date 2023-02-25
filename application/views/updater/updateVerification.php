@@ -1,10 +1,36 @@
-<!-- jQuery 3 -->
-<script src="<?php echo base_url(); ?>assets/bower_components/jquery/dist/jquery.min.js"></script>
-<!-- Bootstrap 3.3.7 -->
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/bower_components/bootstrap/dist/css/bootstrap.min.css">
+<?php
+$wl = getWhiteLabel();
+$system_logo = '';
+if($wl){
+    if($wl->site_name){
+        $site_name = $wl->site_name;
+    }
+    if($wl->footer){
+        $footer = $wl->footer;
+    }
+    if($wl->system_logo){
+        $system_logo = base_url()."images/".$wl->system_logo;
+    }
+}
+//get company information
+$getCompanyInfo = getCompanyInfo();
+?>
+<html>
+<head>
+    <title>Update Verification || <?php echo escape_output($site_name)?></title>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="<?php echo base_url(); ?>images/favicon.ico" type="image/x-icon">
 
-<!-- Bootstrap 3.3.7 -->
-<script src="<?php echo base_url(); ?>assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- jQuery 3 -->
+    <script src="<?php echo base_url(); ?>assets/bower_components/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Bootstrap 3.3.7 -->
+    <script src="<?php echo base_url(); ?>assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+<input type="hidden" value="<?=escape_output($status)?>" id="status_value">
+<input type="hidden" value="<?=escape_output(base_url())?>" id="base_url_custom_update">
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
         <h3 class="text-center response_text" style="color:<?php echo escape_output($color)?>;"><?php echo escape_output($txt_return) ?></h3>
@@ -26,34 +52,18 @@
             </div>
             <!-- modified -->
             <input id="owner" type="hidden" name="owner" class="input-large" value="doorsoftco"  />
+            <input id="owner" type="hidden" name="base_url" class="input-large" value="<?php echo base_url()?>"  />
         </div>
+        <br>
         <div class="bottom txt_w_2">
             <input type="submit" name="submit" class="btn btn-primary button_1"  value="Verify"/>
+            <a class="btn btn-primary" href="<?php echo base_url() ?>Dashboard/dashboard">
+                <?php echo lang('back'); ?>
+            </a>
         </div>
         <?php echo form_close(); ?>
     </div>
 </div>
-<script>
-    let status = "<?=escape_output($status)?>";
-    if(status==2){
-        $(".response_text").show();
-        $(".redirect_text").show();
-        $(".form_div").hide();
-
-        let timeInterval = 5;
-        setInterval(function(){
-            timeInterval--;
-            if(timeInterval<1){
-                window.location.href="<?php echo base_url()?>Update";
-            }else{
-                $(".counter").html(timeInterval);
-            }
-        }, 1000);
-    }else if(status==1){
-        $(".response_text").show();
-        $(".redirect_text").hide();
-    }else{
-        $(".response_text").hide();
-        $(".redirect_text").hide();
-    }
-</script>
+<script src="<?php echo base_url(); ?>frequent_changing/js/update_verification.js"></script>
+</body>
+</html>

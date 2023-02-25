@@ -20,9 +20,7 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('attendances'); ?>" data-id_name="datatable">
             </div>
             <div class="col-md-6">
-                <a class="btn_list m-right btn bg-blue-btn" href="<?php echo base_url() ?>Attendance/addEditAttendance">
-                    <i data-feather="plus"></i> <?php echo lang('add_attendance'); ?>
-                </a>
+
             </div>
         </div>
     </section>
@@ -66,7 +64,7 @@
                                 <td>
                                     <?php 
                                         if($value->out_time == '00:00:00'){ 
-                                            echo 'N/A<br>';  
+                                             echo lang('n_a').'<br>';;
                                         }else{ 
                                             echo escape_output($value->out_time);
                                         } 
@@ -80,13 +78,10 @@
                                 <td>
                                     <?php  
                                         if($value->out_time == '00:00:00'){ 
-                                            echo 'N/A'; 
-                                        }else{ 
-                                            $to_time = strtotime($value->out_time);
-                                            $from_time = strtotime($value->in_time);
-                                            $minute = round(abs($to_time - $from_time) / 60,2); 
-                                            $hour = round(abs($minute) / 60,2);
-                                            echo escape_output($hour)." Hour";
+                                            echo lang('n_a');
+                                        }else{
+                                            $get_hour = getTotalHour($value->out_time,$value->in_time);
+                                            echo escape_output(isset($get_hour) && $get_hour?$get_hour:'0')." ".lang('hour_s');
                                         }
 
                                         ?>
@@ -100,7 +95,7 @@
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a class="delete"
+                                            <li data-access="delete-155" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>Attendance/deleteAttendance/<?php echo escape_output($this->custom->encrypt_decrypt($value->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>
@@ -133,7 +128,4 @@
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/vfs_fonts.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.colVis.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/newDesign/js/forTable.js"></script>
-
-
-
 <script src="<?php echo base_url(); ?>frequent_changing/js/custom_report.js"></script>

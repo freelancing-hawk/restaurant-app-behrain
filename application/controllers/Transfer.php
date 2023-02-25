@@ -40,10 +40,33 @@ class Transfer extends Cl_Controller {
             redirect('Outlet/outlets');
         }
 
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "112";
+        $function = "";
+
+        if($segment_2=="transfers"){
+            $function = "view";
+        }elseif($segment_2=="addEditTransfer" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="transferDetails" && $segment_3){
+            $function = "view_details";
+        }elseif($segment_2=="addEditTransfer"){
+            $function = "add";
+        }elseif($segment_2=="deleteTransfer"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -124,6 +147,7 @@ class Transfer extends Cl_Controller {
                     $transfer_info['outlet_id'] = $this->session->userdata('outlet_id');
 
                     $transfer_id = $this->Common_model->insertInformation($transfer_info, "tbl_transfer");
+                    /*This all variables could not be escaped because this is an array field*/
                     $this->saveTransferIngredients($_POST['ingredient_id'], $transfer_id, $this->session->userdata('outlet_id'),$transfer_info['to_outlet_id'],$transfer_info['status'],'');
                     $this->session->set_flashdata('exception', lang('insertion_success'));
                 } else {
@@ -137,6 +161,7 @@ class Transfer extends Cl_Controller {
                     $this->Common_model->updateInformation($transfer_info, $id, "tbl_transfer");
                     $this->Common_model->deletingMultipleFormData('transfer_id', $id, 'tbl_transfer_ingredients');
                     $this->Common_model->deletingMultipleFormData('transfer_id', $id, 'tbl_transfer_received_ingredients');
+                    /*This variable could not be escaped because this is an array field*/
                     $this->saveTransferIngredients($_POST['ingredient_id'], $id, $transfer_details->outlet_id,$transfer_info['to_outlet_id'],$transfer_info['status'],$transfer_details->to_outlet_id);
                     $this->session->set_flashdata('exception',lang('update_success'));
                 }
@@ -154,9 +179,20 @@ class Transfer extends Cl_Controller {
                         $total = 0;
                         $all_ings = $this->Transfer_model->getTotalCostAmount($value->id);
                         foreach ($all_ings as $vl){
-                            $total+=$vl->purchase_price*$vl->consumption;
+                            $last_purchase_price = getLastPurchaseAmount($vl->ingredient_id);
+                            $conversion_rate = 1;
+                            if($vl->conversion_rate){
+                                $conversion_rate =  $vl->conversion_rate;
+                            }
+                            $inline_total = ($last_purchase_price/$conversion_rate)*$vl->consumption;
+                            $total+=$inline_total;
                         }
-                        $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                           if ($this->session->userdata('collect_tax')=='Yes'){
+                                $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                            }else{
+                                $total_return_amount = 0;
+                            }
+
                         $data['food_menus'][$key]->ings_total_cost = $total;
                         $data['food_menus'][$key]->total_tax = $total_return_amount;
                     }
@@ -174,9 +210,20 @@ class Transfer extends Cl_Controller {
                         $total = 0;
                         $all_ings = $this->Transfer_model->getTotalCostAmount($value->id);
                         foreach ($all_ings as $vl){
-                            $total+=$vl->purchase_price*$vl->consumption;
+                            $last_purchase_price = getLastPurchaseAmount($vl->ingredient_id);
+                            $conversion_rate = 1;
+                            if($vl->conversion_rate){
+                                $conversion_rate =  $vl->conversion_rate;
+                            }
+                            $inline_total = ($last_purchase_price/$conversion_rate)*$vl->consumption;
+                            $total+=$inline_total;
                         }
-                        $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                           if ($this->session->userdata('collect_tax')=='Yes'){
+                                $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                            }else{
+                                $total_return_amount = 0;
+                            }
+
                         $data['food_menus'][$key]->ings_total_cost = $total;
                         $data['food_menus'][$key]->total_tax = $total_return_amount;
                     }
@@ -197,9 +244,19 @@ class Transfer extends Cl_Controller {
                     $total = 0;
                     $all_ings = $this->Transfer_model->getTotalCostAmount($value->id);
                     foreach ($all_ings as $vl){
-                        $total+=$vl->purchase_price*$vl->consumption;
+                        $last_purchase_price = getLastPurchaseAmount($vl->ingredient_id);
+                        $conversion_rate = 1;
+                        if($vl->conversion_rate){
+                            $conversion_rate =  $vl->conversion_rate;
+                        }
+                        $inline_total = ($last_purchase_price/$conversion_rate)*$vl->consumption;
+                        $total+=$inline_total;
                     }
-                    $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                    if ($this->session->userdata('collect_tax')=='Yes'){
+                        $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                    }else{
+                        $total_return_amount = 0;
+                    }
                     $data['food_menus'][$key]->ings_total_cost = $total;
                     $data['food_menus'][$key]->total_tax = $total_return_amount;
                 }
@@ -216,9 +273,20 @@ class Transfer extends Cl_Controller {
                     $total = 0;
                     $all_ings = $this->Transfer_model->getTotalCostAmount($value->id);
                     foreach ($all_ings as $vl){
-                        $total+=$vl->purchase_price*$vl->consumption;
+                        $last_purchase_price = getLastPurchaseAmount($vl->ingredient_id);
+                        $conversion_rate = 1;
+                        if($vl->conversion_rate){
+                            $conversion_rate =  $vl->conversion_rate;
+                        }
+                        $inline_total = ($last_purchase_price/$conversion_rate)*$vl->consumption;
+                        $total+=$inline_total;
                     }
-                    $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                    if ($this->session->userdata('collect_tax')=='Yes'){
+                        $total_return_amount = getTaxAmount($value->sale_price,$value->tax_information);
+                    }else{
+                        $total_return_amount = 0;
+                    }
+
                     $data['food_menus'][$key]->ings_total_cost = $total;
                     $data['food_menus'][$key]->total_tax = $total_return_amount;
                 }
@@ -240,17 +308,18 @@ class Transfer extends Cl_Controller {
         foreach ($transfer_ingredients as $row => $ingredient_id):
             $data_sale_consumptions_detail = array();
             $data_sale_consumptions_detail['status'] = $status;
+            /*This all variables could not be escaped because this is an array field*/
             $data_sale_consumptions_detail['ingredient_id'] = $_POST['ingredient_id'][$row];
             $data_sale_consumptions_detail['quantity_amount'] = $_POST['quantity_amount'][$row];
-            $data_sale_consumptions_detail['transfer_type'] = $_POST['transfer_type'];
-            $data_sale_consumptions_detail['total_cost'] = $_POST['total_cost'][$row];
-            $data_sale_consumptions_detail['single_cost_total'] = $_POST['single_cost_total'][$row];
-            $data_sale_consumptions_detail['total_sale_amount'] = $_POST['total_sale_amount'][$row];
-            $data_sale_consumptions_detail['total_tax'] = $_POST['total_tax'][$row];
-            $data_sale_consumptions_detail['single_total_sale_amount'] = $_POST['single_total_sale_amount'][$row];
-            $data_sale_consumptions_detail['single_total_tax'] = $_POST['single_total_tax'][$row];
+            $data_sale_consumptions_detail['total_cost'] = isset($_POST['total_cost'][$row]) && $_POST['total_cost'][$row]?$_POST['total_cost'][$row]:0;
+            $data_sale_consumptions_detail['single_cost_total'] = isset($_POST['single_cost_total'][$row]) && $_POST['single_cost_total'][$row]?$_POST['single_cost_total'][$row]:0;
+            $data_sale_consumptions_detail['total_sale_amount'] = isset($_POST['total_sale_amount'][$row]) && $_POST['total_sale_amount'][$row]?$_POST['total_sale_amount'][$row]:0;
+            $data_sale_consumptions_detail['total_tax'] = isset($_POST['total_tax'][$row]) && $_POST['total_tax'][$row]?$_POST['total_tax'][$row]:0;
+            $data_sale_consumptions_detail['single_total_sale_amount'] = isset($_POST['single_total_sale_amount'][$row]) && $_POST['single_total_sale_amount'][$row]?$_POST['single_total_sale_amount'][$row]:0;
+            $data_sale_consumptions_detail['single_total_tax'] = isset($_POST['single_total_tax'][$row]) && $_POST['single_total_tax'][$row]?$_POST['single_total_tax'][$row]:0;
             $data_sale_consumptions_detail['transfer_id'] = $transfer_id;
             $data_sale_consumptions_detail['from_outlet_id'] = $from_outlet;
+            $data_sale_consumptions_detail['transfer_type'] =htmlspecialchars($this->input->post($this->security->xss_clean('transfer_type')));
             if($to_outlet_id!=''){
                 $data_sale_consumptions_detail['to_outlet_id'] = $to_outlet_id;
             }else{
@@ -260,35 +329,6 @@ class Transfer extends Cl_Controller {
 
             $this->db->insert('tbl_transfer_ingredients',$data_sale_consumptions_detail);
         endforeach;
-
-        if($_POST['transfer_type']==2){
-            foreach ($transfer_ingredients as $row => $ingredient_id):
-                $main_ingredients = $this->Common_model->getAllByCustomId($_POST['ingredient_id'][$row],"food_menu_id","tbl_food_menus_ingredients",$order='');;
-                foreach ($main_ingredients as $value){
-                    $data_sale_consumptions_detail = array();
-                    $data_sale_consumptions_detail['status'] = $status;
-                    $data_sale_consumptions_detail['ingredient_id'] = $value->ingredient_id;
-                    $data_sale_consumptions_detail['quantity_amount'] = ($_POST['quantity_amount'][$row] * $value->consumption);
-                    $data_sale_consumptions_detail['transfer_type'] = $_POST['transfer_type'];
-                    $data_sale_consumptions_detail['total_cost'] = $_POST['total_cost'][$row];
-                    $data_sale_consumptions_detail['single_cost_total'] = $_POST['single_cost_total'][$row];
-                    $data_sale_consumptions_detail['total_sale_amount'] = $_POST['total_sale_amount'][$row];
-                    $data_sale_consumptions_detail['total_tax'] = $_POST['total_tax'][$row];
-                    $data_sale_consumptions_detail['single_total_sale_amount'] = $_POST['single_total_sale_amount'][$row];
-                    $data_sale_consumptions_detail['single_total_tax'] = $_POST['single_total_tax'][$row];
-                    $data_sale_consumptions_detail['transfer_id'] = $transfer_id;
-                    $data_sale_consumptions_detail['from_outlet_id'] = $from_outlet;
-                    if($to_outlet_id!=''){
-                        $data_sale_consumptions_detail['to_outlet_id'] = $to_outlet_id;
-                    }else{
-                        $data_sale_consumptions_detail['to_outlet_id'] = $to_outlet;
-                    }
-                    $data_sale_consumptions_detail['del_status'] = 'Live';
-                    $this->db->insert('tbl_transfer_received_ingredients',$data_sale_consumptions_detail);
-                }
-
-            endforeach;
-        }
 
     }
      /**
@@ -307,42 +347,5 @@ class Transfer extends Cl_Controller {
         $data['food_details'] = $this->Transfer_model->getFoodDetails($id);
         $data['main_content'] = $this->load->view('transfer/transferDetails', $data, TRUE);
         $this->load->view('userHome', $data);
-    }
-     /**
-     * add New Supplier By Ajax
-     * @access public
-     * @return object
-     * @param no
-     */
-    public function addNewSupplierByAjax() {
-        $data['name'] = $_GET['name'];
-        $data['contact_person'] = $_GET['contact_person'];
-        $data['phone'] = $_GET['phone'];
-        $data['email'] = $_GET['emailAddress'];
-        $data['address'] = $_GET['supAddress'];
-        $data['description'] = $_GET['description'];
-        $data['user_id'] = $this->session->userdata('user_id');
-        $data['company_id'] = $this->session->userdata('company_id');
-        $this->db->insert('tbl_suppliers', $data);
-        $supplier_id = $this->db->insert_id();
-        $data1 = array('supplier_id' => $supplier_id);
-        echo json_encode($data1);
-    }
-     /**
-     * get Supplier List
-     * @access public
-     * @return void
-     * @param no
-     */
-    public function getSupplierList() {
-        $company_id = $this->session->userdata('company_id');
-        $data1 = $this->db->query("SELECT * FROM tbl_suppliers 
-              WHERE company_id=$company_id")->result();
-        //generate html content for view
-        echo '<option value="">Select</option>';
-        foreach ($data1 as $value) {
-            echo '<option value="' . $value->id . '" >' . $value->name . '</option>';
-        }
-        exit;
     }
 }

@@ -49,7 +49,7 @@ class Master_model extends CI_Model {
      * @param int
      */
     public function getIngredientListWithUnit($company_id) {
-        $result = $this->db->query("SELECT tbl_ingredients.id, tbl_ingredients.name, tbl_ingredients.code, tbl_units.unit_name 
+        $result = $this->db->query("SELECT tbl_ingredients.id, tbl_ingredients.name, tbl_ingredients.code, tbl_units.unit_name,tbl_ingredients.purchase_price,tbl_ingredients.consumption_unit_cost 
           FROM tbl_ingredients 
           JOIN tbl_units ON tbl_ingredients.unit_id = tbl_units.id
           WHERE tbl_ingredients.company_id=$company_id AND tbl_ingredients.del_status = 'Live'  
@@ -161,7 +161,14 @@ class Master_model extends CI_Model {
             return $this->upload->data();           
         }
     }
-
+    public function getPremadeIngredients($id) {
+        $this->db->select("*");
+        $this->db->from("tbl_premade_ingredients");
+        $this->db->order_by('id', 'ASC');
+        $this->db->where("pre_made_id", $id);
+        $this->db->where("del_status", 'Live');
+        return $this->db->get()->result();
+    }
     
     
 

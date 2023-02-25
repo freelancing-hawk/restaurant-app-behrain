@@ -124,6 +124,39 @@ class Common_model extends CI_Model {
         $this->db->order_by('id', 'DESC');
         return $this->db->get()->result();
     }
+    public function getAllByTableAsc($table_name) {
+        $this->db->select("*");
+        $this->db->from($table_name);
+        $this->db->where("del_status", 'Live');
+        return $this->db->get()->result();
+    }
+    /**
+     * return all custom table data
+     * @access public
+     * @return  boolean
+     * @param string
+     * @param string
+     * @param string
+     * @param string
+     */
+    public function getAllCustomData($tbl,$order_colm,$order_type,$where_colm,$coln_value) {
+        $this->db->select('*');
+        $this->db->from($tbl);
+        if($order_colm!=''){
+            $this->db->order_by($order_colm,$order_type);
+        }
+        if($where_colm!=''){
+            $this->db->where($where_colm,$coln_value);
+        }
+        $this->db->where("del_status", 'Live');
+        $result = $this->db->get();
+
+        if($result != false){
+            return $result->result();
+        }else{
+            return false;
+        }
+    }
     /**
      * get All By Table
      * @access public
@@ -234,11 +267,15 @@ class Common_model extends CI_Model {
      * @param string
      */
     public function getAllByCompanyId($company_id, $table_name) {
+        $where = "";
+        if($table_name=="tbl_food_menus"){
+            $where.=" AND parent_id =  '0'";
+        }
         $language_manifesto = $this->session->userdata('language_manifesto');
         if(str_rot13($language_manifesto)=="eriutoeri"){
             $result = $this->db->query("SELECT * 
           FROM $table_name 
-          WHERE company_id=$company_id AND del_status = 'Live'  
+          WHERE company_id=$company_id AND del_status = 'Live' $where  
           ORDER BY id DESC")->result();
             return $result;
         }else{
@@ -246,20 +283,17 @@ class Common_model extends CI_Model {
             if($table_name=="tbl_tables" || $table_name=="tbl_users"){
                 $result = $this->db->query("SELECT * 
           FROM $table_name 
-          WHERE company_id=$company_id AND outlet_id=$outlet_id AND del_status = 'Live'  
+          WHERE company_id=$company_id AND outlet_id=$outlet_id AND del_status = 'Live' $where  
           ORDER BY id DESC")->result();
                 return $result;
             }else{
                 $result = $this->db->query("SELECT * 
           FROM $table_name 
-          WHERE company_id=$company_id AND del_status = 'Live'  
+          WHERE company_id=$company_id AND del_status = 'Live' $where  
           ORDER BY id DESC")->result();
                 return $result;
             }
         }
-
-
-
     }
     /**
      * get Food Menu
@@ -269,9 +303,13 @@ class Common_model extends CI_Model {
      * @param string
      */
     public function getFoodMenu($company_id, $table_name) {
+        $where = "";
+        if($table_name=="tbl_food_menus"){
+            $where.=" AND parent_id =  '0'";
+        }
         $result = $this->db->query("SELECT * 
           FROM $table_name 
-          WHERE company_id=$company_id AND del_status = 'Live'  
+          WHERE company_id=$company_id AND del_status = 'Live'  $where
           ORDER BY name asc")->result();
         return $result;
     }
@@ -297,9 +335,29 @@ class Common_model extends CI_Model {
      * @param string
      */
     public function getAllByCompanyIdForDropdown($company_id, $table_name) {
+        $where = "";
+        if($table_name=="tbl_food_menus"){
+            $where.=" AND parent_id =  '0'";
+        }
+
         $result = $this->db->query("SELECT * 
           FROM $table_name 
-          WHERE company_id=$company_id AND del_status = 'Live'  
+          WHERE company_id=$company_id AND del_status = 'Live' $where 
+          ORDER BY 2")->result();
+        return $result;
+    }
+    /**
+     * get All By Company Id ForDropdown
+     * @access public
+     * @return object
+     * @param int
+     * @param string
+     */
+    public function getFoodMenuWithVariations($company_id, $table_name) {
+        $where = "";
+        $result = $this->db->query("SELECT * 
+          FROM $table_name 
+          WHERE company_id=$company_id AND del_status = 'Live' $where 
           ORDER BY 2")->result();
         return $result;
     }
@@ -331,6 +389,106 @@ class Common_model extends CI_Model {
         return $result;
     }
     /**
+     * get All By Outlet Id
+     * @access public
+     * @return object
+     * @param int
+     * @param string
+     */
+    public function getKitchenCategories($id='') {
+        $company_id = $this->session->userdata('company_id');
+        if($id==''){
+            $result = $this->db->query("SELECT * FROM `tbl_food_menu_categories` WHERE id not in (select distinct cat_id FROM tbl_kitchen_categories WHERE del_status='Live') AND del_status='Live' AND company_id='$company_id'")->result();
+        }else{
+            $result = $this->db->query("SELECT * FROM `tbl_food_menu_categories` WHERE id not in (select distinct cat_id FROM tbl_kitchen_categories WHERE del_status='Live' AND kitchen_id!='$id') AND del_status='Live' AND company_id='$company_id'")->result();
+        }
+        return $result;
+    }
+    public function getKitchenCategoriesById($id) {
+        $this->db->select('category_name');
+        $this->db->from('tbl_kitchen_categories');
+        $this->db->join('tbl_food_menu_categories', 'tbl_food_menu_categories.id = tbl_kitchen_categories.cat_id', 'left');
+        $this->db->where('kitchen_id', $id);
+        $this->db->where('tbl_kitchen_categories.del_status', 'Live');
+        return $this->db->get()->result();
+    }
+    public function getAllViaPanel() {
+        $company_id = $this->session->userdata('company_id');
+        $this->db->select('*');
+        $this->db->from('tbl_kitchens');
+        $this->db->where('del_status', 'Live');
+        $this->db->where('company_id', $company_id);
+        return $this->db->get()->result();
+    }
+    public function checkForExist($id) {
+        $this->db->select('id');
+        $this->db->from('tbl_kitchen_categories');
+        $this->db->where('cat_id', $id);
+        $this->db->where('del_status', 'Live');
+        return $this->db->get()->row();
+    }
+    public function checkForExistUpdate($id,$outlet_id) {
+        $this->db->select('id');
+        $this->db->from('tbl_kitchen_categories');
+        $this->db->where('cat_id', $id);
+        $this->db->where('outlet_id', $outlet_id);
+        $this->db->where('del_status', 'Live');
+        return $this->db->get()->row();
+    }
+    public function getDenomination($company_id) {
+        $this->db->select("*");
+        $this->db->from("tbl_denominations");
+        $this->db->where("del_status", 'Live');
+        $this->db->where("company_id", $company_id);
+        $this->db->order_by("amount", 'asc');
+        return $this->db->get()->result();
+    }
+    public function getOrderDetailsWithKitchenStatus($sales_id){
+        $this->db->select("tbl_kitchen_categories.kitchen_id");
+        $this->db->from('tbl_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->where("sales_id", $sales_id);
+        $this->db->where('tbl_sales_details.del_status', 'Live');
+        $this->db->order_by('tbl_sales_details.id', 'ASC');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    public function getOrderDetailsForPrint($sales_id,$kitchen_id){
+        $this->db->select("tbl_sales_details.*,tbl_kitchen_categories.kitchen_id");
+        $this->db->from('tbl_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->where("tbl_sales_details.sales_id", $sales_id);
+        $this->db->where("tbl_kitchen_categories.kitchen_id", $kitchen_id);
+        $this->db->where('tbl_sales_details.del_status', 'Live');
+        $this->db->order_by('tbl_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_sales_details.food_menu_id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    public function getOnlyKitchenID($sales_id){
+        $this->db->select("tbl_kitchen_categories.kitchen_id");
+        $this->db->from('tbl_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->where("tbl_sales_details.sales_id", $sales_id);
+        $this->db->where('tbl_sales_details.del_status', 'Live');
+        $this->db->order_by('tbl_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_kitchen_categories.kitchen_id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    public function getKitchenDetails($kitchen_id){
+        $this->db->select("tbl_kitchens.print_server_url,tbl_printers.*");
+        $this->db->from('tbl_kitchens');
+        $this->db->join('tbl_printers', 'tbl_printers.id = tbl_kitchens.printer_id', 'left');
+        $this->db->where("tbl_kitchens.id", $kitchen_id);
+        $this->db->where('tbl_kitchens.del_status', 'Live');
+        $data =  $this->db->get()->row();
+        return $data;
+    }
+    /**
      * get All By Outlet Id For Dropdown
      * @access public
      * @return object
@@ -345,6 +503,21 @@ class Common_model extends CI_Model {
         return $result;
     }
     /**
+     * get Food Menu
+     * @access public
+     * @return object
+     * @param int
+     * @param string
+     */
+    public function getFoodMenuForOutlet($company_id, $table_name) {
+        $where = "";
+        $result = $this->db->query("SELECT * 
+          FROM $table_name 
+          WHERE company_id=$company_id AND del_status = 'Live'  $where
+          ORDER BY name asc")->result();
+        return $result;
+    }
+    /**
      * get All Food Menus By Category
      * @access public
      * @return object
@@ -352,9 +525,13 @@ class Common_model extends CI_Model {
      * @param string
      */
     public function getAllFoodMenusByCategory($category_id, $table_name) {
+        $where = "";
+        if($table_name=="tbl_food_menus"){
+            $where.=" AND parent_id =  '0'";
+        }
         $result = $this->db->query("SELECT * 
           FROM $table_name 
-          WHERE category_id=$category_id AND del_status = 'Live'  
+          WHERE category_id=$category_id AND del_status = 'Live' AND parent_id = '0' $where
           ORDER BY id DESC")->result();
         return $result;
     }
@@ -382,6 +559,18 @@ class Common_model extends CI_Model {
     public function deleteStatusChange($id, $table_name) {
         $this->db->set('del_status', "Deleted");
         $this->db->where('id', $id);
+        $this->db->update($table_name);
+    }
+    /**
+     * delete Status Change
+     * @access public
+     * @return object
+     * @param int
+     * @param string
+     */
+    public function deleteStatusChangeByCustomRow($id,$field, $table_name) {
+        $this->db->set('del_status', "Deleted");
+        $this->db->where($field, $id);
         $this->db->update($table_name);
     }
     /**
@@ -426,6 +615,13 @@ class Common_model extends CI_Model {
         $this->db->select("*");
         $this->db->from($table_name);
         $this->db->where("id", $id);
+        return $this->db->get()->row();
+    }
+    public function getActiveAddress($id) {
+        $this->db->select("*");
+        $this->db->from("tbl_customer_address");
+        $this->db->where("customer_id", $id);
+        $this->db->where("is_active", "1");
         return $this->db->get()->row();
     }
     public function getCustomDataByParams($field_name,$value, $table_name) {
@@ -653,6 +849,7 @@ class Common_model extends CI_Model {
         $this->db->limit(10);
         return $this->db->get()->result();
     }
+
     /**
      * get Main Menu
      * @access public
@@ -666,7 +863,11 @@ class Common_model extends CI_Model {
         $this->db->order_by('order_by asc');
         return $this->db->get()->result();
     }
-
+    public function deleteStatusChangeWithCustom($id,$filed_name, $table_name) {
+        $this->db->set('del_status', "Deleted");
+        $this->db->where($filed_name, $id);
+        $this->db->update($table_name);
+    }
     /**
      * top ten supplier payable
      * @access public
@@ -764,7 +965,7 @@ class Common_model extends CI_Model {
      * @param string
      * @param string
      * @param string
-     * @param int
+     * @param string
      */
     public function get_row($table_name, $where_param, $select_param, $group = "", $limit = "") {
         if (!empty($select_param))
@@ -855,6 +1056,393 @@ class Common_model extends CI_Model {
         $this->db->where("email", $email);
         $this->db->where("del_status", 'Live');
         return $this->db->get()->row();
+    }
+    /**
+     * check $sales_id
+     * @access public
+     * @param string
+     */
+    public function getAllKitchenItems($sales_id,$printer_id){
+        $this->db->select("tbl_kitchen_sales_details.menu_name,tbl_kitchen_sales_details.qty,tbl_kitchen_sales_details.menu_combo_items,tbl_kitchen_sales_details.menu_note,tbl_kitchen_sales_details.id as sales_details_id");
+        $this->db->from('tbl_kitchen_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_kitchen_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->join('tbl_kitchens', 'tbl_kitchens.id = tbl_kitchen_categories.kitchen_id', 'left');
+        $this->db->join('tbl_printers', 'tbl_printers.id = tbl_kitchens.printer_id', 'left');
+        $this->db->where("sales_id", $sales_id);
+        $this->db->where("tbl_printers.id", $printer_id);
+        $this->db->where("tbl_kitchen_categories.del_status", "Live");
+        $this->db->order_by('tbl_kitchen_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_kitchen_sales_details.id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    /**
+     * check $sales_id
+     * @access public
+     * @param string
+     */
+    public function getAllKitchenItemsAuto($sales_id,$printer_id){
+        $this->db->select("tbl_kitchen_sales_details.menu_name,tbl_kitchen_sales_details.qty,tbl_kitchen_sales_details.menu_combo_items,tbl_kitchen_sales_details.menu_note,tbl_kitchen_sales_details.id as sales_details_id,tbl_kitchen_sales_details.is_print");
+        $this->db->from('tbl_kitchen_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_kitchen_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->join('tbl_kitchens', 'tbl_kitchens.id = tbl_kitchen_categories.kitchen_id', 'left');
+        $this->db->join('tbl_printers', 'tbl_printers.id = tbl_kitchens.printer_id', 'left');
+        $this->db->where("sales_id", $sales_id);
+        $this->db->where("tbl_printers.id", $printer_id);
+        $this->db->where("tbl_kitchen_sales_details.is_print", 1);
+        $this->db->where("tbl_kitchen_categories.del_status", "Live");
+        $this->db->order_by('tbl_kitchen_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_kitchen_sales_details.id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    /**
+     * check getOrderedPrinter
+     * @access public
+     * @param string
+     */
+    public function getOrderedPrinter($sales_id){
+        $this->db->select("tbl_printers.*,tbl_kitchens.name as kitchen_name,tbl_kitchens.id as kitchen_id");
+        $this->db->from('tbl_kitchen_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_kitchen_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->join('tbl_kitchens', 'tbl_kitchens.id = tbl_kitchen_categories.kitchen_id', 'left');
+        $this->db->join('tbl_printers', 'tbl_printers.id = tbl_kitchens.printer_id', 'left');
+        $this->db->where("sales_id", $sales_id);
+        $this->db->where("tbl_kitchen_categories.del_status", "Live");
+        $this->db->order_by('tbl_kitchen_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_printers.id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    /**
+     * check getOrderedKitchens
+     * @access public
+     * @param string
+     */
+    public function getOrderedKitchens($sales_id){
+        $this->db->select("tbl_kitchens.id as kitchen_id");
+        $this->db->from('tbl_kitchen_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_kitchen_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->join('tbl_kitchens', 'tbl_kitchens.id = tbl_kitchen_categories.kitchen_id', 'left');
+        $this->db->join('tbl_printers', 'tbl_printers.id = tbl_kitchens.printer_id', 'left');
+        $this->db->where("sales_id", $sales_id);
+        $this->db->where("tbl_kitchen_categories.del_status", "Live");
+        $this->db->order_by('tbl_kitchen_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_kitchens.id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    /**
+     * check checkPrinterForKOT
+     * @access public
+     * @param string
+     */
+    public function checkPrinterForKOT($sales_id){
+        $outlet_id = $this->session->userdata('outlet_id');
+        $this->db->select("tbl_printers.*,tbl_kitchens.id as kitchen_id,tbl_kitchens.name as kitchen_name");
+        $this->db->from('tbl_kitchen_sales_details');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_kitchen_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->join('tbl_kitchens', 'tbl_kitchens.id = tbl_kitchen_categories.kitchen_id', 'left');
+        $this->db->join('tbl_printers', 'tbl_printers.id = tbl_kitchens.printer_id', 'left');
+        $this->db->where("sales_id", $sales_id);
+        $this->db->where("tbl_kitchens.outlet_id", $outlet_id);
+        $this->db->where("tbl_kitchen_categories.del_status", "Live");
+        $this->db->order_by('tbl_kitchen_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_kitchens.id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    /**
+     * check get Selected Printers
+     * @access public
+     * @param int
+     * @param int
+     */
+    public function getSelectedPrinters($sales_id,$kitchen_id){
+        $printers  = explode(",",$kitchen_id);
+        $this->db->select("tbl_printers.*,tbl_kitchens.name as kitchen_name,tbl_kitchens.id as kitchen_id");
+        $this->db->from('tbl_kitchen_sales_details');
+        $this->db->join('tbl_kitchen_sales', 'tbl_kitchen_sales.id = tbl_kitchen_sales_details.sales_id', 'left');
+        $this->db->join('tbl_food_menus', 'tbl_food_menus.id = tbl_kitchen_sales_details.food_menu_id', 'left');
+        $this->db->join('tbl_kitchen_categories', 'tbl_kitchen_categories.cat_id = tbl_food_menus.category_id', 'left');
+        $this->db->join('tbl_kitchens', 'tbl_kitchens.id = tbl_kitchen_categories.kitchen_id', 'left');
+        $this->db->join('tbl_printers', 'tbl_printers.id = tbl_kitchens.printer_id', 'left');
+        $this->db->where("sale_no", $sales_id);
+        $this->db->where("tbl_kitchen_categories.del_status", "Live");
+        $this->db->where_in('tbl_kitchens.id',$printers);
+        $this->db->order_by('tbl_kitchen_sales_details.id', 'ASC');
+        $this->db->group_by('tbl_printers.id');
+        $data =  $this->db->get()->result();
+        return $data;
+    }
+    /**
+     * get AllBy Custom Row Id
+     * @access public
+     * @param int
+     * @param string
+     * @param string
+     * @param string
+     */
+    public function getAllByCustomRowId($id,$filed,$tbl,$order=''){
+        $this->db->select('*');
+        $this->db->from($tbl);
+        $this->db->where($filed,$id);
+        if($order!=''){
+            $this->db->order_by('id',$order);
+        }
+        $this->db->where("del_status", 'Live');
+        return $this->db->get()->row();
+    }
+    /**
+     * get Pre Made Ingredients,
+     * @access public
+     * @param int
+     * @param string
+     */
+    public function getPreMadeIngredients($company_id,$status) {
+        $this->db->select('*');
+        $this->db->from('tbl_ingredients');
+        $this->db->where('company_id', $company_id);
+        $this->db->where('ing_type', $status);
+        $this->db->where('del_status',"Live");
+        $this->db->order_by('id',"DESC");
+        return $this->db->get()->result();
+    }
+    /**
+     * check get Access List
+     * @access public
+     * @param no
+     */
+    public function getAccessList() {
+        $company_id = $this->session->userdata('company_id');
+        $status_sa = false;
+        if(!isServiceAccess('','','sGmsJaFJE')){
+            $status_sa  = true;
+        }
+
+        $this->db->select('*');
+        $this->db->from('tbl_access');
+        if($company_id!=1){
+            $this->db->where('main_module_id!=', 2);
+        }
+        if($status_sa){
+            $this->db->where('main_module_id!=', 2);
+            $this->db->where('id!=', 316);
+        }
+        $this->db->where('parent_id', "0");
+        $this->db->where('del_status',"Live");
+        $this->db->order_by('main_module_id',"DESC");
+        return $this->db->get()->result();
+    }
+    /**
+     * check get Reservations
+     * @access public
+     * @param no
+     */
+    public function getReservations() {
+        $outlet_id = $this->session->userdata('outlet_id');
+        $this->db->select('*');
+        $this->db->from('tbl_reservations');
+        $this->db->where('outlet_id', $outlet_id);
+        $this->db->where('del_status', 'Live');
+        $this->db->order_by('status',"DESC");
+        return $this->db->get()->result();
+    }
+    /**
+     * check get Sorting For POS
+     * @access public
+     * @param no
+     */
+    public function getSortingForPOS() {
+        $company_id = $this->session->userdata('company_id');
+        $this->db->select('*');
+        $this->db->from('tbl_food_menu_categories');
+        $this->db->where('company_id', $company_id);
+        $this->db->where('del_status', 'Live');
+        $this->db->order_by('order_by',"ASC");
+        return $this->db->get()->result();
+    }
+    /**
+     * check get Data Custom Name
+     * @access public
+     * @param string
+     * @param string
+     * @param string
+     */
+    public function getDataCustomName($tbl, $db_field,$search_value){
+        $this->db->select('*');
+        $this->db->from($tbl);
+        $this->db->where($db_field, $search_value);
+        $this->db->where("del_status", 'Live');
+        return $this->db->get()->result();
+    }
+    /**
+     * check get Kitchen Categories By Ajax
+     * @access public
+     * @param no
+     */
+    public function getKitchenCategoriesByAjax() {
+        $company_id = $this->session->userdata('company_id');
+
+        $id = isset($_POST['kitchen_id']) && $_POST['kitchen_id']?$_POST['kitchen_id']:'';
+        $outlet_id = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+        if($id==''){
+            $result = $this->db->query("SELECT * FROM `tbl_food_menu_categories` WHERE id not in (select distinct cat_id FROM tbl_kitchen_categories WHERE del_status='Live' AND outlet_id='$outlet_id') AND del_status='Live' AND company_id='$company_id'")->result();
+            foreach ($result as $key=>$value){
+                $result[$key]->outlet_id = $outlet_id;
+            }
+        }else{
+            $result = $this->db->query("SELECT * FROM `tbl_food_menu_categories` WHERE id not in (select distinct cat_id FROM tbl_kitchen_categories WHERE del_status='Live' AND outlet_id='$outlet_id' AND kitchen_id!='$id') AND del_status='Live' AND company_id='$company_id'")->result();
+            foreach ($result as $key=>$value){
+                $result[$key]->outlet_id = $outlet_id;
+            }
+        }
+        return $result;
+    }
+    /**
+     * check get Waiter Orders
+     * @access public
+     * @param no
+     */
+    public function getWaiterOrders() {
+        $company_id = $this->session->userdata('company_id');
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $role = $this->session->userdata('role');
+        $designation = $this->session->userdata('designation');
+
+        if($role=="Admin"){
+            $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND pull_update_admin=1 AND is_accept=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id_admin='$user_id'")->result();
+        }else{
+            if($designation=="Cashier"){
+                $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND pull_update_cashier=1 AND is_accept=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id='$user_id'")->result();
+            }else{
+                $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND pull_update=1 AND is_accept=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id='$user_id'")->result();
+            }
+        }
+        return $result;
+    }
+    /**
+     * check get Waiter Orders For Update Sender
+     * @access public
+     * @param no
+     */
+    public function getWaiterOrdersForUpdateSender() {
+        $company_id = $this->session->userdata('company_id');
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND is_update_sender=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND user_id='$user_id'")->result();
+        return $result;
+    }
+    /**
+     * check get Waiter Orders For Update Receiver
+     * @access public
+     * @param no
+     */
+    public function getWaiterOrdersForUpdateReceiver() {
+        $company_id = $this->session->userdata('company_id');
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $role = $this->session->userdata('role');
+        $designation = $this->session->userdata('designation');
+
+        if($role=="Admin"){
+            $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND is_update_receiver_admin=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id_admin='$user_id'")->result();
+        }else{
+            $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND is_update_receiver=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id='$user_id'")->result();
+        }
+
+        return $result;
+    }
+    /**
+     * check get Waiter Orders For Delete Sender
+     * @access public
+     * @param string
+     */
+    public function getWaiterOrdersForDeleteSender() {
+        $company_id = $this->session->userdata('company_id');
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND is_delete_sender=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND user_id='$user_id'")->result();
+        return $result;
+    }
+    /**
+     * check get Waiter Orders For Delete Receiver
+     * @access public
+     * @param no
+     */
+    public function getWaiterOrdersForDeleteReceiver() {
+        $company_id = $this->session->userdata('company_id');
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $role = $this->session->userdata('role');
+        $designation = $this->session->userdata('designation');
+        if($role=="Admin"){
+            $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND is_delete_receiver_admin=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id_admin='$user_id'")->result();
+        }else{
+            if($designation=="Cashier"){
+                $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no  in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live' AND is_delete_receiver=1 AND company_id='$company_id' AND outlet_id='$outlet_id'")->result();
+            }else{
+                $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no not in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND is_delete_receiver=1 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id='$user_id'")->result();
+            }
+        }
+        return $result;
+    }
+    public function getOrderedTable() {
+        $outlet_id = $this->session->userdata('outlet_id');
+        $result = $this->db->query("SELECT * FROM `tbl_running_order_tables` WHERE del_status='Live' AND outlet_id='$outlet_id'")->result();
+        return $result;
+    }
+    /**
+     * check get Waiter Invoice Orders
+     * @access public
+     * @param no
+     */
+    public function getWaiterInvoiceOrders() {
+        $company_id = $this->session->userdata('company_id');
+        $user_id = $this->session->userdata('user_id');
+        $outlet_id = $this->session->userdata('outlet_id');
+        $role = $this->session->userdata('role');
+        $designation = $this->session->userdata('designation');
+        if($role=="Admin"){
+            $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND pull_update_admin=2 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id_admin='$user_id'")->result();
+        }else{
+            if($designation=="Cashier"){
+                $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND pull_update_cashier=2 AND company_id='$company_id' AND outlet_id='$outlet_id' AND order_receiving_id='$user_id'")->result();
+            }else{
+                $result = $this->db->query("SELECT id,sale_no,self_order_content FROM `tbl_kitchen_sales` WHERE sale_no in (select distinct sale_no FROM tbl_sales WHERE del_status='Live' AND outlet_id='$outlet_id' AND company_id='$company_id') AND del_status='Live'  AND pull_update=2 AND company_id='$company_id' AND outlet_id='$outlet_id' AND user_id='$user_id'")->result();
+            }
+        }
+        return $result;
+    }
+    /**
+     * check get Waiter Invoice Orders
+     * @access public
+     * @param no
+     */
+    public function alreadyInvoicedOrders() {
+        $sale_no_all = escape_output($_POST['sale_no_all']);
+        $spt = explode(',',$sale_no_all);
+        $arr = array();
+        foreach ($spt as $key=>$value){
+            if($value){
+                $row = getKitchenSaleDetailsBySaleNo($value);
+
+                if(isset($row) && $row){
+
+                }else{
+                    $inline_arr = array();
+                    $inline_arr['sale_no'] =  $value;
+                    $arr[] = $inline_arr;
+                }
+            }
+        }
+        return $arr;
     }
 }
 

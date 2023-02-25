@@ -289,7 +289,7 @@ let ingredient_id_container = <?php echo escape_output($ingredient_id_container)
     </div>
         
 
-    <div class="modal fade" id="noticeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="noticeModal" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="noticeModal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -305,18 +305,7 @@ let ingredient_id_container = <?php echo escape_output($ingredient_id_container)
                                 <?php echo lang('notice_text_1'); ?>
                             </p>
                         </div>
-                        <div class="col-md-12 hidden-xs hidden-sm">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
-                        <div class="col-md-12 hidden-xs hidden-lg">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
+
                         <div class="col-md-12">
                             <p class="foodMenuCartInfo">
                                 <a class="ir_font_bold" href="#"
@@ -347,16 +336,8 @@ let ingredient_id_container = <?php echo escape_output($ingredient_id_container)
                     </div>
                     <div class="modal-body">
                         <div class="panel-body">
-
                             <fieldset>
-
-
-
-
                                 <div class="row">
-
-
-
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label><?php echo lang('quantity'); ?> <span
@@ -378,14 +359,7 @@ let ingredient_id_container = <?php echo escape_output($ingredient_id_container)
 
                                 </div>
                                 <!--End Row-->
-
-
-
-
-
                         </div>
-
-                        </fieldset>
 
                     </div>
                     <div class="modal-footer">
@@ -394,12 +368,8 @@ let ingredient_id_container = <?php echo escape_output($ingredient_id_container)
                             data-dismiss="modal"><?php echo lang('close'); ?></button>
 
                     </div>
+                </form>
             </div>
-
-            </form>
         </div>
     </div>
-
-
-
 </section>

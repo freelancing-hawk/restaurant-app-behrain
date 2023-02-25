@@ -9,19 +9,15 @@
 .bg-red-btn {
   background-color: #ea5455;
 }
-
 .bg-red-btn:hover, .bg-red-btn:focus {
-  -webkit-box-shadow: 0 8px 25px -8px #ea5455 !important;
-          box-shadow: 0 8px 25px -8px #ea5455 !important;
+  box-shadow: 0 8px 25px -8px #ea5455 !important;
 }
 
 .bg-blue-btn {
   background-color: #7367f0;
 }
-
 .bg-blue-btn:hover, .bg-blue-btn:focus {
-  -webkit-box-shadow: 0 8px 25px -8px #7367f0 !important;
-          box-shadow: 0 8px 25px -8px #7367f0 !important;
+  box-shadow: 0 8px 25px -8px #7367f0 !important;
 }
 
 .bg-blue-btn,
@@ -33,25 +29,16 @@
   font-weight: 500;
   font-size: 14px;
   text-transform: capitalize;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-transition: all 0.3s;
+  align-items: center;
+  justify-content: center;
   transition: all 0.3s;
 }
-
 .bg-blue-btn svg,
 .bg-red-btn svg {
   width: 14px;
   height: 14px;
 }
-
 .bg-blue-btn:hover, .bg-blue-btn:focus,
 .bg-red-btn:hover,
 .bg-red-btn:focus {
@@ -60,8 +47,7 @@
 
 .btn-check:focus + .btn,
 .btn:focus {
-  -webkit-box-shadow: none;
-          box-shadow: none;
+  box-shadow: none;
 }
 
 .txt-color-grey {
@@ -93,8 +79,7 @@
 
 select:focus,
 input:focus {
-  -webkit-box-shadow: none !important;
-          box-shadow: none !important;
+  box-shadow: none !important;
 }
 
 /*
@@ -104,10 +89,8 @@ input:focus {
   border: 1px solid #ea5455 !important;
   background-color: transparent !important;
   color: #ea5455 !important;
-  -webkit-transition: all 0.3s;
   transition: all 0.3s;
 }
-
 .sweet-alert button.cancel:hover {
   background-color: rgba(234, 84, 84, 0.1) !important;
 }
@@ -117,13 +100,10 @@ input:focus {
   padding: 0.786rem 1.5rem;
   font-size: 1rem;
   border-radius: 0.358rem;
-  -webkit-transition: all 0.3s;
   transition: all 0.3s;
 }
-
 .sa-button-container .sa-confirm-button-container .confirm:hover {
-  -webkit-box-shadow: 0 8px 25px -8px #7367f0 !important;
-          box-shadow: 0 8px 25px -8px #7367f0 !important;
+  box-shadow: 0 8px 25px -8px #7367f0 !important;
 }
 
 .swal2-confirm {
@@ -131,15 +111,11 @@ input:focus {
   padding: 0.786rem 1.5rem;
   font-size: 1rem;
   border-radius: 0.358rem;
-  -webkit-box-shadow: none;
-          box-shadow: none;
-  -webkit-transition: all 0.3s;
+  box-shadow: none;
   transition: all 0.3s;
 }
-
 .swal2-confirm:hover {
-  -webkit-box-shadow: 0 8px 25px -8px #7367f0 !important;
-          box-shadow: 0 8px 25px -8px #7367f0 !important;
+  box-shadow: 0 8px 25px -8px #7367f0 !important;
 }
 
 /*
@@ -153,12 +129,10 @@ input:focus {
 .nav-tabs .nav-link {
   color: #6e6b7b;
 }
-
 .nav-tabs .nav-item.show .nav-link:hover,
 .nav-tabs .nav-link:hover {
   border-color: transparent;
 }
-
 .nav-tabs .nav-item.show .nav-link.active,
 .nav-tabs .nav-link.active {
   color: #7367f0;
@@ -192,20 +166,17 @@ input:focus {
 .login-auth-page {
   height: 100vh;
 }
-
 .main-wrapper .auth-title,
 .login-auth-page .auth-title {
   color: #5e5873;
   font-size: 1.714rem;
   font-weight: 500;
 }
-
 .main-wrapper .auth-subtitle,
 .login-auth-page .auth-subtitle {
   color: #5e5873;
   font-size: 1.3rem;
 }
-
 .main-wrapper .auth-desc,
 .login-auth-page .auth-desc {
   color: #6e6b7b;
@@ -215,7 +186,6 @@ input:focus {
 .login-auth-page .left-item {
   background-color: #f8f8f8;
 }
-
 .login-auth-page .set_credentials {
   padding: 8.5px 0px !important;
 }
@@ -229,10 +199,9 @@ input:focus {
     padding: 20px;
   }
   .main-wrapper .auth-title,
-  .main-wrapper .auth-desc,
-  .login-auth-page .auth-title,
-  .login-auth-page .auth-desc {
+.main-wrapper .auth-desc,
+.login-auth-page .auth-title,
+.login-auth-page .auth-desc {
     text-align: center;
   }
-}
-/*# sourceMappingURL=signin.css.map */
+}/*# sourceMappingURL=signin.css.map */

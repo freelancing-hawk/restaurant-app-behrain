@@ -28,10 +28,31 @@ class Table extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "280";
+        $function = "";
+        if($segment_2=="tables"){
+            $function = "view";
+        }elseif($segment_2=="addEditTable" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditTable"){
+            $function = "add";
+        }elseif($segment_2=="deleteTable"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -75,17 +96,19 @@ class Table extends Cl_Controller {
         $company_id = $this->session->userdata('company_id');
         $id = $this->custom->encrypt_decrypt($encrypted_id, 'decrypt');
         if ($this->input->post('submit')) {
+            $this->form_validation->set_rules('area',lang('area'), 'required|max_length[50]');
             $this->form_validation->set_rules('name',lang('table_name'), 'required|max_length[50]');
             $this->form_validation->set_rules('sit_capacity', lang('seat_capacity'), 'required|max_length[50]');
             $this->form_validation->set_rules('position', lang('position'), 'required|max_length[50]');
             $this->form_validation->set_rules('description',lang('description'), 'max_length[50]');
             if ($this->form_validation->run() == TRUE) {
                 $igc_info = array();
+                $igc_info['area'] = htmlspecialchars($this->input->post($this->security->xss_clean('area')));
                 $igc_info['name'] = htmlspecialchars($this->input->post($this->security->xss_clean('name')));
                 $igc_info['sit_capacity'] = htmlspecialchars($this->input->post($this->security->xss_clean('sit_capacity')));
                 $igc_info['position'] = htmlspecialchars($this->input->post($this->security->xss_clean('position')));
                 $igc_info['description'] =htmlspecialchars($this->input->post($this->security->xss_clean('description')));
-                $igc_info['outlet_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('outlet')));
+                $igc_info['outlet_id'] = getOutletIdByArea($igc_info['area']);
                 $igc_info['user_id'] = $this->session->userdata('user_id');
                 $igc_info['company_id'] = $this->session->userdata('company_id');
                 if ($id == "") {
@@ -99,13 +122,13 @@ class Table extends Cl_Controller {
             } else {
                 if ($id == "") {
                     $data = array();
-                    $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_outlets');
+                    $data['areas'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_areas');
                     $data['main_content'] = $this->load->view('master/table/addTable', $data, TRUE);
                     $this->load->view('userHome', $data);
                 } else {
                     $data = array();
+                    $data['areas'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_areas');
                     $data['encrypted_id'] = $encrypted_id;
-                    $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_outlets');
                     $data['table_information'] = $this->Common_model->getDataById($id, "tbl_tables");
                     $data['main_content'] = $this->load->view('master/table/editTable', $data, TRUE);
                     $this->load->view('userHome', $data);
@@ -114,13 +137,13 @@ class Table extends Cl_Controller {
         } else {
             if ($id == "") {
                 $data = array();
-                $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_outlets');
+                $data['areas'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_areas');
                 $data['main_content'] = $this->load->view('master/table/addTable', $data, TRUE);
                 $this->load->view('userHome', $data);
             } else {
                 $data = array();
+                $data['areas'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_areas');
                 $data['encrypted_id'] = $encrypted_id;
-                $data['outlets'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_outlets');
                 $data['table_information'] = $this->Common_model->getDataById($id, "tbl_tables");
                 $data['main_content'] = $this->load->view('master/table/editTable', $data, TRUE);
                 $this->load->view('userHome', $data);

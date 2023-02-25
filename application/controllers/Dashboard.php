@@ -40,12 +40,13 @@ class Dashboard extends Cl_Controller {
             redirect('Outlet/outlets');
         }
 
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-            redirect('Authentication/userProfile');
-        }
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
+
+
+
+
     }
 
      /**
@@ -55,8 +56,27 @@ class Dashboard extends Cl_Controller {
      * @param no
      */
     public function dashboard() {
-        $first_day_this_month = date('Y-m-01');
-        $last_day_this_month  = date('Y-m-t');
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $controller = "1";
+        $function = "";
+
+        if($segment_2=="dashboard"){
+            $function = "view";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
+        $first_day_this_month  = isset($_POST['start_date_dashboard']) && $_POST['start_date_dashboard']?$_POST['start_date_dashboard']:date('Y-m-01');
+        $last_day_this_month  = isset($_POST['end_date_dashboard']) && $_POST['end_date_dashboard']?$_POST['end_date_dashboard']:date('Y-m-t');
+
         $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
         if(!$outlet_id){
             $outlet_id = $this->session->userdata('outlet_id');
@@ -66,6 +86,9 @@ class Dashboard extends Cl_Controller {
         $data['ingredient_count'] = sizeof($this->Dashboard_model->getInventory('', '', '',$outlet_id));
         $data['customer_count'] = $this->Dashboard_model->countData('tbl_customers');
         $data['employee_count'] = $this->Dashboard_model->countData('tbl_users');
+
+        $data['start_date_dashboard'] = $first_day_this_month;
+        $data['end_date_dashboard'] = $last_day_this_month;
 
         $data['low_stock_ingredients'] = $this->Inventory_model->getInventoryAlertList($outlet_id);
         $data['top_ten_food_menu'] = $this->Dashboard_model->top_ten_food_menu($first_day_this_month, $last_day_this_month,$outlet_id);
@@ -83,8 +106,11 @@ class Dashboard extends Cl_Controller {
         $data['expense_sum'] = $this->Dashboard_model->expense_sum($first_day_this_month, $last_day_this_month,$outlet_id);
         $data['customer_due_receive_sum'] = $this->Dashboard_model->customer_due_receive_sum($first_day_this_month, $last_day_this_month,$outlet_id);
         $data['supplier_due_payment_sum'] = $this->Dashboard_model->supplier_due_payment_sum($first_day_this_month, $last_day_this_month,$outlet_id);
-
         $data['outlets'] = $this->Common_model->getAllOutlestByAssign();
+        $data['sale_by_payments'] = $this->Dashboard_model->sale_by_payments($first_day_this_month, $last_day_this_month,$outlet_id);
+        $data['sale_by_paymentsTotal'] = $this->Dashboard_model->sale_by_paymentsTotal($first_day_this_month, $last_day_this_month,$outlet_id);
+
+
         $data['main_content'] = $this->load->view('dashboard/dashboard', $data, TRUE);
         $this->load->view('userHome', $data);
     }
@@ -130,5 +156,143 @@ class Dashboard extends Cl_Controller {
             );
         }
         echo json_encode($finalOutput);
+    }
+    function get_sale_report_charge(){
+        $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+        $start_date  = isset($_POST['start_date']) && $_POST['start_date']?$_POST['start_date']:'';
+        $end_date  = isset($_POST['end_date']) && $_POST['end_date']?$_POST['end_date']:'';
+        $type  = isset($_POST['type']) && $_POST['type']?$_POST['type']:'';
+        $action_type  = isset($_POST['action_type']) && $_POST['action_type']?$_POST['action_type']:'';
+
+        if(!$outlet_id){
+            $outlet_id = $this->session->userdata('outlet_id');
+        }
+        $return_date_day = array();
+        $transaction_details_main = (object)$this->Report_model->getTotalTransaction($start_date, $end_date,$outlet_id);
+
+        if($action_type=="revenue"){
+            $day_wise_date = (getSaleDate($start_date,$end_date,$type));
+            foreach ($day_wise_date as $key=>$value){
+                $date_split = explode("||",$value);
+                $start_date_generated = date("Y-m-d",strtotime($date_split[0]));
+                $start_end_generated = date("Y-m-d",strtotime($date_split[1]));
+                $profit_details = (object)$this->Report_model->profitLossReport($start_date_generated, $start_end_generated,$outlet_id);
+                $inline_array = array();
+                $inline_array['y_value'] = getAmtP($profit_details->profit_1);
+                $inline_array['y_label'] =$date_split[2];
+                $inline_array['x_label'] =$date_split[3];
+                $inline_array['x_label_tmp'] ='';
+                $return_date_day[] = $inline_array;
+            }
+        }else if($action_type=="profit"){
+            $day_wise_date = (getSaleDate($start_date,$end_date,$type));
+            foreach ($day_wise_date as $key=>$value){
+                $date_split = explode("||",$value);
+                $start_date_generated = date("Y-m-d",strtotime($date_split[0]));
+                $start_end_generated = date("Y-m-d",strtotime($date_split[1]));
+                $profit_details = (object)$this->Report_model->profitLossReport($start_date_generated, $start_end_generated,$outlet_id);
+                $inline_array = array();
+                $inline_array['y_value'] = getAmtP($profit_details->profit_9);
+                $inline_array['y_label'] =$date_split[2];
+                $inline_array['x_label'] =$date_split[3];
+                $inline_array['x_label_tmp'] ='';
+                $return_date_day[] = $inline_array;
+            }
+        }else if($action_type=="transactions"){
+            $day_wise_date = (getSaleDate($start_date,$end_date,$type));
+            foreach ($day_wise_date as $key=>$value){
+                $date_split = explode("||",$value);
+                $start_date_generated = date("Y-m-d",strtotime($date_split[0]));
+                $start_end_generated = date("Y-m-d",strtotime($date_split[1]));
+                $profit_details = (object)$this->Report_model->getTotalTransaction($start_date_generated, $start_end_generated,$outlet_id);
+                $inline_array = array();
+                $inline_array['y_value'] = getAmtP($profit_details->total_transaction);
+                $inline_array['y_label'] =$date_split[2];
+                $inline_array['x_label'] =$date_split[3];
+                $inline_array['x_label_tmp'] =lang('transactions');
+                $return_date_day[] = $inline_array;
+            }
+        }else if($action_type=="customers"){
+            $day_wise_date = (getSaleDate($start_date,$end_date,$type));
+            foreach ($day_wise_date as $key=>$value){
+                $date_split = explode("||",$value);
+                $start_date_generated = date("Y-m-d",strtotime($date_split[0]));
+                $start_end_generated = date("Y-m-d",strtotime($date_split[1]));
+                $profit_details = (object)$this->Report_model->getTotalCustomer($start_date_generated, $start_end_generated,$outlet_id);
+                $inline_array = array();
+                $inline_array['y_value'] = getAmtP($profit_details->total_customer);
+                $inline_array['y_label'] =$date_split[2];
+                $inline_array['x_label'] =$date_split[3];
+                $inline_array['x_label_tmp'] =lang('customers');
+                $return_date_day[] = $inline_array;
+            }
+        }else if($action_type=="average_receipt"){
+            $day_wise_date = (getSaleDate($start_date,$end_date,$type));
+            foreach ($day_wise_date as $key=>$value){
+                $date_split = explode("||",$value);
+                $start_date_generated = date("Y-m-d",strtotime($date_split[0]));
+                $start_end_generated = date("Y-m-d",strtotime($date_split[1]));
+
+                $profit_details = (object)$this->Report_model->profitLossReport($start_date_generated, $start_end_generated,$outlet_id);
+                $average_trans = @(($profit_details->profit_1)/$transaction_details_main->total_transaction);
+                $inline_array = array();
+                $inline_array['y_value'] = getAmtP($average_trans);
+                $inline_array['y_label'] =$date_split[2];
+                $inline_array['x_label'] =$date_split[3];
+                $inline_array['x_label_tmp'] =lang('average_receipt');
+                $return_date_day[] = $inline_array;
+            }
+        }
+        $return_array['data_points'] =  $return_date_day;
+
+        $return_value_set_total_1 = 0;
+        $return_value_set_total_2 = 0;
+        $return_value_set_total_3 = 0;
+        $return_value_set_total_4 = 0;
+
+        $profit_details = (object)$this->Report_model->profitLossReport($start_date, $end_date,$outlet_id);
+        $customer_details = (object)$this->Report_model->getTotalCustomer($start_date, $end_date,$outlet_id);
+
+        $return_value_set_total_1+=($profit_details->profit_1);
+        $return_value_set_total_2+=$profit_details->profit_9;
+        $return_value_set_total_3+=$transaction_details_main->total_transaction;
+        $return_value_set_total_4+=$customer_details->total_customer;
+
+        $return_array['set_total_1'] =  getAmtP($return_value_set_total_1);
+        $return_array['set_total_2'] =  getAmtP($return_value_set_total_2);
+        $return_array['set_total_3'] =  getAmtP($return_value_set_total_3);
+        $return_array['set_total_4'] =  getAmtP($return_value_set_total_4);
+
+        echo json_encode($return_array);
+    }
+    function get_sale_report_charge_today(){
+        $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+        $start_date  = date('Y-m-d');
+        $end_date  =date('Y-m-d');
+
+        if(!$outlet_id){
+            $outlet_id = $this->session->userdata('outlet_id');
+        }
+
+        $transaction_details_main = (object)$this->Report_model->getTotalTransaction($start_date, $end_date,$outlet_id);
+        $return_value_set_total_1 = 0;
+        $return_value_set_total_2 = 0;
+        $return_value_set_total_3 = 0;
+        $return_value_set_total_4 = 0;
+
+        $profit_details = (object)$this->Report_model->profitLossReport($start_date, $end_date,$outlet_id);
+        $customer_details = (object)$this->Report_model->getTotalCustomer($start_date, $end_date,$outlet_id);
+
+        $return_value_set_total_1+=($profit_details->profit_1);
+        $return_value_set_total_2+=$profit_details->profit_9;
+        $return_value_set_total_3+=$transaction_details_main->total_transaction;
+        $return_value_set_total_4+=$customer_details->total_customer;
+
+        $return_array['set_total_1'] =  getAmtP($return_value_set_total_1);
+        $return_array['set_total_2'] =  getAmtP($return_value_set_total_2);
+        $return_array['set_total_3'] =  getAmtP($return_value_set_total_3);
+        $return_array['set_total_4'] =  getAmtP($return_value_set_total_4);
+
+        echo json_encode($return_array);
     }
 }

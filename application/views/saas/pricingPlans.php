@@ -1,5 +1,3 @@
-
-
 <section class="main-content-wrapper">
 
     <?php
@@ -9,7 +7,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -37,6 +35,7 @@
                                             <th class="ir_w_1"> <?php echo lang('sn'); ?></th>
                                             <th class="ir_w_9"><?php echo lang('plan_name'); ?></th>
                                             <th class="ir_w_9"><?php echo lang('monthly_cost'); ?></th>
+                                            <th class="ir_w_9"><?php echo lang('price_for_month2'); ?></th>
                                             <th class="ir_w_9"><?php echo lang('number_of_maximum_users'); ?></th>
                                             <th class="ir_w_9"><?php echo lang('number_of_maximum_outlets'); ?></th>
                                             <th class="ir_w_9"><?php echo lang('number_of_maximum_invoices'); ?></th>
@@ -54,7 +53,8 @@
                                         <tr>
                                             <td><?php echo escape_output($i--); ?></td>
                                             <td>   <?php echo escape_output($spns->plan_name) ?></td>
-                                            <td>   <?php echo escape_output(getAmtP($spns->monthly_cost)) ?></td>
+                                            <td>   <?php echo escape_output(getAmtPCustom($spns->monthly_cost)) ?></td>
+                                            <td>   <?php echo escape_output(getAmtPCustom($spns->price_for_month2)) ?></td>
                                             <td>   <?php echo escape_output($spns->number_of_maximum_users) ?></td>
                                             <td>   <?php echo escape_output($spns->number_of_maximum_outlets) ?></td>
                                             <td>   <?php echo escape_output($spns->number_of_maximum_invoices) ?></td>
@@ -269,6 +269,4 @@
             </div>
 
         </div>
-   
-        
 </section>

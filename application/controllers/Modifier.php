@@ -29,10 +29,33 @@ class Modifier extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "223";
+        $function = "";
+
+        if($segment_2=="modifiers"){
+            $function = "view";
+        }elseif($segment_2=="addEditModifier" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditModifier"){
+            $function = "add";
+        }elseif($segment_2=="modifierDetails"){
+            $function = "view_details";
+        }elseif($segment_2=="deleteModifier"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -104,7 +127,7 @@ class Modifier extends Cl_Controller {
                 $modifier_info['company_id'] = $this->session->userdata('company_id');
                 $modifier_info['tax_information'] = $tax_information;
                 $modifier_info['tax_string'] = $tax_string;
-
+                $modifier_info['total_cost'] =htmlspecialchars($this->input->post($this->security->xss_clean('grand_total_cost')));
                 if ($id == "") {
                     $modifier_id = $this->Common_model->insertInformation($modifier_info, "tbl_modifiers");
                     $this->saveModifierIngredients($_POST['ingredient_id'], $modifier_id, 'tbl_modifier_ingredients');
@@ -161,6 +184,9 @@ class Modifier extends Cl_Controller {
             $fmi = array();
             $fmi['ingredient_id'] = $ingredient_id;
             $fmi['consumption'] = $_POST['consumption'][$row];
+            $fmi['consumption'] = $_POST['consumption'][$row];
+            $fmi['cost'] = $_POST['cost'][$row];
+            $fmi['total'] = $_POST['total_cost'][$row];
             $fmi['modifier_id'] = $modifier_id_id;
             $fmi['user_id'] = $this->session->userdata('user_id');
             $fmi['company_id'] = $this->session->userdata('company_id');

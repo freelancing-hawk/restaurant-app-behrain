@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
     <?php
     if ($this->session->flashdata('exception')) {
@@ -8,7 +7,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -20,9 +19,7 @@
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('users'); ?>" data-id_name="datatable">
             </div>
             <div>
-                <a class="btn_list btn bg-blue-btn m-right" href="<?php echo base_url() ?>User/addEditUser">
-                    <i data-feather="plus"></i> <?php echo lang('add_user'); ?>
-                </a>
+
             </div>
         </div>
     </section>
@@ -40,11 +37,18 @@
                         <thead>
                             <tr>
                                 <th class="ir_w_1"> <?php echo lang('sn'); ?></th>
+                                <?php if(isServiceAccess('','','sGmsJaFJE')): ?>
+                                    <th class="ir_w_12"><?php echo lang('company'); ?></th>
+                                <?php
+                                    endif;
+                                ?>
                                 <th class="ir_w_23"><?php echo lang('name'); ?></th>
                                 <th class="ir_w_8"><?php echo lang('designation'); ?></th>
                                 <th class="ir_w_8"><?php echo lang('email'); ?></th>
                                 <th class="ir_w_7"><?php echo lang('status'); ?></th>
-                                <th class="ir_w_27 <?=isset($language_manifesto) && $language_manifesto!="eriutoeri"?'txt_11':''?>"><?php echo lang('outlets'); ?></th>
+                                <th class="ir_w_20"><?php echo lang('kitchens'); ?></th>
+                                <th class="ir_w_20 <?=isset($language_manifesto) && $language_manifesto!="eriutoeri"?'txt_11':''?>"><?php echo lang('outlets'); ?></th>
+                                <th class="ir_w_20"><?php echo lang('role'); ?></th>
                                 <th class="ir_w_1 ir_txt_center not-export-col"><?php echo lang('actions'); ?></th>
                             </tr>
                         </thead>
@@ -55,15 +59,23 @@
                             }
                             foreach ($users as $usrs) {
                                 if ($usrs->id != $this->session->userdata['user_id']):
+                                        $company = getCompanyInfoById($usrs->company_id);
                                     ?>
                             <tr>
+
                                 <td class="ir_txt_center"><?php echo escape_output($i--); ?></td>
                                 <td><?php echo escape_output($usrs->full_name) ?></td>
+                                    <?php if(isServiceAccess('','','sGmsJaFJE')): ?>
+                                            <td><?php echo escape_output($company->business_name) ?></td>
+                                        <?php
+                                    endif;
+                                    ?>
                                 <td><?php echo escape_output($usrs->designation) ?></td>
                                 <td><?php echo escape_output($usrs->email_address) ?></td>
                                 <td><?php echo escape_output($usrs->active_status) ?></td>
+                                <td><?php echo getKitchens($usrs->kitchens); ?></td>
                                 <td class="<?=isset($language_manifesto) && $language_manifesto!="eriutoeri"?'txt_11':''?>"><?php echo getOutlets($usrs->outlets); ?></td>
-
+                                <td><?php echo getRole($usrs->role_id); ?></td>
                                 <td class="ir_txt_center">
                                     <div class="btn-group  actionDropDownBtn">
                                         <button type="button" class="btn bg-blue-color dropdown-toggle"
@@ -74,31 +86,29 @@
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
                                             <?php if ($usrs->role != 'Admin') { ?>
                                             <?php if ($usrs->active_status == 'Active') { ?>
-                                            <li>
+                                            <li data-access="deactivate-291" class="menu_assign_class">
                                                 <a
                                                     href="<?php echo base_url() ?>User/deactivateUser/<?php echo escape_output($this->custom->encrypt_decrypt($usrs->id, 'encrypt')); ?>"><i
                                                         class="fa fa-times tiny-icon"></i><?php echo lang('deactivate'); ?></a>
                                             </li>
                                             <?php } else { ?>
-                                            <li>
+                                            <li data-access="activate-291" class="menu_assign_class">
                                                 <a
                                                     href="<?php echo base_url() ?>User/activateUser/<?php echo escape_output($this->custom->encrypt_decrypt($usrs->id, 'encrypt')); ?>"><i
                                                         class="fa fa-check tiny-icon"></i><?php echo lang('activate'); ?></a>
                                             </li>
                                             <?php } ?>
                                             <?php } ?>
-                                            <li>
+                                            <li data-access="update-291" class="menu_assign_class">
                                                 <a
                                                     href="<?php echo base_url() ?>User/addEditUser/<?php echo escape_output($this->custom->encrypt_decrypt($usrs->id, 'encrypt')); ?>"><i
                                                         class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a>
                                             </li>
-                                            <?php if ($usrs->role != 'Admin') { ?>
-                                            <li>
+                                            <li data-access="delete-291" class="menu_assign_class">
                                                 <a class="delete"
-                                                    href="<?php echo base_url() ?>User/deleteUser/<?php echo escape_output($this->custom->encrypt_decrypt($usrs->id, 'encrypt')); ?>"><i
-                                                        class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
+                                                   href="<?php echo base_url() ?>User/deleteUser/<?php echo escape_output($this->custom->encrypt_decrypt($usrs->id, 'encrypt')); ?>"><i
+                                                            class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>
-                                            <?php } ?>
                                         </ul>
                                     </div>
                                 </td>

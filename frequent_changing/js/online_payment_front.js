@@ -32,27 +32,27 @@ $(function() {
     });
 
     $(document).on('change', '#plan_id', function(e) {
-       let trail_days = Number($("#plan_id option:selected").attr('data-trail_days'));
-       let total_amount = Number($("#plan_id option:selected").attr('data-total_amount'));
-       let plan_name = ($("#plan_id option:selected").attr('data-plan_name'));
+        let trail_days = Number($("#plan_id option:selected").attr('data-trail_days'));
+        let total_amount = Number($("#plan_id option:selected").attr('data-total_amount'));
+        let plan_name = ($("#plan_id option:selected").attr('data-plan_name'));
         //for amount after select plan
-       $("#total_payable_str").val(total_amount);
-       $("#total_payable").val(total_amount);
-       $("#paypalAmt").val(total_amount);
+        $("#total_payable_str").val(total_amount);
+        $("#total_payable").val(total_amount);
+        $("#paypalAmt").val(total_amount);
 
-       $("#item_description_str").val(plan_name);
-       $("#item_name").val("Monthly payment for "+plan_name);
-       $("#item_name_recurring").val("Monthly payment for "+plan_name);
-       $("#item_description_str_paypal").val("Monthly payment for "+plan_name);
+        $("#item_description_str").val(plan_name);
+        $("#item_name").val("Monthly payment for "+plan_name);
+        $("#item_name_recurring").val("Monthly payment for "+plan_name);
+        $("#item_description_str_paypal").val("Monthly payment for "+plan_name);
 
 
-       if(trail_days===111){
-           $("#is_trail_plan").val("No");
-           $(".hide_div_for_free").show();
-       }else{
-           $("#is_trail_plan").val("Yes");
-           $(".hide_div_for_free").hide();
-       }
+        if(trail_days===111){
+            $("#is_trail_plan").val("No");
+            $(".hide_div_for_free").show();
+        }else{
+            $("#is_trail_plan").val("Yes");
+            $(".hide_div_for_free").hide();
+        }
     });
     //check valid email address
     function validateEmail(email) {
@@ -63,9 +63,10 @@ $(function() {
     $(document).on('change', '#payment_type', function(e) {
         let this_value = $(this).val();
         if(Number(this_value)===2){
+            $("#stripe_hide").hide();
             let value = 2;
             $("#payment_method option[value=" + value + "]").hide();
-             value = 3;
+            value = 3;
             $("#payment_method option[value=" + value + "]").hide();
             $("#payment_method").val(1);
         }else{
@@ -73,10 +74,12 @@ $(function() {
             $("#payment_method option[value=" + value + "]").show();
             value = 3;
             $("#payment_method option[value=" + value + "]").show();
+            $("#stripe_hide").show();
         }
     });
     $(document).on('click', '.payment_now', function(e) {
         e.preventDefault();
+        let update_plan = Number($("#update_plan").val());
         let business_name = $("#business_name").val();
         let phone = $("#phone").val();
         let address = $("#address").val();
@@ -109,7 +112,7 @@ $(function() {
         let status = false;
         let focus  = 1;
         if(business_name==''){
-             status = true;
+            status = true;
             if(focus==1){
                 $("#business_name").focus();
             }
@@ -121,8 +124,8 @@ $(function() {
                 confirmButtonColor: '#7367f0'
             });
         }else if(phone==''){
-             status = true;
-             if(focus==1){
+            status = true;
+            if(focus==1){
                 $("#phone").focus();
             }
             focus++;
@@ -133,8 +136,8 @@ $(function() {
                 confirmButtonColor: '#7367f0'
             });
         }else if(address==''){
-             status = true;
-             if(focus==1){
+            status = true;
+            if(focus==1){
                 $("#address").focus();
             }
             focus++;
@@ -167,9 +170,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(admin_name==''){
-             status = true;
-             if(focus==1){
+        }else if(admin_name=='' && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#admin_name").focus();
             }
             focus++;
@@ -179,9 +182,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(email==''){
-             status = true;
-             if(focus==1){
+        }else if(email==''  && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#email").focus();
             }
             focus++;
@@ -191,9 +194,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(!validateEmail(email)){
-             status = true;
-             if(focus==1){
+        }else if(!validateEmail(email)  && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#email").focus();
             }
             focus++;
@@ -203,9 +206,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(password==''){
-             status = true;
-             if(focus==1){
+        }else if(password==''  && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#password").focus();
             }
             focus++;
@@ -215,9 +218,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(confirm_password==''){
-             status = true;
-             if(focus==1){
+        }else if(confirm_password==''  && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#confirm_password").focus();
             }
             focus++;
@@ -227,9 +230,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(password.length<6){
-             status = true;
-             if(focus==1){
+        }else if(password.length<6  && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#password").focus();
             }
             focus++;
@@ -239,9 +242,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(confirm_password.length<6){
-             status = true;
-             if(focus==1){
+        }else if(confirm_password.length<6  && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#confirm_password").focus();
             }
             focus++;
@@ -251,9 +254,9 @@ $(function() {
                 confirmButtonText: ok,
                 confirmButtonColor: '#7367f0'
             });
-        }else if(password !== confirm_password){
-             status = true;
-             if(focus==1){
+        }else if(password !== confirm_password  && !update_plan){
+            status = true;
+            if(focus==1){
                 $("#confirm_password ").focus();
             }
             focus++;
@@ -264,7 +267,6 @@ $(function() {
                 confirmButtonColor: '#7367f0'
             });
         }
-
         if(status==false){
             if(is_trail_plan=="No"){
                 var data = $("form#singup_company").serialize();

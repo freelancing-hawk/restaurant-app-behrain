@@ -8,8 +8,7 @@ $(function () {
         let tax_registration_no = $('#tax_registration_no');
         let tax_is_gst_yes = $('#tax_is_gst_yes');
         let tax_is_gst_no = $('#tax_is_gst_no');
-        let state_code = $('#state_code');
-        let pre_or_post_payment_post = $('#pre_or_post_payment_post');
+
 
         if(!collect_tax_yes.is(':checked') && !collect_tax_no.is(':checked')){
             error++;
@@ -23,19 +22,7 @@ $(function () {
                 error++;
                 $('#tax_registration_no').fadeIn();
             }
-            if(!tax_is_gst_yes.is(':checked') && !tax_is_gst_no.is(':checked')){
-                error++;
-            }
-            if(tax_is_gst_yes.is(':checked')){
-                if(state_code.val()==""){
-                    error++;
-                    $('#state_code_error').fadeIn();
-                }
-            }
-        }
 
-        if(pre_or_post_payment_post.val()==""){
-            error++;
         }
     });
     $(document).on('click','.remove_this_tax_row',function(){
@@ -60,12 +47,22 @@ $(function () {
     $(document).on('click','#collect_tax_no',function(){
         $('#tax_yes_section').fadeOut();
     });
-
+    function show_hide_div() {
+        let tax_is_gst = $("input[type='radio'][name='tax_is_gst']:checked").val();
+        if(tax_is_gst=="Yes"){
+            $(".gst_div").fadeIn();
+        }else{
+            $(".gst_div").fadeOut();
+        }
+    }
+    show_hide_div();
     $(document).on('click','#tax_is_gst_yes',function(){
         $('#gst_yes_section').fadeIn();
+        show_hide_div();
     });
     $(document).on('click','#tax_is_gst_no',function(){
         $('#gst_yes_section').fadeOut();
+        show_hide_div();
     });
     $(document).on('click','#add_tax',function(){
         let table_tax_body = $('#tax_table_body');

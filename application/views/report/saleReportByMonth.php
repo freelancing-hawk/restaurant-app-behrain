@@ -116,7 +116,7 @@
                             <tr>
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?= escape_output(date('M-Y', strtotime($value->sale_date))) ?></td>
-                                <td><?php echo escape_output(getAmt($value->total_payable)) ?></td>
+                                <td><?php echo escape_output(getAmtCustom($value->total_payable)) ?></td>
                             </tr>
                             <?php
                                 }
@@ -128,7 +128,7 @@
                                 <th class="ir_w2_txt_center"></th>
                                 <th class="ir_txt_right"><?php echo lang('total'); ?> </th>
                                 <th>
-                                    <?php echo escape_output(getAmt($grandTotal)) ?>
+                                    <?php echo escape_output(getAmtCustom($grandTotal)) ?>
                                 </th>
                             </tr>
 

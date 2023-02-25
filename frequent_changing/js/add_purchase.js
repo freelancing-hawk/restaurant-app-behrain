@@ -5,6 +5,7 @@ $(function() {
     let date_field_required = $("#date_field_required").val();
     let at_least_ingredient = $("#at_least_ingredient").val();
     let paid_field_required = $("#paid_field_required").val();
+    let payment_id_field_required = $("#payment_id_field_required").val();
     let are_you_sure = $("#are_you_sure").val();
     let warning = $("#warning").val();
     let a_error = $("#a_error").val();
@@ -76,6 +77,7 @@ $(function() {
     // Validate form
     $(document).on('submit', '#purchase_form', function() {
         let supplier_id = $("#supplier_id").val();
+        let payment_id = $("#payment_id").val();
         let date = $("#date").val();
         //let note = $("#note").val();
         let paid = $("#paid").val();
@@ -109,6 +111,11 @@ $(function() {
             $(".paid_err_msg_contnr").show(200);
             error = true;
         }
+        if (payment_id == "") {
+            $("#payment_id_err_msg").text(payment_id_field_required);
+            $(".payment_id_err_msg_contnr").show(200);
+            error = true;
+        }
 
         $(".countID").each(function() {
             let n = $(this).attr("data-countID");
@@ -129,9 +136,6 @@ $(function() {
             return false;
         }
     });
-
-
-
 })
 
 function calculateAll() {

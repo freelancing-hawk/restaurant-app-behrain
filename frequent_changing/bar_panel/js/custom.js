@@ -1130,6 +1130,12 @@ function new_notification_interval() {
     },
   });
 }
+
+// sound effect
+let bell_new_order = new Howl({
+    src: [base_url + "assets/media/kitchen_bell.mp3"],
+});
+
 refresh_orders();
 function refresh_orders() {
   let url = base_url + "Bar/get_new_orders_ajax";
@@ -1162,6 +1168,10 @@ function refresh_orders() {
           order_name = "C " + response[key].sale_no;
           order_type = "Delivery";
         }
+          //for new order play bell
+          if (Number(response[key].is_kitchen_bell) == 1) {
+              bell_new_order.play();
+          }
         let tables_booked = "";
         if (response[key].tables_booked.length > 0) {
           let w = 1;

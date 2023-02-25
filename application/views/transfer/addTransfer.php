@@ -130,7 +130,7 @@
                                     <option value=""><?php echo lang('select'); ?></option>
                                     <?php foreach ($ingredients as $ingnts) { ?>
                                         <option
-                                        value="<?php echo escape_output($ingnts->id . "||" . $ingnts->name . " (" . $ingnts->code . ")||" . $ingnts->purchase_price. "||" . $ingnts->unit_name) ?>"
+                                        value="<?php echo escape_output($ingnts->id . "||" . $ingnts->name . " (" . $ingnts->code . ")||" . $ingnts->purchase_price. "||" . $ingnts->consumtion_unit_name) ?>"
                                         <?php echo set_select('ingredient_id', $ingnts->id); ?>>
                                         <?php echo escape_output($ingnts->name . "(" . $ingnts->code . ")") ?></option>
                                     <?php } ?>
@@ -251,18 +251,6 @@
                         <div class="col-md-12 hidden-lg hidden-sm">
                             <p class="foodMenuCartNotice">
                                 <strong class="ir_ml39"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
-                        <div class="col-md-12 hidden-xs hidden-sm">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
-                                <?php echo lang('notice_text_1'); ?>
-                            </p>
-                        </div>
-                        <div class="col-md-12 hidden-xs hidden-lg">
-                            <p class="foodMenuCartNotice">
-                                <strong class="ir_m_l_45"><?php echo lang('notice'); ?></strong><br>
                                 <?php echo lang('notice_text_1'); ?>
                             </p>
                         </div>

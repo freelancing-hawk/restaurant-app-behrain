@@ -1,7 +1,5 @@
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/foodMenuSales.css">
 
-
-
 <section class="main-content-wrapper">
 
     <section class="content-header">
@@ -42,6 +40,24 @@
                                     value="<?php echo set_value('endDate'); ?>">
                             </div>
             </div>
+            <div class="mb-3 col-md-4 col-lg-2 col-sm-12">
+                <div class="form-group">
+                    <select tabindex="2" class="form-control select2 ir_w_100" id="top_less" name="top_less">
+                        <option <?php echo set_select('top_less',"DESC")?> value="DESC"><?php echo lang('Less'); ?></option>
+                        <option <?php echo set_select('top_less',"ASC")?> value="ASC"><?php echo lang('Top'); ?></option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3 col-md-4 col-lg-2 col-sm-12">
+                <div class="form-group">
+                    <select tabindex="2" class="form-control select2 ir_w_100" id="product_type" name="product_type">
+                        <option  value=""><?php echo lang('select_product_type'); ?></option>
+                        <option <?php echo set_select('product_type',1)?> value="1"><?php echo lang('Regular'); ?></option>
+                        <option <?php echo set_select('product_type',2)?> value="2"><?php echo lang('Combo'); ?></option>
+                        <option <?php echo set_select('product_type',3)?> value="3"><?php echo lang('Product'); ?></option>
+                    </select>
+                </div>
+            </div>
             <?php
             if(isLMni()):
                 ?>
@@ -80,6 +96,7 @@
                                 <th class="ir_w2_txt_center"><?php echo lang('sn'); ?></th>
                                 <th><?php echo lang('code'); ?></th>
                                 <th><?php echo lang('food_menu'); ?>(<?php echo lang('code'); ?>)</th>
+                                <th><?php echo lang('category'); ?></th>
                                 <th><?php echo lang('quantity'); ?></th>
                             </tr>
                         </thead>
@@ -93,6 +110,7 @@
                                 <td class="ir_txt_center"><?php echo escape_output($key); ?></td>
                                 <td><?php echo escape_output($value->code) ?></td>
                                 <td><?php echo escape_output($value->menu_name) ?></td>
+                                <td><?php echo escape_output($value->category_name) ?></td>
                                 <td><?php echo escape_output($value->totalQty) ?></td>
                             </tr>
                             <?php

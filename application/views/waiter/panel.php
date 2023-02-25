@@ -54,18 +54,17 @@ if($wl){
     <link rel="stylesheet"
           href="<?php echo base_url(); ?>assets/bower_components/font-awesome/v5/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>frequent_changing/waiter_panel/css/sweetalert2.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/bower_components/select2/dist/css/select2.min.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>asset/plugins/iCheck/minimal/color-scheme.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/common.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/dist/css/custom/waiterPanel.css">
 
-    <script src="<?php echo base_url()?>frequent_changing/waiter_panel/js/jquery-3.3.1.min.js"></script>
+    <script src="<?php echo base_url()?>frequent_changing/bar_panel/js/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/waiter_panel/js/jquery.slimscroll.min.js">
     </script>
-    <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/waiter_panel/js/sweetalert2.all.min.js">
-    </script>
+    <script src="<?php echo base_url(); ?>assets/POS/sweetalert2/dist/sweetalert.min.js"></script>
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/POS/sweetalert2/dist/sweetalert.min.css">
     <script type="text/javascript"
         src="<?php echo base_url(); ?>assets/bower_components/select2/dist/js/select2.full.min.js"></script>
 
@@ -161,7 +160,7 @@ if($wl){
 
                 <div id="notification_list_holder" class="fix">
                     <!--This variable could not be escaped because this is html content-->
-                    <?php echo $notification_list_show;?>
+                    <?php echo ($notification_list_show);?>
                 </div>
                 <!-- <span class="btn-close">&times;</span> -->
                 <!-- <p>Some text in the Modal..</p> -->
@@ -173,7 +172,7 @@ if($wl){
         </div>
     </div>
 
-    <div class="modal" id="notification_list_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal" id="notification_list_modal" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -225,10 +224,11 @@ if($wl){
     </div>
     <!-- end of item modal -->
     <script src="<?php echo base_url(); ?>assets/css-framework/bootstrap-new/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/waiter_panel/js/marquee.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/kitchen_panel/js/marquee.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/kitchen_panel/js/datable.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/kitchen_panel/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/POS/js/howler.min.js"></script>
     <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/waiter_panel/js/custom.js"></script>
-    <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/waiter_panel/js/datable.js"></script>
-    <script type="text/javascript" src="<?php echo base_url(); ?>frequent_changing/waiter_panel/js/jquery.cookie.js"></script>
 </body>
 
 </html>

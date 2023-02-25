@@ -88,55 +88,55 @@
                                 <td>1</td>
                                 <td class="ir_w_40">
                                     <?php echo lang('profit_1'); ?></td>
-                                <td><?= isset($saleReportByDate['profit_1']) ? getAmt($saleReportByDate['profit_1']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['profit_1']) ? getAmtCustom($saleReportByDate['profit_1']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td>2</td>
-                                <td> <?php echo lang('profit_2'); ?></td>
-                                <td><?= isset($saleReportByDate['profit_2']) ? getAmt($saleReportByDate['profit_2']) : getAmt(0) ?>
+                                <td> <?php echo lang('profit_3'); ?></td>
+                                <td><?= isset($saleReportByDate['profit_3']) ? getAmtCustom($saleReportByDate['profit_3']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td>3</td>
-                                <td> <?php echo lang('profit_3'); ?></td>
-                                <td><?= isset($saleReportByDate['profit_3']) ? getAmt($saleReportByDate['profit_3']) : getAmt(0) ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
                                 <td> <?php echo lang('profit_4'); ?></td>
-                                <td><?= isset($saleReportByDate['profit_4']) ? getAmt($saleReportByDate['profit_4']) : getAmt(0) ?>
+                                <td><?= isset($saleReportByDate['profit_4']) ? getAmtCustom($saleReportByDate['profit_4']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr class="profit_txt">
+                                <td>4</td>
+                                <td> <?php echo lang('profit_5'); ?> (1) - (2+3)</td>
+                                <td> <?= isset($saleReportByDate['profit_5']) ? getAmtCustom($saleReportByDate['profit_5']) : getAmtCustom(0) ?>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>5</td>
-                                <td> <?php echo lang('profit_5'); ?> (1+2) - (3+4)</td>
-                                <td> <?= isset($saleReportByDate['profit_5']) ? getAmt($saleReportByDate['profit_5']) : getAmt(0) ?>
+                                <td> <?php echo lang('profit_6'); ?></td>
+                                <td><?= isset($saleReportByDate['profit_6']) ? getAmtCustom($saleReportByDate['profit_6']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td>6</td>
-                                <td> <?php echo lang('profit_6'); ?></td>
-                                <td><?= isset($saleReportByDate['profit_6']) ? getAmt($saleReportByDate['profit_6']) : getAmt(0) ?>
+                                <td> <?php echo lang('profit_7'); ?></td>
+                                <td><?= isset($saleReportByDate['profit_7']) ? getAmtCustom($saleReportByDate['profit_7']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td>7</td>
-                                <td> <?php echo lang('profit_7'); ?></td>
-                                <td><?= isset($saleReportByDate['profit_7']) ? getAmt($saleReportByDate['profit_7']) : getAmt(0) ?>
+                                <td> <?php echo lang('profit_8'); ?></td>
+                                <td><?= isset($saleReportByDate['profit_8']) ? getAmtCustom($saleReportByDate['profit_8']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td>8</td>
-                                <td> <?php echo lang('profit_8'); ?></td>
-                                <td><?= isset($saleReportByDate['profit_8']) ? getAmt($saleReportByDate['profit_8']) : getAmt(0) ?>
+                                <td> <?php echo lang('total'); ?> <?php echo lang('refund'); ?></td>
+                                <td><?= isset($saleReportByDate['profit_8_1']) ? getAmt($saleReportByDate['profit_8_1']) : getAmt(0) ?>
                                 </td>
                             </tr>
                             <tr class="profit_txt">
                                 <td>9</td>
-                                <td> <?php echo lang('profit_9'); ?> (5) - (6+7+8)</td>
-                                <td><?= isset($saleReportByDate['profit_9']) ? getAmt($saleReportByDate['profit_9']) : getAmt(0) ?>
+                                <td> <?php echo lang('profit_9'); ?> (4) - (5+6+7+8)</td>
+                                <td><?= isset($saleReportByDate['profit_9']) ? getAmtCustom($saleReportByDate['profit_9']) : getAmtCustom(0) ?>
                                 </td>
                             </tr>
                         </tbody>

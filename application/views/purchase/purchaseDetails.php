@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">
@@ -64,9 +63,9 @@
                                                 echo '<tr id="row_' . $i . '">' .
                                                 '<td class="txt_24"><p>' . $i . '</p></td>' .
                                                 '<td class="ir_w_20"><span class="txt_18">' . getIngredientNameById($pi->ingredient_id) . ' (' . getIngredientCodeById($pi->ingredient_id) . ')</span></td>' .
-                                                '<td class="ir_w_15">' . escape_output(getAmtP($pi->unit_price)) . '</td>' .
-                                                '<td class="ir_w_15">' . $pi->quantity_amount . ' ' . unitName(getUnitIdByIgId($pi->ingredient_id)) . '</td>' .
-                                                '<td class="ir_w_20">' . escape_output(getAmtP($pi->total)) . '</td>' .
+                                                '<td class="ir_w_15">' . escape_output(getAmtPCustom($pi->unit_price)) . '</td>' .
+                                                '<td class="ir_w_15">' . $pi->quantity_amount . ' ' . unitName(getPurchaseUnitIdByIgId($pi->ingredient_id)) . '</td>' .
+                                                '<td class="ir_w_20">' . escape_output(getAmtPCustom($pi->total)) . '</td>' .
                                                 '</tr>'
                                                 ;
                                             }
@@ -87,19 +86,26 @@
                             <div class="form-group">
                                 <h3><?php echo lang('g_total'); ?></h3>
                                 <p class="">
-                                    <?php echo escape_output(getAmtP($purchase_details->grand_total)) ?>
+                                    <?php echo escape_output(getAmtPCustom($purchase_details->grand_total)) ?>
                                 </p>
                             </div>
                             <div class="form-group">
                                 <h3><?php echo lang('paid'); ?></h3>
                                 <p class="">
-                                    <?php echo escape_output(getAmtP($purchase_details->paid)) ?>
+                                    <?php echo escape_output(getAmtPCustom($purchase_details->paid)) ?>
                                 </p>
                             </div>
                             <div class="form-group">
                                 <h3><?php echo lang('due'); ?></h3>
                                 <p class="">
-                                    <?php echo escape_output(getAmtP($purchase_details->due)) ; ?>
+                                    <?php echo escape_output(getAmtPCustom($purchase_details->due)) ; ?>
+                                </p>
+
+                            </div>
+                            <div class="form-group">
+                                <h3><?php echo lang('payment_method'); ?></h3>
+                                <p class="">
+                                    <?php echo escape_output(getPaymentName($purchase_details->payment_id)) ; ?>
                                 </p>
 
                             </div>

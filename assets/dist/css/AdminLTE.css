@@ -2842,7 +2842,7 @@ select.input-sm {
 .table tr td .progress {
   margin-top: 5px;
 }
-/* 
+/*
 .table-bordered {
   border: 1px solid #ddd;
 } */
@@ -3398,6 +3398,9 @@ table.text-center th {
   width: auto;
 }
 
+.treeview.sub_sub > a::after{
+  top: 5px !important;
+}
 /*
  * Page: Mailbox
  * -------------
@@ -5375,7 +5378,7 @@ table.text-center th {
  * Plugin: Select2
  * ---------------
  */
-/*  
+/*
 .select2-container--default.select2-container--focus,
 .select2-selection.select2-container--focus,
 .select2-container--default:focus,
@@ -6532,7 +6535,7 @@ table.text-center th {
   background-color: #00c0ef;
   border-color: #00c0ef;
 }
-/* 
+/*
 #datatable_wrapper .dt-buttons button {
   border: none;
   background-image: none;

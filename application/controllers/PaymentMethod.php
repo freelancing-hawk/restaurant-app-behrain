@@ -22,16 +22,40 @@ class PaymentMethod extends Cl_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('Common_model');
+        $this->load->model('Sale_model');
         $this->load->library('form_validation');
         $this->Common_model->setDefaultTimezone();
 
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "260";
+        $function = "";
+        if($segment_2=="paymentMethods"){
+            $function = "view";
+        }elseif($segment_2=="addEditPaymentMethod" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditPaymentMethod"){
+            $function = "add";
+        }elseif($segment_2=="deletePaymentMethod"){
+            $function = "delete";
+        }elseif($segment_2=="sorting"){
+            $function = "sorting";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -43,11 +67,23 @@ class PaymentMethod extends Cl_Controller {
      * @param no
      */
     public function paymentMethods() {
-        $company_id = $this->session->userdata('company_id');
-
         $data = array();
-        $data['paymentMethods'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_payment_methods");
+        $company_id = $this->session->userdata('company_id');
+        $data['paymentMethods'] = $this->Sale_model->getAllPaymentMethodsFinalize();
         $data['main_content'] = $this->load->view('master/paymentMethod/paymentMethods', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+     /**
+     * payment Methods
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function sorting() {
+        $data = array();
+        $company_id = $this->session->userdata('company_id');
+        $data['paymentMethods'] = $this->Sale_model->getAllPaymentMethodsFinalize();
+        $data['main_content'] = $this->load->view('master/paymentMethod/sorting', $data, TRUE);
         $this->load->view('userHome', $data);
     }
      /**
@@ -57,11 +93,11 @@ class PaymentMethod extends Cl_Controller {
      * @param int
      */
     public function deletePaymentMethod($id) {
+        if($id!=1 && $id!=5):
         $id = $this->custom->encrypt_decrypt($id, 'decrypt');
-
         $this->Common_model->deleteStatusChange($id, "tbl_payment_methods");
-
         $this->session->set_flashdata('exception', lang('delete_success'));
+        endif;
         redirect('paymentMethod/paymentMethods');
     }
      /**

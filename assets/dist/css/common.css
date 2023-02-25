@@ -301,7 +301,7 @@
 }
 .ir_pa_b_w100 {
   position: absolute !important;
-  bottom: 8px !important;
+  bottom: 45px !important;
   width: 100% !important;
 }
 .ir_flex_jc_pw94 {
@@ -774,4 +774,25 @@
 
 .display_none {
   display: none;
+}
+
+@font-face {
+  font-family: irestora_font;
+  src: url(custom/righteous_regular.ttf);
+}
+
+.irestora_font_div{
+  font-family: irestora_font;
+  font-size: xx-large;
+  color:#5466b5;
+}
+.irestora_font_div_pos{
+  font-family: irestora_font;
+  color:#5466b5;
+}
+.site_logo_parent_div{
+  text-align: center;padding: 10px;
+}
+.site_logo_parent_img{
+  width: 100%;
 }

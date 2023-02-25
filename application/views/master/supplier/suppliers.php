@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
 
 <?php
@@ -7,7 +6,7 @@ if ($this->session->flashdata('exception')) {
     echo '<section class="alert-wrapper"><div class="alert alert-success alert-dismissible fade show"> 
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-    echo escape_output($this->session->flashdata('exception'));
+    echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
     echo '</p></div></div></section>';
 }
 ?>
@@ -19,9 +18,7 @@ if ($this->session->flashdata('exception')) {
                 <input type="hidden" class="datatable_name" data-title="<?php echo lang('suppliers'); ?>" data-id_name="datatable">
             </div>
             <div>
-                <a class="btn_list btn bg-blue-btn m-right" href="<?php echo base_url() ?>supplier/addEditSupplier">
-                <i data-feather="plus"></i> <?php echo lang('add_supplier'); ?>
-                </a>
+
             </div>
         </div>
     </section>
@@ -69,11 +66,11 @@ if ($this->session->flashdata('exception')) {
                                             <i data-feather="more-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton1" role="menu">
-                                            <li><a
+                                            <li data-access="update-244" class="menu_assign_class"><a
                                                     href="<?php echo base_url() ?>supplier/addEditSupplier/<?php echo escape_output($this->custom->encrypt_decrypt($si->id, 'encrypt')); ?>"><i
                                                         class="fa fa-pencil tiny-icon"></i><?php echo lang('edit'); ?></a>
                                             </li>
-                                            <li><a class="delete"
+                                            <li data-access="delete-244" class="menu_assign_class"><a class="delete"
                                                     href="<?php echo base_url() ?>supplier/deleteSupplier/<?php echo escape_output($this->custom->encrypt_decrypt($si->id, 'encrypt')); ?>"><i
                                                         class="fa fa-trash tiny-icon"></i><?php echo lang('delete'); ?></a>
                                             </li>
@@ -97,8 +94,7 @@ if ($this->session->flashdata('exception')) {
 <!-- DataTables -->
 <script src="<?php echo base_url(); ?>assets/datatable_custom/jquery-3.3.1.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/jquery.dataTables.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js">
-</script>
+<script src="<?php echo base_url(); ?>assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/dataTables.buttons.min.js"></script>
 <script src="<?php echo base_url(); ?>frequent_changing/js/dataTable/buttons.html5.min.js"></script>

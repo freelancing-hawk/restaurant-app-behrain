@@ -374,7 +374,8 @@
   .payable {
   background-color: #ced4da5d;
   color: #333333;
-  padding: 0px 10px;
+  padding: 8px;
+  margin: 10px 0 0 0;
   font-weight: normal;
   text-transform: capitalize;
   text-align: center;
@@ -602,6 +603,7 @@
   grid-template-columns: repeat(auto-fit, minmax(380px, auto));
   gap: 10px;
   padding: 10px;
+  margin-top: 10px;
 }
 
 /* .cus_pos_modal .pos__modal__footer button {
@@ -743,6 +745,9 @@
 
 .modifier_item_details_holder {
   height: 235px;
+  border-left: 1px solid rgba(169, 189, 204, 0.425);
+    border-right: 1px solid rgba(169, 189, 204, 0.425);
+    border-bottom: 1px solid rgba(169, 189, 204, 0.425);
 }
 .item_order_details header {
   display: flex;
@@ -845,3 +850,4 @@
 .position_future_sale_irp {
   position: relative;
 }
+

@@ -4,7 +4,7 @@ if ($this->session->flashdata('exception_3')) {
     echo '<section class="alert-wrapper"><div class="alert alert-danger alert-dismissible"> 
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <div class="alert-body"><p><i class="m-right fa fa-check"></i>';
-    echo escape_output($this->session->flashdata('exception_3'));
+    echo escape_output($this->session->flashdata('exception_3'));unset($_SESSION['exception_3']);
     echo '</p></div></div></section>';
 }
 ?>

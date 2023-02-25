@@ -36,6 +36,12 @@ class IR_api extends REST_Controller
         $user_information = $this->Waiter_api_model->getUserInformationWater($email, $password);
         $this->response($user_information);
     }
+    public function waiter_login_pin_check_post()
+    {
+        $login_pin = isset($_POST['login_pin']) && $_POST['login_pin']?$_POST['login_pin']:'';
+        $user_information = $this->Waiter_api_model->getUserInformationWaterPin($login_pin);
+        $this->response($user_information);
+    }
     /**
      * collect notification
      * @access public

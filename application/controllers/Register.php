@@ -46,7 +46,20 @@ class Register extends Cl_Controller {
      */
     public function openRegister(){
         $data = array();
+        $company_id = $this->session->userdata('company_id');
+        $data['payment_methods'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_payment_methods");
         $data['main_content'] = $this->load->view('register/openRegister', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+     /**
+     * open Register
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function registerDetails(){
+        $data = array();
+        $data['main_content'] = $this->load->view('register/registerDetails', $data, TRUE);
         $this->load->view('userHome', $data);
     }
      /**
@@ -68,6 +81,18 @@ class Register extends Cl_Controller {
                 $register_info['user_id'] = $this->session->userdata('user_id');
                 $register_info['outlet_id'] = $this->session->userdata('outlet_id');
                 $register_info['company_id'] = $this->session->userdata('company_id');
+
+                //This variable could not be escaped because this is array content
+                $payment_names = $this->input->post($this->security->xss_clean('payment_names'));
+                $payment_ids = $this->input->post($this->security->xss_clean('payment_ids'));
+                $payments = $this->input->post($this->security->xss_clean('payments'));
+                $arr = array();
+
+                foreach ($payment_ids as $key=>$value){
+                    $arr[] = $value."||".$payment_names[$key]."||".$payments[$key];
+                }
+                $register_info['opening_details'] = json_encode($arr);
+
                 $this->Common_model->insertInformation($register_info, "tbl_register");
                 
                 if (!$this->session->has_userdata('clicked_controller')) {

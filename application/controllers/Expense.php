@@ -36,10 +36,32 @@ class Expense extends Cl_Controller {
             $this->session->set_userdata("clicked_method", $this->uri->segment(2));
             redirect('Outlet/outlets');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "142";
+        $function = "";
+
+        if($segment_2=="expenses"){
+            $function = "view";
+        }elseif($segment_2=="addEditExpense" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="addEditExpense"){
+            $function = "add";
+        }elseif($segment_2=="deleteExpense"){
+            $function = "delete";
+        }else{
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -87,6 +109,7 @@ class Expense extends Cl_Controller {
             $this->form_validation->set_rules('amount',lang('amount'), 'required|max_length[50]');
             $this->form_validation->set_rules('category_id',lang('category'), 'required|max_length[10]');
             $this->form_validation->set_rules('employee_id',lang('responsible_person'), 'required|max_length[10]');
+            $this->form_validation->set_rules('payment_id', lang('payment_method'), 'required|numeric|max_length[50]');
             $this->form_validation->set_rules('note',lang('note'), 'max_length[200]');
             if ($this->form_validation->run() == TRUE) {
                 $expnse_info = array();
@@ -97,8 +120,9 @@ class Expense extends Cl_Controller {
                 $expnse_info['note'] =htmlspecialchars($this->input->post($this->security->xss_clean('note')));
                 $expnse_info['user_id'] = $this->session->userdata('user_id');
                 $expnse_info['outlet_id'] = $this->session->userdata('outlet_id');
-
+                $expnse_info['payment_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('payment_id')));
                 if ($id == "") {
+                    $expnse_info['added_date_time'] = date('Y-m-d H:i:s');
                     $this->Common_model->insertInformation($expnse_info, "tbl_expenses");
                     $this->session->set_flashdata('exception', lang('insertion_success'));
                 } else {
@@ -109,12 +133,14 @@ class Expense extends Cl_Controller {
             } else {
                 if ($id == "") {
                     $data = array();
+                    $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                     $data['expense_categories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_expense_items");
                     $data['employees'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
                     $data['main_content'] = $this->load->view('expense/addExpense', $data, TRUE);
                     $this->load->view('userHome', $data);
                 } else {
                     $data = array();
+                    $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                     $data['encrypted_id'] = $encrypted_id;
                     $data['expense_categories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_expense_items");
                     $data['employees'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
@@ -126,12 +152,14 @@ class Expense extends Cl_Controller {
         } else {
             if ($id == "") {
                 $data = array();
+                $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                 $data['expense_categories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_expense_items");
                 $data['employees'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
                 $data['main_content'] = $this->load->view('expense/addExpense', $data, TRUE);
                 $this->load->view('userHome', $data);
             } else {
                 $data = array();
+                $data['payment_methods'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_payment_methods");
                 $data['encrypted_id'] = $encrypted_id;
                 $data['expense_categories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_expense_items");
                 $data['employees'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");

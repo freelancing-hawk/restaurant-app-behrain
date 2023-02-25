@@ -46,16 +46,30 @@ class Authentication_model extends CI_Model {
      * @return object
      * @param string
      * @param string
+     * @param string
+     * @param string
      */
-    public function getUserInformation($email_address, $password) {
+    public function getUserInformation($email_address, $password,$login_pin='',$login_type='') {
         $this->db->select("*");
         $this->db->from("tbl_users");
-        $this->db->where("email_address", $email_address);
-        $this->db->where("password", $password);
+        if($login_type==2){
+            $this->db->where("email_address", $email_address);
+            $this->db->where("password", $password);
+        }else{
+            $this->db->where("login_pin", $login_pin);
+        }
         $this->db->where("del_status", 'Live');
         return $this->db->get()->row();
     }
-
+    public function pinCheck($old_pin, $user_id) {
+        $row = $this->db->query("SELECT * FROM tbl_users WHERE id=$user_id AND login_pin='$old_pin'")->row();
+        return $row;
+    }
+    public function updatePin($new_pin, $user_id) {
+        $this->db->set('login_pin', $new_pin);
+        $this->db->where('id', $user_id);
+        $this->db->update('tbl_users');
+    }
     /**
      * update User Info
      * @access public
@@ -194,8 +208,10 @@ class Authentication_model extends CI_Model {
     public function getSMSInformation($company_id) {
         $this->db->select("*");
         $this->db->from("tbl_companies");
+        $this->db->where("id", $company_id);
+        $this->db->where("del_status", "Live");
         $row = $this->db->get()->row();
-        return json_decode($row->sms_details);
+        return ($row);
     }
     /**
      * get Profile Information
@@ -210,6 +226,11 @@ class Authentication_model extends CI_Model {
         $this->db->where("id", $user_id);
         return $this->db->get()->row();
     }
-
+    public function updateSecurityQuestion($company_id, $user_id, $security_question, $security_answer) {
+        $this->db->set(array('question' => $security_question, 'answer'=> $security_answer));
+        $this->db->where('id', $user_id);
+        $this->db->where("del_status", 'Live');
+        $this->db->update('tbl_users');
+    }
 }
 

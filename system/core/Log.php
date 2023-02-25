@@ -120,6 +120,7 @@ class CI_Log {
 	 */
 	public function __construct()
 	{
+
 		$config =& get_config();
 
 		isset(self::$func_overload) OR self::$func_overload = (extension_loaded('mbstring') && ini_get('mbstring.func_overload'));
@@ -144,7 +145,6 @@ class CI_Log {
 			$this->_threshold = 0;
 			$this->_threshold_array = array_flip($config['log_threshold']);
 		}
-
 		if ( ! empty($config['log_date_format']))
 		{
 			$this->_date_fmt = $config['log_date_format'];

@@ -1,4 +1,3 @@
-
 <section class="main-content-wrapper">
     <?php
     if ($this->session->flashdata('exception')) {
@@ -7,7 +6,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <p><i class="m-right fa fa-check"></i>';
-        echo escape_output($this->session->flashdata('exception'));
+        echo escape_output($this->session->flashdata('exception'));unset($_SESSION['exception']);
         echo '</p></div></div></section>';
     }
     ?>
@@ -19,7 +18,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         <div class="alert-body">
         <p><i class="m-right fa fa-times"></i>';
-        echo escape_output($this->session->flashdata('exception_1'));
+        echo escape_output($this->session->flashdata('exception_1'));unset($_SESSION['exception_1']);
         echo '</p></div><div></section>';
     }
     ?>
@@ -35,14 +34,6 @@
         echo '</p></div><div></section>';
     }
     ?>
-
-
-    <div class="row">
-        <?php
-        //icon color code array
-        $arr_color = array("green","blue","red","#c151fb9c","#5195fb9c","#8be43a9c","#00c0ef9c","#0044cc9c","#f39c129c","#3333339c","#8a6d1c9c");
-        foreach ($outlets as $value) {
-            ?>
         <div class="row">
             <!-- /.col -->
             <?php
@@ -60,10 +51,7 @@
                     </div>
                 </div>
                 <?php
-            }
-            ?>
-            <?php
-        }?>
+            }?>
     </div>
         <p>&nbsp;</p>
         <a href="<?php echo base_url() ?>Service/companies"><button type="button"

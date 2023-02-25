@@ -1,5 +1,3 @@
-
-
 <section class="main-content-wrapper">
     <section class="content-header">
         <h3 class="top-left-header">
@@ -10,11 +8,29 @@
     
         <div class="box-wrapper">
             <!-- general form elements -->
+            <?php echo form_open(base_url('table/addEditTable')); ?>
             <div class="table-box">
                 <!-- form start -->
-                <?php echo form_open(base_url('table/addEditTable')); ?>
+
                 <div>
                     <div class="row">
+                        <div class="col-sm-12 mb-2 col-md-4">
+
+                            <div class="form-group">
+                                <label><?php echo lang('area'); ?> <span class="required_star">*</span></label>
+                                <select class="form-control select2" name="area">
+                                 <option value=""><?php echo lang('select'); ?></option>
+                                 <?php foreach ($areas as $value):?>
+                                      <option <?php echo set_select('area',$value->id)?> value="<?php echo escape_output($value->id)?>"><?php echo escape_output($value->area_name)?></option>
+                                 <?php endforeach;?>
+                             </select>
+                            </div>
+                            <?php if (form_error('area')) { ?>
+                            <div class="callout callout-danger my-2">
+                                <?php echo form_error('area'); ?>
+                            </div>
+                            <?php } ?>
+                        </div>
                         <div class="col-sm-12 mb-2 col-md-4">
 
                             <div class="form-group">
@@ -71,29 +87,11 @@
                                 </div>
                             <?php } ?>
                         </div>
-                        <div class="col-sm-12 mb-2 col-md-4">
-
-                            <div class="form-group">
-                                <label><?php echo lang('outlet'); ?></label>
-                               <select class="form-control select2" name="outlet">
-                                   <?php
-                                    foreach ($outlets as $outlet):
-                                   ?>
-                                   <option value="<?php echo escape_output($outlet->id)?>"><?php echo escape_output($outlet->outlet_name)?></option>
-                                   <?php
-                                   endforeach;
-                                   ?>
-                               </select>
-                            </div>
-                            <?php if (form_error('outlet')) { ?>
-                                <div class="callout callout-danger my-2">
-                                    <?php echo form_error('outlet'); ?>
-                                </div>
-                            <?php } ?>
-                        </div>
                     </div>
 
-                </div>
+                    </div>
+
+            </div>
 
                 <div class="row mt-2">
                     <div class="col-sm-12 col-md-2 mb-2">
@@ -106,8 +104,8 @@
                     </div>
                 </div>
                 <?php echo form_close(); ?>
-            </div>
-        </div>
+         </div>
+
 
         
 </section>

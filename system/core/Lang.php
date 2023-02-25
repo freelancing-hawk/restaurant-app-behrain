@@ -47,7 +47,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link		https://codeigniter.com/user_guide/libraries/language.html
  */
 class CI_Lang {
-
 	/**
 	 * List of translations
 	 *

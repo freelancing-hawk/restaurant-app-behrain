@@ -30,26 +30,37 @@ class Outlet extends Cl_Controller {
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
-        $language_manifesto = $this->session->userdata('language_manifesto');
-        if(str_rot13($language_manifesto)=="fgjgldkfg"){
-            $getAccessURL = ucfirst($this->uri->segment(1));
-            if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-                redirect('Authentication/userProfile');
-            }else{
-                $login_session['active_menu_tmp'] = 4;
-                $this->session->set_userdata($login_session);
-            }
+
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $segment_3 = $this->uri->segment(3);
+        $controller = "67";
+        $function = "";
+
+        if($segment_2=="outlets"){
+            $function = "view";
+        }elseif($segment_2=="addEditOutlet" && $segment_3){
+            $function = "update";
+        }elseif($segment_2=="setOutletSession" && $segment_3){
+            $function = "enter";
+        }elseif($segment_2=="addEditOutlet"){
+            $function = "add";
+        }elseif($segment_2=="deleteOutlet"){
+            $function = "delete";
         }else{
-            $login_session['active_menu_tmp'] = 4;
-            $this->session->set_userdata($login_session);
-        }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
             redirect('Authentication/userProfile');
         }
+
+        if(!checkAccess($controller,$function)){
+            $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+            redirect('Authentication/userProfile');
+        }
+        //end check access function
     }
 
-     /**
+    /**
      * outlets info
      * @access public
      * @return void
@@ -68,7 +79,7 @@ class Outlet extends Cl_Controller {
         $data['main_content'] = $this->load->view('outlet/outlets', $data, TRUE);
         $this->load->view('userHome', $data);
     }
-     /**
+    /**
      * delete Outlet
      * @access public
      * @return void
@@ -82,7 +93,7 @@ class Outlet extends Cl_Controller {
         $this->session->set_flashdata('exception',lang('delete_success'));
         redirect('Outlet/outlets');
     }
-     /**
+    /**
      * add/Edit Outlet
      * @access public
      * @return void
@@ -119,7 +130,7 @@ class Outlet extends Cl_Controller {
                 $outlet_info['address'] = preg_replace("/[\n\r]/"," ",$c_address); #remove new line from address
                 $outlet_info['phone'] =htmlspecialchars($this->input->post($this->security->xss_clean('phone')));
                 $outlet_info['email'] =htmlspecialchars($this->input->post($this->security->xss_clean('email')));
-                $outlet_info['has_kitchen'] =htmlspecialchars($this->input->post($this->security->xss_clean('has_kitchen')));
+                $outlet_info['online_self_order_receiving_id'] =htmlspecialchars($this->input->post($this->security->xss_clean('online_self_order_receiving_id')));
                 if(str_rot13($language_manifesto)=="eriutoeri"):
                     $outlet_info['default_waiter'] =htmlspecialchars($this->input->post($this->security->xss_clean('default_waiter')));
                     $outlet_info['active_status'] =htmlspecialchars($this->input->post($this->security->xss_clean('active_status')));
@@ -127,13 +138,24 @@ class Outlet extends Cl_Controller {
                 $this->session->set_userdata($outlet_info);
                 if ($id == "") {
                     $outlet_info['company_id'] = $this->session->userdata('company_id');
-                            if(str_rot13($language_manifesto)=="eriutoeri") {
-                                $outlet_info['outlet_code'] = htmlspecialchars($this->input->post($this->security->xss_clean('outlet_code')));
-                            }
+                    if(str_rot13($language_manifesto)=="eriutoeri") {
+                        $outlet_info['outlet_code'] = htmlspecialchars($this->input->post($this->security->xss_clean('outlet_code')));
+                    }
                 }
                 if ($id == "") {
                     $id = $this->Common_model->insertInformation($outlet_info, "tbl_outlets");
                     $this->session->set_flashdata('exception', lang('insertion_success'));
+
+                    //update user
+                    $user_id = $this->session->userdata('user_id');
+                    $user_details = $this->Common_model->getDataById($id, "tbl_users");
+                    $data_user = array();
+                    $data_user['outlets'] = isset($user_details->outlets) && $user_details->outlets?$user_details->outlets.",".$id:$id;
+                    $login_session['session_outlets'] = $data_user['outlets'];
+                    $this->session->set_userdata($login_session);
+                    //end update user
+
+                    $this->Common_model->updateInformation($data_user, $user_id, "tbl_users");
                 } else {
                     $this->Common_model->updateInformation($outlet_info, $id, "tbl_outlets");
                     $this->session->set_flashdata('exception', lang('update_success'));
@@ -145,40 +167,62 @@ class Outlet extends Cl_Controller {
                         $main_arr = '';
                         $total_selected = sizeof($item_check);
                         $data_price_array = array();
+                        $json_data = array();
+
                         for($i=0;$i<$total_selected;$i++){
                             $main_arr.=$item_check[$i];
-                            if($i < ($total_selected) -1){
+                            if($i <= ($total_selected) -1){
                                 $main_arr.=",";
                                 $name_generate = "price_".$item_check[$i];
-                                $data_price_array["tmp".$item_check[$i]] = htmlspecialchars($this->input->post($this->security->xss_clean($name_generate)));;
+                                $price_ta_name_generate = "price_ta_".$item_check[$i];
+                                $price_de_name_generate = "price_de_".$item_check[$i];
+                                $data_price_array["tmp".$item_check[$i]] = htmlspecialchars($this->input->post($this->security->xss_clean($name_generate)))."||".htmlspecialchars($this->input->post($this->security->xss_clean($price_ta_name_generate)))."||".htmlspecialchars($this->input->post($this->security->xss_clean($price_de_name_generate)));
                             }
+
+                            $field_name = "sale_price_delivery_json".$item_check[$i];
+                            $delivery_person_field_name = "delivery_person".$item_check[$i];
+                            $del_price_total = $this->input->post($this->security->xss_clean($field_name));
+                            $delivery_person_field_name_value = $this->input->post($this->security->xss_clean($delivery_person_field_name));
+
+                            if(isset($del_price_total) && $del_price_total){
+                                $tmp_array = array();
+                                foreach ($del_price_total as $row => $value_1):
+                                    $tmp_array["index_".$delivery_person_field_name_value[$row]] = $value_1;
+                                endforeach;
+                                $json_data["index_".$item_check[$i]] = json_encode($tmp_array);
+                            }
+
                         }
                         //set food menu for this outlet
                         $data_food_menus['food_menus'] = $main_arr;
                         $data_food_menus['food_menu_prices'] = json_encode($data_price_array);
+                        $data_food_menus['delivery_price'] = json_encode($json_data);
                         $this->Common_model->updateInformation($data_food_menus, $id, "tbl_outlets");
                     }
-                    endif;
+                endif;
                 $data_c = getLanguageManifesto();
                 redirect($data_c[1]);
             } else {
                 if ($id == "") {
                     $data = array();
-                    $data['items'] = $this->Common_model->getFoodMenu($company_id, "tbl_food_menus");
+                    $data['outlet_information'] = $this->Common_model->getDataById($id, "tbl_outlets");
+                    $data['deliveryPartners'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_delivery_partners");
+                    $data['items'] = $this->Common_model->getFoodMenuForOutlet($company_id, "tbl_food_menus");
                     $data['outlet_code'] = $this->Outlet_model->generateOutletCode();
-                     if(str_rot13($language_manifesto)=="eriutoeri"):
+                    if(str_rot13($language_manifesto)=="eriutoeri"):
                         $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
-                     endif;
+                    endif;
                     $data['main_content'] = $this->load->view('outlet/addOutlet', $data, TRUE);
                     $this->load->view('userHome', $data);
                 } else {
                     $data = array();
                     $data['encrypted_id'] = $encrypted_id;
-                    $data['items'] = $this->Common_model->getFoodMenu($company_id, "tbl_food_menus");
+                    $data['deliveryPartners'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_delivery_partners");
+                    $data['items'] = $this->Common_model->getFoodMenuForOutlet($company_id, "tbl_food_menus");
                     $data['outlet_information'] = $this->Common_model->getDataById($id, "tbl_outlets");
-                     if(str_rot13($language_manifesto)=="eriutoeri"):
+                    if(str_rot13($language_manifesto)=="eriutoeri"):
                         $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
-                     endif;
+                    endif;
                     $data['main_content'] = $this->load->view('outlet/editOutlet', $data, TRUE);
                     $this->load->view('userHome', $data);
                 }
@@ -193,21 +237,24 @@ class Outlet extends Cl_Controller {
             }
             if ($id == "") {
                 $data = array();
-                $data['items'] = $this->Common_model->getFoodMenu($company_id, "tbl_food_menus");
+                $data['outlet_information'] = $this->Common_model->getDataById($id, "tbl_outlets");
+                $data['deliveryPartners'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_delivery_partners");
+                $data['items'] = $this->Common_model->getFoodMenuForOutlet($company_id, "tbl_food_menus");
                 $data['outlet_code'] = $this->Outlet_model->generateOutletCode();
-                 if(str_rot13($language_manifesto)=="eriutoeri"):
-                        $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
-                 endif;
+                if(str_rot13($language_manifesto)=="eriutoeri"):
+                    $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
+                endif;
                 $data['main_content'] = $this->load->view('outlet/addOutlet', $data, TRUE);
                 $this->load->view('userHome', $data);
             } else {
                 $data = array();
                 $data['encrypted_id'] = $encrypted_id;
-                $data['items'] = $this->Common_model->getFoodMenu($company_id, "tbl_food_menus");
+                $data['deliveryPartners'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_delivery_partners");
+                $data['items'] = $this->Common_model->getFoodMenuForOutlet($company_id, "tbl_food_menus");
                 $data['outlet_information'] = $this->Common_model->getDataById($id, "tbl_outlets");
-                 if(str_rot13($language_manifesto)=="eriutoeri"):
-                        $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
-                 endif;
+                if(str_rot13($language_manifesto)=="eriutoeri"):
+                    $data['waiters'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_users");
+                endif;
 
                 $selected_modules =  explode(',',$data['outlet_information']->food_menus);
                 $selected_modules_arr = array();
@@ -220,7 +267,7 @@ class Outlet extends Cl_Controller {
             }
         }
     }
-     /**
+    /**
      * set Outlet Session
      * @access public
      * @return void
@@ -237,14 +284,13 @@ class Outlet extends Cl_Controller {
         $outlet_session['address'] = $outlet_details->address;
         $outlet_session['phone'] = $outlet_details->phone;
         $outlet_session['email'] = $outlet_details->email;
-        $outlet_session['has_kitchen'] = $outlet_details->has_kitchen;
 
         if(str_rot13($language_manifesto)=="eriutoeri"):
             $outlet_session['default_waiter'] = $outlet_details->default_waiter;
         else:
             $setting = getCompanyInfo();
             $outlet_session['default_waiter'] = $setting->default_waiter;
-            endif;
+        endif;
         $this->session->set_userdata($outlet_session);
 
         if (!$this->session->has_userdata('clicked_controller')) {

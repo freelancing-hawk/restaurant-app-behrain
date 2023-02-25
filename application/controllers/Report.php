@@ -28,10 +28,111 @@ class Report extends Cl_Controller {
         $this->load->model('Sale_model');
         $this->load->library('form_validation');
         $this->Common_model->setDefaultTimezone();
-        
+        setAverageCost(225);
         if (!$this->session->has_userdata('user_id')) {
             redirect('Authentication/index');
         }
+
+        //start check access function
+        $segment_2 = $this->uri->segment(2);
+        $controller = "";
+        $function = "";
+        if($segment_2!="todayReport"){
+            if($segment_2=="registerReport"){
+                $controller = "159";
+                $function = "view";
+            }elseif($segment_2=="dailySummaryReport"){
+                $controller = "161";
+                $function = "view";
+            }elseif($segment_2=="foodMenuSales"){
+                $controller = "163";
+                $function = "view";
+            }elseif($segment_2=="saleReportByDate"){
+                $controller = "165";
+                $function = "view";
+            }elseif($segment_2=="detailedSaleReport"){
+                $controller = "167";
+                $function = "view";
+            }elseif($segment_2=="consumptionReport"){
+                $controller = "169";
+                $function = "view";
+            }elseif($segment_2=="inventoryReport"){
+                $controller = "171";
+                $function = "view";
+            }elseif($segment_2=="getInventoryAlertList"){
+                $controller = "173";
+                $function = "view";
+            }elseif($segment_2=="profitLossReport"){
+                $controller = "175";
+                $function = "view";
+            }elseif($segment_2=="attendanceReport"){
+                $controller = "179";
+                $function = "view";
+            }elseif($segment_2=="supplierLedgerReport"){
+                $controller = "181";
+                $function = "view";
+            }elseif($segment_2=="supplierDueReport"){
+                $controller = "183";
+                $function = "view";
+            }elseif($segment_2=="customerDueReport"){
+                $controller = "185";
+                $function = "view";
+            }elseif($segment_2=="customerLedgerReport"){
+                $controller = "187";
+                $function = "view";
+            }elseif($segment_2=="purchaseReportByDate"){
+                $controller = "189";
+                $function = "view";
+            }elseif($segment_2=="expenseReport"){
+                $controller = "191";
+                $function = "view";
+            }elseif($segment_2=="wasteReport"){
+                $controller = "193";
+                $function = "view";
+            }elseif($segment_2=="vatReport"){
+                $controller = "195";
+                $function = "view";
+            }elseif($segment_2=="foodMenuSaleByCategories"){
+                $controller = "197";
+                $function = "view";
+            }elseif($segment_2=="tipsReport"){
+                $controller = "199";
+                $function = "view";
+            }elseif($segment_2=="auditLogReport"){
+                $controller = "201";
+                $function = "view";
+            }elseif($segment_2=="availableLoyaltyPointReport"){
+                $controller = "205";
+                $function = "view";
+            }elseif($segment_2=="usageLoyaltyPointReport"){
+                $controller = "203";
+                $function = "view";
+            }elseif($segment_2=="transferReport"){
+                $controller = "307";
+                $function = "view";
+            }elseif($segment_2=="zReport"){
+                $controller = "314";
+                $function = "view";
+            }elseif($segment_2=="productAnalysisReport"){
+                $controller = "332";
+                $function = "view";
+            }elseif($segment_2=="productionReport"){
+                $controller = "337";
+                $function = "view";
+            }else{
+                $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+                redirect('Authentication/userProfile');
+            }
+
+            if(!checkAccess($controller,$function)){
+                $this->session->set_flashdata('exception_er', lang('menu_not_permit_access'));
+                redirect('Authentication/userProfile');
+            }
+        }
+
+
+        //end check access function
+
 
         if (!$this->session->has_userdata('outlet_id')) {
             $this->session->set_flashdata('exception_2', 'Please click on green Enter button of an outlet');
@@ -39,10 +140,7 @@ class Report extends Cl_Controller {
             $this->session->set_userdata("clicked_method", $this->uri->segment(2));
             redirect('Outlet/outlets');
         }
-        $getAccessURL = ucfirst($this->uri->segment(1));
-        if (!in_array($getAccessURL, $this->session->userdata('menu_access'))) {
-            redirect('Authentication/userProfile');
-        }
+
         $login_session['active_menu_tmp'] = '';
         $this->session->set_userdata($login_session);
     }
@@ -69,6 +167,7 @@ class Report extends Cl_Controller {
      */
     public function dailySummaryReport() {
         $data = array();
+        /*This variable could not be escaped because this is an array field*/
         $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
         if(!$outlet_id){
             $outlet_id = $this->session->userdata('outlet_id');
@@ -90,6 +189,57 @@ class Report extends Cl_Controller {
             $data['selectedDate'] = $selectedDate;
         }
         $data['main_content'] = $this->load->view('report/dailySummaryReport', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+    public function zReport() {
+        $data = array();
+        $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+        if(!$outlet_id){
+            $outlet_id = $this->session->userdata('outlet_id');
+        }
+        $data['outlet_id'] = $outlet_id;
+        $selected_submit_post = $this->input->post('date');
+        $selectedDate = (isset($selected_submit_post) && $selected_submit_post?$selected_submit_post:date("Y-m-d"));
+        $data['sub_total_foods'] = $this->Report_model->sub_total_foods($selectedDate,$outlet_id);
+        $data['sub_total_modifiers'] = $this->Report_model->sub_total_modifiers($selectedDate,$outlet_id);
+        $data['totalDueReceived'] = $this->Report_model->totalDueReceived($selectedDate,$outlet_id);
+        $data['service_charge_foods'] = $this->Report_model->delivery_charge_foods($selectedDate,$outlet_id,'service');
+        $data['delivery_charge_foods'] = $this->Report_model->delivery_charge_foods($selectedDate,$outlet_id,'delivery');
+        $data['waiter_tips_foods'] = $this->Report_model->waiter_tips_foods($selectedDate,$outlet_id);
+        $data['taxes_foods'] = $this->Report_model->taxes_foods($selectedDate,$outlet_id);
+        $data['total_discount_amount_foods'] = $this->Report_model->total_discount_amount_foods($selectedDate,$outlet_id);
+        $data['totalFoodSales'] = $this->Report_model->totalFoodSales($selectedDate,$selectedDate,$outlet_id,"DESC");
+        $data['totalFoodModifierSales'] = $this->Report_model->totalFoodModifierSales($selectedDate,$outlet_id,"DESC");
+        $data['totals_sale_others'] = $this->Report_model->totalTaxDiscountChargeTips($selectedDate,$outlet_id);
+        $data['totals_sale_service'] = $this->Report_model->totalCharge($selectedDate,$outlet_id,"service");
+        $data['totals_sale_delivery'] = $this->Report_model->totalCharge($selectedDate,$outlet_id,"delivery");
+        $data['get_all_sale_payment'] = $this->Report_model->getAllSalePaymentZReport($selectedDate,$outlet_id);
+        $data['get_all_other_sale_payment'] = $this->Report_model->getAllOtherSalePaymentZReport($selectedDate,$outlet_id);
+        $data['getAllPurchasePaymentZreport'] = $this->Report_model->getAllPurchasePaymentZreport($selectedDate,$outlet_id);
+        $data['getAllExpensePaymentZreport'] = $this->Report_model->getAllExpensePaymentZreport($selectedDate,$outlet_id);
+        $data['getAllSupplierPaymentZreport'] = $this->Report_model->getAllSupplierPaymentZreport($selectedDate,$outlet_id);
+        $data['getAllCustomerDueReceiveZreport'] = $this->Report_model->getAllCustomerDueReceiveZreport($selectedDate,$outlet_id);
+
+
+        $data['registers'] = getAllPaymentMethods('no');
+
+        $array_p_name = array();
+
+        foreach ($data['registers'] as $ky=>$vl){
+            $data['registers'][$ky]->paid_sales = $this->Report_model->getAllSaleByPayment($selectedDate,$vl->id,$outlet_id);
+            $data['registers'][$ky]->purchase = $this->Report_model->getAllPurchaseByPayment($selectedDate,$vl->id,$outlet_id);
+            $data['registers'][$ky]->due_receive = $this->Report_model->getAllDueReceiveByPayment($selectedDate,$vl->id,$outlet_id);
+            $data['registers'][$ky]->due_payment = $this->Report_model->getAllDuePaymentByPayment($selectedDate,$vl->id,$outlet_id);
+            $data['registers'][$ky]->expense = $this->Report_model->getAllExpenseByPayment($selectedDate,$vl->id,$outlet_id);
+
+            $inline_total = $data['registers'][$ky]->paid_sales - $data['registers'][$ky]->purchase + $data['registers'][$ky]->due_receive - $data['registers'][$ky]->due_payment - $data['registers'][$ky]->expense;
+            $data['registers'][$ky]->inline_total = $inline_total;
+
+            $array_p_name[] = $vl->name."||".$inline_total;
+        }
+        $data['total_payments'] = $array_p_name;
+        $data['selectedDate'] = $selectedDate;
+        $data['main_content'] = $this->load->view('report/zReport', $data, TRUE);
         $this->load->view('userHome', $data);
     }
         /**
@@ -233,21 +383,49 @@ class Report extends Cl_Controller {
      * @return void
      * @param no
      */
-    public function vatReport() {
+    public function vatReport()
+    {
         $data = array();
+        if ($this->input->post('submit')) {
+            $outlet_id = isset($_POST['outlet_id']) && $_POST['outlet_id'] ? $_POST['outlet_id'] : '';
+            if (!$outlet_id) {
+                $outlet_id = $this->session->userdata('outlet_id');
+            }
+            $data['outlet_id'] = $outlet_id;
+            $start_date = htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
+            $data['start_date'] = $start_date;
+            $end_date = htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
+            $data['end_date'] = $end_date;
+            $data['vatReport'] = $this->Report_model->vatReport($start_date, $end_date, $outlet_id);
+        }
+        $data['main_content'] = $this->load->view('report/vatReport', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+      /**
+     * vat Report
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function tipsReport() {
+        $data = array();
+        $company_id = $this->session->userdata('company_id');
         if ($this->input->post('submit')) {
             $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
             if(!$outlet_id){
                 $outlet_id = $this->session->userdata('outlet_id');
             }
+            $waiter_id =htmlspecialchars($this->input->post($this->security->xss_clean('waiter_id')));
+            $data['waiter_id'] = $waiter_id;
             $data['outlet_id'] = $outlet_id;
             $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
             $data['start_date'] = $start_date;
             $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
             $data['end_date'] = $end_date;
-            $data['vatReport'] = $this->Report_model->vatReport($start_date, $end_date,$outlet_id);
+            $data['tipsReport'] = $this->Report_model->tipsReport($start_date, $end_date,$outlet_id,$waiter_id);
         }
-        $data['main_content'] = $this->load->view('report/vatReport', $data, TRUE);
+        $data['users'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_users');
+        $data['main_content'] = $this->load->view('report/tipsReport', $data, TRUE);
         $this->load->view('userHome', $data);
     }
       /**
@@ -324,32 +502,231 @@ class Report extends Cl_Controller {
         $this->load->view('userHome', $data);
     }
       /**
-     * supplier Report
+     * supplier ledger Report
      * @access public
      * @return void
      * @param no
      */
-    public function supplierReport() {
+    public function supplierLedgerReport() {
+        $company_id = $this->session->userdata('company_id');
+        $data = array();
+
+
+        if($this->input->post('submit')){
+            $this->form_validation->set_rules('supplier_id', lang('supplier'), 'required|max_length[50]');
+            if ($this->form_validation->run() == TRUE) {
+
+                $start_date = date('Y-m-d',strtotime($this->input->post($this->security->xss_clean('startDate'))));
+                $end_date = date('Y-m-d',strtotime($this->input->post($this->security->xss_clean('endDate'))));
+                $supplier_id = htmlspecialchars($this->input->post($this->security->xss_clean('supplier_id')));
+
+                $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+                if(!$outlet_id){
+                    $outlet_id = $this->session->userdata('outlet_id');
+                }
+
+                $data['supplier_id'] =$supplier_id;
+                $data['outlet_id'] =$outlet_id;
+                $data['start_date'] = $start_date;
+                $data['end_date'] = $end_date;
+                $remaining_due = $this->Report_model->getSupplierOpeningDueByDate($supplier_id,$start_date,$outlet_id);
+                $key=0;
+                $supplier = getSupplier($supplier_id);
+                $op_start_date = date("Y-m-d",strtotime($supplier->added_date));;
+                $op_end_date = date("Y-m-d",strtotime($start_date." -1days"));
+
+                if($op_end_date<$op_start_date || $op_end_date==$op_start_date){
+                    $op_date_view = date($this->session->userdata('date_format'), strtotime($op_start_date));
+                }else{
+                    $op_date_view = date($this->session->userdata('date_format'), strtotime($op_start_date))." - ".date($this->session->userdata('date_format'), strtotime($op_end_date));
+                }
+
+                $data['supplierLedger'][$key]['title']="Opening Due";
+                $data['supplierLedger'][$key]['date']=$op_date_view;
+                $data['supplierLedger'][$key]['grant_total']="N/A";
+
+                $data['supplierLedger'][$key]['credit']="";
+
+                $data['supplierLedger'][$key]['debit']=$remaining_due;
+                $data['supplierLedger'][$key]['balance']=$remaining_due;
+                $balance=-$remaining_due;
+
+                //$balance=-$remaining_due;
+                for($i=$start_date;$i<=$end_date;$i=date('Y-m-d',strtotime("+1 day",strtotime($i)))){
+                    $purchase_grant_total=$this->Report_model->getSupplierGrantTotalByDate($supplier_id,$i,$outlet_id);
+                    if(!empty($purchase_grant_total->total)){
+                        $key++;
+                        if($balance<0){
+                            $balance=($balance+(-$purchase_grant_total->due));
+                        }else{
+                            $balance= ($balance-$purchase_grant_total->due);
+                        }
+
+                        $data['supplierLedger'][$key]['title']="Purchase Due Amount";
+                        $data['supplierLedger'][$key]['date']=$i;
+                        if($purchase_grant_total->due>0){
+                            $data['supplierLedger'][$key]['grant_total']=$purchase_grant_total->total;
+                            $data['supplierLedger'][$key]['debit']=$purchase_grant_total->due;
+                        }else{
+                            $data['supplierLedger'][$key]['grant_total']='';
+                            $data['supplierLedger'][$key]['debit']='';
+                        }
+                        $data['supplierLedger'][$key]['credit']='';
+                        $data['supplierLedger'][$key]['balance']=$balance;
+                    }
+                    $supplier_due_payment=$this->Report_model->getSupplierDuePaymentByDate($supplier_id,$i,$outlet_id);
+                    if(!empty($supplier_due_payment)){
+                        $key++;
+
+                        $balance=$balance+$supplier_due_payment;
+
+                        $data['supplierLedger'][$key]['title']="Supplier Due Payment";
+                        $data['supplierLedger'][$key]['date']=$i;
+                        $data['supplierLedger'][$key]['grant_total']="";
+                        $data['supplierLedger'][$key]['debit']='';
+                        $data['supplierLedger'][$key]['credit']=$supplier_due_payment;
+                        if($balance!=0){
+                            $data['supplierLedger'][$key]['balance']=$balance;
+                        }else{
+                            $data['supplierLedger'][$key]['balance']='';
+                        }
+                    }
+                }
+                $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_suppliers");
+                $data['main_content'] = $this->load->view('report/supplierLedgerReport', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }else{
+                $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_suppliers");
+                $data['main_content'] = $this->load->view('report/supplierLedgerReport', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+        }else{
+            $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_suppliers");
+            $data['main_content'] = $this->load->view('report/supplierLedgerReport', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+
+    }
+      /**
+     * customer Report
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function customerLedgerReport() {
+        $company_id = $this->session->userdata('company_id');
+        $data = array();
+        if($this->input->post('submit')){
+            $this->form_validation->set_rules('customer_id', lang('customer'), 'required|max_length[50]');
+            if ($this->form_validation->run() == TRUE) {
+                $start_date = date('Y-m-d',strtotime($this->input->post($this->security->xss_clean('startDate'))));
+                $end_date = date('Y-m-d',strtotime($this->input->post($this->security->xss_clean('endDate'))));
+                $customer_id = htmlspecialchars($this->input->post($this->security->xss_clean('customer_id')));
+                $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+                if(!$outlet_id){
+                    $outlet_id = $this->session->userdata('outlet_id');
+                }
+                $data['outlet_id'] =$outlet_id;
+                $data['customer_id'] =$customer_id;
+                $data['start_date'] = $start_date;
+                $data['end_date'] = $end_date;
+                $remaining_due = $this->Report_model->getCustomerOpeningDueByDate($customer_id,$start_date,$outlet_id);
+
+                $customer = getCustomerData($customer_id);
+                $op_start_date = date("Y-m-d",strtotime($customer->added_date));;
+                $op_end_date = date("Y-m-d",strtotime($start_date." -1days"));
+
+                if($op_end_date<$op_start_date || $op_end_date==$op_start_date){
+                    $op_date_view = date($this->session->userdata('date_format'), strtotime($op_start_date));
+                }else{
+                    $op_date_view = date($this->session->userdata('date_format'), strtotime($op_start_date))." - ".date($this->session->userdata('date_format'), strtotime($op_end_date));
+                }
+
+                $key=0;
+                $data['customerLedger'][$key]['title']="Opening Due";
+                $data['customerLedger'][$key]['date']= $op_date_view;
+                $data['customerLedger'][$key]['grant_total']="N/A";
+
+                $data['customerLedger'][$key]['paid']="N/A";
+                $data['customerLedger'][$key]['due']="N/A";
+
+                $data['customerLedger'][$key]['credit']="N/A";
+                $data['customerLedger'][$key]['debit']= getAmtP($remaining_due);
+                $data['customerLedger'][$key]['balance']=getAmtP($remaining_due);
+                $balance=$remaining_due;
+
+                for($i=$start_date;$i<=$end_date;$i=date('Y-m-d',strtotime("+1 day",strtotime($i)))){
+                    $sale_details=$this->Report_model->getCustomerGrantTotalByDate($customer_id,$i,$outlet_id);
+                    if(!empty($sale_details->total)){
+                        $key++;
+                        $balance = ($balance+$sale_details->due);
+
+                        $data['customerLedger'][$key]['title']="Sale Due Amount";
+                        $data['customerLedger'][$key]['date']=$i;
+                        $data['customerLedger'][$key]['grant_total']=getAmtP($sale_details->total);
+                        $data['customerLedger'][$key]['paid']=getAmtP($sale_details->paid);
+                        $data['customerLedger'][$key]['due']=getAmtP($sale_details->due);
+                        $data['customerLedger'][$key]['debit']=getAmtP($sale_details->due);
+                        $data['customerLedger'][$key]['credit']= getAmtP(0);
+                        if($balance!=0){
+                            $data['customerLedger'][$key]['balance']=getAmtP($balance);
+                        }else{
+                            $data['customerLedger'][$key]['balance']=getAmtP(0);
+                        }
+                    }
+                    $payment_receive=$this->Report_model->getCustomerDuePaymentByDate($customer_id,$i,$outlet_id);
+                    if(!empty($payment_receive)){
+                        $key++;
+                        $balance=$balance-$payment_receive;
+                        $data['customerLedger'][$key]['title']="Due Receive";
+                        $data['customerLedger'][$key]['date']=$i;
+                        $data['customerLedger'][$key]['grant_total']=getAmtP($payment_receive);
+                        $data['customerLedger'][$key]['paid']=getAmtP(0);
+                        $data['customerLedger'][$key]['due']=getAmtP(0);
+                        $data['customerLedger'][$key]['debit']= getAmtP(0);
+                        $data['customerLedger'][$key]['credit']=getAmtP($payment_receive);
+                        if($balance!=0){
+                            $data['customerLedger'][$key]['balance']=getAmtP($balance);
+                        }else{
+                            $data['customerLedger'][$key]['balance']='';
+                        }
+                    }
+                }
+                $data['customers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_customers");
+                $data['main_content'] = $this->load->view('report/customerLedgerReport', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }else{
+                $data['customers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_customers");
+                $data['main_content'] = $this->load->view('report/customerLedgerReport', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+        }else{
+            $data['customers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_customers");
+            $data['main_content'] = $this->load->view('report/customerLedgerReport', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+
+    }
+      /**
+     * customer Report
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function availableLoyaltyPointReport() {
         $data = array();
         $company_id = $this->session->userdata('company_id');
 
-        if ($this->input->post('submit')) {
-            $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
-            if(!$outlet_id){
-                $outlet_id = $this->session->userdata('outlet_id');
-            }
-            $data['outlet_id'] = $outlet_id;
-            $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
-            $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
-            $supplier_id =htmlspecialchars($this->input->post($this->security->xss_clean('supplier_id')));
-            $data['supplier_id'] = $supplier_id;
-            $data['start_date'] = $start_date;
-            $data['end_date'] = $end_date;
-            $data['supplierReport'] = $this->Report_model->supplierReport($start_date, $end_date, $supplier_id,$outlet_id);
-            $data['supplierDuePaymentReport'] = $this->Report_model->supplierDuePaymentReport($start_date, $end_date, $supplier_id,$outlet_id);
+        $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+        if(!$outlet_id){
+            $outlet_id = $this->session->userdata('outlet_id');
         }
-        $data['suppliers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_suppliers');
-        $data['main_content'] = $this->load->view('report/supplierReport', $data, TRUE);
+        $customer_id =htmlspecialchars($this->input->post($this->security->xss_clean('customer_id')));
+        $data['customer_id'] = $customer_id;
+        $data['outlet_id'] = $outlet_id;
+        $data['customers'] = $this->Report_model->availableLoyaltyPointReport($customer_id,$outlet_id);
+        $data['customers_dropdown'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_customers');
+        $data['main_content'] = $this->load->view('report/loyalty_point_available_report', $data, TRUE);
         $this->load->view('userHome', $data);
     }
       /**
@@ -358,28 +735,41 @@ class Report extends Cl_Controller {
      * @return void
      * @param no
      */
-    public function customerReport() {
-        $data = array();
+    public function usageLoyaltyPointReport() {
         $company_id = $this->session->userdata('company_id');
-
-        if ($this->input->post('submit')) {
+        $data = array();
+        if($this->input->post('submit')){
+            $start_date = date('Y-m-d',strtotime($this->input->post($this->security->xss_clean('startDate'))));
+            $end_date = date('Y-m-d',strtotime($this->input->post($this->security->xss_clean('endDate'))));
+            $customer_id = htmlspecialchars($this->input->post($this->security->xss_clean('customer_id')));
             $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
             if(!$outlet_id){
                 $outlet_id = $this->session->userdata('outlet_id');
             }
-            $data['outlet_id'] = $outlet_id;
-            $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
-            $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
-            $customer_id =htmlspecialchars($this->input->post($this->security->xss_clean('customer_id')));
-            $data['customer_id'] = $customer_id;
+            $data['outlet_id'] =$outlet_id;
+            $data['customer_id'] =$customer_id;
             $data['start_date'] = $start_date;
             $data['end_date'] = $end_date;
-            $data['customerReport'] = $this->Report_model->customerReport($start_date, $end_date, $customer_id,$outlet_id);
-            $data['customerDueReceiveReport'] = $this->Report_model->customerDueReceiveReport($start_date, $end_date, $customer_id,$outlet_id);
+
+            $data = array();
+            $company_id = $this->session->userdata('company_id');
+
+            $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+            if(!$outlet_id){
+                $outlet_id = $this->session->userdata('outlet_id');
+            }
+            $customer_id =htmlspecialchars($this->input->post($this->security->xss_clean('customer_id')));
+            $data['customer_id'] = $customer_id;
+            $data['customers'] = $this->Report_model->usageLoyaltyPointReport($start_date, $end_date,$customer_id,$outlet_id);
+            $data['customers_dropdown'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_customers');
+            $data['main_content'] = $this->load->view('report/loyalty_point_usage_report', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }else{
+            $data['customers_dropdown'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_customers');
+            $data['main_content'] = $this->load->view('report/loyalty_point_usage_report', $data, TRUE);
+            $this->load->view('userHome', $data);
         }
-        $data['customers'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, 'tbl_customers');
-        $data['main_content'] = $this->load->view('report/customerReport', $data, TRUE);
-        $this->load->view('userHome', $data);
+
     }
       /**
      * food Menu Sales
@@ -398,10 +788,14 @@ class Report extends Cl_Controller {
             $data['outlet_id'] = $outlet_id;
             $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
             $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));  
+            $top_less =htmlspecialchars($this->input->post($this->security->xss_clean('top_less')));
+            $product_type =htmlspecialchars($this->input->post($this->security->xss_clean('product_type')));
+            $data['product_type'] = $product_type;
             $data['start_date'] = $start_date;
             $data['end_date'] = $end_date;
             $data['outlet_id'] = $outlet_id;
-            $data['foodMenuSales'] = $this->Report_model->foodMenuSales($start_date, $end_date,$outlet_id);
+            $data['top_less'] = $top_less;
+            $data['foodMenuSales'] = $this->Report_model->foodMenuSales($start_date, $end_date,$outlet_id,$top_less,$product_type);
         }
         $data['main_content'] = $this->load->view('report/foodMenuSales', $data, TRUE);
         $this->load->view('userHome', $data);
@@ -434,41 +828,59 @@ class Report extends Cl_Controller {
         $data['main_content'] = $this->load->view('report/foodMenuSaleByCategories', $data, TRUE);
         $this->load->view('userHome', $data);
     }
+    public function productAnalysisReport() {
+        $data = array();
+        $company_id = $this->session->userdata('company_id');
+        $data['is_direct_food'] = '';
+        if ($this->input->post('submit')) {
+            $this->form_validation->set_rules('startDate', lang('start_date'), 'required|max_length[50]');
+            $this->form_validation->set_rules('endDate', lang('end_date'), 'required|max_length[50]');
+            $this->form_validation->set_rules('category_id', lang('category'), 'required|max_length[50]');
+            if ($this->form_validation->run() == TRUE) {
+                $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+                if(!$outlet_id){
+                    $outlet_id = $this->session->userdata('outlet_id');
+                }
+                $data['outlet_id'] = $outlet_id;
+                $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
+                $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
+                $category_id =htmlspecialchars($this->input->post($this->security->xss_clean('category_id')));
+                $data['start_date'] = $start_date;
+                $data['end_date'] = $end_date;
+                $data['category_id'] = $category_id;
+                $data['outlet_id'] = $outlet_id;
+                $total_qty_all = $this->Report_model->productAnalysisReportTotal($start_date, $end_date,$outlet_id,$category_id);
+                $data['total_qty_all'] = 0;
+                $data['total_amount_all'] = 0;
+                $data['total_amount_all'] = 0;
+                if(isset($total_qty_all) && $total_qty_all){
+                    $data['total_qty_all'] = $total_qty_all->total_qty;
+                    $data['total_amount_all'] = $total_qty_all->totalSale;
+                }
+                $data['productAnalysisReport'] = $this->Report_model->productAnalysisReport($start_date, $end_date,$outlet_id,$category_id);
+
+                $data['categories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_food_menu_categories");
+                $data['main_content'] = $this->load->view('report/productAnalysisReport', $data, TRUE);
+                $this->load->view('userHome', $data);
+            } else {
+                $data['categories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_food_menu_categories");
+                $data['main_content'] = $this->load->view('report/productAnalysisReport', $data, TRUE);
+                $this->load->view('userHome', $data);
+            }
+        }else{
+            $data['categories'] = $this->Common_model->getAllByCompanyId($company_id, "tbl_food_menu_categories");
+            $data['main_content'] = $this->load->view('report/productAnalysisReport', $data, TRUE);
+            $this->load->view('userHome', $data);
+        }
+
+    }
     /**
      * food Menu Sales
      * @access public
      * @return void
      * @param no
      */
-    public function foodTransferReport() {
-        $data = array();
-        if ($this->input->post('submit')) {
-            $from_outlet_id  = isset($_POST['from_outlet_id']) && $_POST['from_outlet_id']?$_POST['from_outlet_id']:'';
-            $to_outlet_id  = isset($_POST['to_outlet_id']) && $_POST['to_outlet_id']?$_POST['to_outlet_id']:'';
 
-            $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
-            $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
-            $data['start_date'] = $start_date;
-            $data['end_date'] = $end_date;
-            $data['from_outlet_id'] = $from_outlet_id;
-            $data['to_outlet_id'] = $to_outlet_id;
-            $data['foodTransferReport'] = $this->Report_model->foodTransferReport($start_date, $end_date,$from_outlet_id,$to_outlet_id);
-            foreach ($data['foodTransferReport'] as $key=>$value){
-                $foods = '';
-                $food_list = $this->Common_model->getAllByCustomId($value->id,"transfer_id","tbl_transfer_ingredients",$order='');;
-                foreach ($food_list as $keys=>$value1){
-                    $foods.=getFoodMenuNameById($value1->ingredient_id)."(".getFoodMenuCodeById($value1->ingredient_id).") - ".$value1->quantity_amount." Pcs";
-                    if($keys>sizeof($foods)-1){
-                        $foods.="<br>";
-                    }
-                }
-                $data['foodTransferReport'][$key]->foods = $foods;
-            }
-        }
-        $company_id = $this->session->userdata('company_id');
-        $data['main_content'] = $this->load->view('report/foodTransferReport', $data, TRUE);
-        $this->load->view('userHome', $data);
-    }
     /**
      * food Menu Sales
      * @access public
@@ -819,6 +1231,99 @@ class Report extends Cl_Controller {
         $data['employees'] = $this->Common_model->getAllByCompanyIdForDropdown($company_id, "tbl_users");
         $data['main_content'] = $this->load->view('report/attendanceReport', $data, TRUE);
         $this->load->view('userHome', $data);
-    }    
+    }
+    public function auditLogReport()
+    {
+        $data = array();
+        $data['submit_d'] = false;
+        if ($this->input->post('submit')) {
+            if($this->input->post('startDate')){
+                $start_date = date("Y-m-d", strtotime($this->input->post('startDate')));
+            }else{
+                $start_date = '';
+            }
+            if($this->input->post('endDate')){
+                $end_date = date("Y-m-d", strtotime($this->input->post('endDate')));
+            }else{
+                $end_date = '';
+            }
+            $outlet_id  = isset($_POST['outlet_id']) && $_POST['outlet_id']?$_POST['outlet_id']:'';
+            if(!$outlet_id){
+                $outlet_id = $this->session->userdata('outlet_id');
+            }
+
+            $data['submit_d'] = true;
+            $user_id = $this->input->post('user_id');
+            $event_title = $this->input->post('event_title');
+            $data['auditLogReport'] = $this->Report_model->auditLogReport($start_date,$end_date,$user_id,$event_title,$outlet_id);
+            $data['start_date'] = $start_date;
+            $data['end_date'] = $end_date;
+            $data['user_id'] = $user_id;
+            $data['event_title'] = $event_title;
+        }
+        $data['users'] =   $this->Common_model->getAllByTable("tbl_users");
+        $data['main_content'] = $this->load->view('report/auditLogReport', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+
+    /**
+     * transfer report
+     * @access public
+     * @return void
+     * @param no
+     */
+    public function transferReport() {
+        $data = array();
+        if ($this->input->post('submit')) {
+            $from_outlet_id  = isset($_POST['from_outlet_id']) && $_POST['from_outlet_id']?$_POST['from_outlet_id']:'';
+            $to_outlet_id  = isset($_POST['to_outlet_id']) && $_POST['to_outlet_id']?$_POST['to_outlet_id']:'';
+
+            $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
+            $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
+            $data['start_date'] = $start_date;
+            $data['end_date'] = $end_date;
+            $data['from_outlet_id'] = $from_outlet_id;
+            $data['to_outlet_id'] = $to_outlet_id;
+            $data['transferReport'] = $this->Report_model->transferReport($start_date, $end_date,$from_outlet_id,$to_outlet_id);
+            foreach ($data['transferReport'] as $key=>$value){
+                $foods = '';
+                $food_list = $this->Common_model->getAllByCustomId($value->id,"transfer_id","tbl_transfer_ingredients",$order='');;
+                foreach ($food_list as $keys=>$value1){
+                    $foods.=getIngredientNameById($value1->ingredient_id)."(".getIngredientCodeById($value1->ingredient_id).") - ".$value1->quantity_amount." ".unitName(getPUnitIdByIgId($value1->ingredient_id));
+                    if($keys>sizeof($food_list)-1){
+                        $foods.="<br>";
+                    }
+                }
+                $data['transferReport'][$key]->foods = $foods;
+            }
+        }
+        $data['main_content'] = $this->load->view('report/transferReport', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
+    public function productionReport() {
+        $data = array();
+        if ($this->input->post('submit')) {
+            $start_date =htmlspecialchars($this->input->post($this->security->xss_clean('startDate')));
+            $end_date =htmlspecialchars($this->input->post($this->security->xss_clean('endDate')));
+            $data['start_date'] = $start_date;
+            $data['end_date'] = $end_date;
+            $data['productionReport'] = $this->Report_model->productionReport($start_date, $end_date);
+            foreach ($data['productionReport'] as $key=>$value){
+                $foods = '';
+                $food_list = $this->Common_model->getAllByCustomId($value->id,"production_id","tbl_production_ingredients",$order='');;
+                foreach ($food_list as $keys=>$value1){
+                    $foods.=getIngredientNameById($value1->ingredient_id)."(".getIngredientCodeById($value1->ingredient_id).") - ".$value1->quantity_amount." ".unitName(getUnitIdByIgId($value1->ingredient_id));
+                    if($keys<sizeof($food_list)-1){
+                        $foods.="<br>";
+                    }
+                }
+                $data['productionReport'][$key]->foods = $foods;
+            }
+        }
+        $outlet_id = $this->session->userdata('outlet_id');
+        $data['kitchens'] = $this->Common_model->getAllByOutletId($outlet_id, "tbl_kitchens");
+        $data['main_content'] = $this->load->view('report/productionReport', $data, TRUE);
+        $this->load->view('userHome', $data);
+    }
 
 }

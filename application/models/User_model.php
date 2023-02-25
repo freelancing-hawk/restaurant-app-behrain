@@ -34,15 +34,21 @@ class User_model extends CI_Model {
      * @param int
      */
     public function getUsersByCompanyId($company_id) {
+        $user_id = $this->session->userdata('user_id');
         $language_manifesto = $this->session->userdata('language_manifesto');
+
         if(str_rot13($language_manifesto)=="eriutoeri"){
             $this->db->select("tbl_users.*,tbl_outlets.outlet_name");
             $this->db->from("tbl_users");
             $this->db->join('tbl_outlets', 'tbl_outlets.id = tbl_users.outlet_id', 'left');
             if($company_id!=1){
                 $this->db->where("tbl_users.company_id", $company_id);
+            }else if($user_id!=1){
+                $this->db->where("tbl_users.company_id", $company_id);
             }
+            $this->db->where("tbl_users.id!=", 1);
             $this->db->where("tbl_users.del_status", 'Live');
+            $this->db->order_by("id", 'DESC');
             return $this->db->get()->result();
         }else{
             $outlet_id = $this->session->userdata('outlet_id');
@@ -52,8 +58,9 @@ class User_model extends CI_Model {
             if($company_id!=1){
                 $this->db->where("tbl_users.company_id", $company_id);
             }
-            $this->db->where("tbl_users.outlet_id", $outlet_id);
+            $this->db->where("tbl_users.id!=", 1);
             $this->db->where("tbl_users.del_status", 'Live');
+            $this->db->order_by("id", 'DESC');
             return $this->db->get()->result();
         }
     }
